@@ -25,7 +25,7 @@ tool's.
 ## The crates
 
 - `as-wav`: WAV written crash-safe (24-bit, 16-bit dithered, float) and read.
-- `as-flac`: FLAC written, 24-bit, with no dependencies. Reading is `claxon`'s.
+- `as-flac`: FLAC written, 24-bit, with no dependencies; and read, through `claxon`.
 - `as-resample`: a whole sound converted to another rate, as sox's `rate -v`.
 - `as-seam`: a LOOP's seam: its join, the crossfade's law matched to how alike its sides are,
   and FIND.

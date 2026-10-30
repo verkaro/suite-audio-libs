@@ -5,6 +5,11 @@
 //! smaller; the samples' MD5 in STREAMINFO. Plain and sure rather than small: a sixth bigger
 //! than `flac -8` on a noisy recording, half again on a sweep (it also tries LPC). Read back by `claxon` in its tests, and passed by
 //! `flac -t`. The format: https://xiph.org/flac/format.html.
+//!
+//! Read with [`read::read`], through `claxon`.
+
+pub mod read;
+pub use read::{Flac, read};
 
 /// Samples a frame.
 const BLOCK: usize = 4096;
@@ -488,5 +493,24 @@ mod tests {
         let x: Vec<i32> = (0..48000).map(|i| ((i as f64 * 0.05).sin() * 6_000_000.0) as i32).collect();
         let bytes = encode(&[x], 48000);
         assert!(bytes.len() < 48000 * 3 / 2, "{}", bytes.len());
+    }
+
+    #[test]
+    fn read_back_exactly_and_cut_short_its_whole_frames() {
+        let dir = std::env::temp_dir().join(format!("as-flac-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let x: Vec<i32> = (0..10_000).map(|i| ((i as f64 * 0.01).sin() * 4_000_000.0) as i32).collect();
+        let y: Vec<i32> = x.iter().map(|v| -v).collect();
+        let bytes = encode(&[x.clone(), y], 44100);
+        let p = dir.join("a.flac");
+        std::fs::write(&p, &bytes).unwrap();
+        let f = read(&p).unwrap();
+        assert_eq!((f.rate, f.bits, f.channels.len()), (44100, 24, 2));
+        assert!(f.channels[0].iter().zip(&x).all(|(a, b)| *a == *b as f32 / 8_388_608.0));
+        let q = dir.join("cut.flac");
+        std::fs::write(&q, &bytes[..bytes.len() * 2 / 3]).unwrap();
+        let g = read(&q).unwrap();
+        assert!(g.channels[0].len() == g.channels[1].len() && g.channels[0].len() < 10_000);
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

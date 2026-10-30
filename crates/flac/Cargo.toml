@@ -4,7 +4,7 @@ version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-description = "A 24-bit FLAC encoder with no dependencies: fixed predictors, Rice coding, MD5."
+description = "FLAC: a 24-bit encoder with no dependencies (fixed predictors, Rice coding, MD5), and a reader through claxon"
 
-[dev-dependencies]
+[dependencies]
 claxon.workspace = true

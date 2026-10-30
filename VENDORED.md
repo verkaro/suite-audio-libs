@@ -38,6 +38,8 @@ for BRR's step 4:
 
 Written here, not moved:
 
+- `as-flac`'s `read` (2026-10-29, at BRR's code review): FLAC read through `claxon`, whole,
+  as floats; a stream cut short keeps its whole frames.
 - `crates/ir` (`as-ir`, 2026-10-29): true stereo folded, unit energy, the onset, and the echoes
   without the direct sound, after place's `crates/library/src/ir.rs`, `numbers.rs`'s `onset`
   and its design's "The outside's space".
