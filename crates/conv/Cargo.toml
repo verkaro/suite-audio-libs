@@ -1,0 +1,10 @@
+[package]
+name = "as-conv"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Zero-latency partitioned convolution, the same at any block size, allocating nothing once made"
+
+[dependencies]
+realfft.workspace = true

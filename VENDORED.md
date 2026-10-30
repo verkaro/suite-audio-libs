@@ -28,7 +28,19 @@ show`, for BRR's step 2:
   a number, where scape had its `What`; the layer's seed is `own_seed`; `spread` as scape's;
   `between` and `pick` (never the same twice running) written here.
 
+From `dexter-place` at `784f1ba6ab09b492e68bde1aca56f5b724189664` (2026-10-28), with `git show`,
+for BRR's step 4:
+
+- `crates/core/src/conv.rs`, now `as-conv` (`crates/conv`): `touched` made public, for the
+  callers' own buffers; as it was otherwise. Its tests, from place's `crates/core/src/tests.rs`.
+- `crates/core/src/opening.rs`, now `as-opening` (`crates/opening`): as it was. Its tests, from
+  place's, and one more: between two stops, each route theirs crossfaded.
+
 Written here, not moved:
+
+- `crates/ir` (`as-ir`, 2026-10-29): true stereo folded, unit energy, the onset, and the echoes
+  without the direct sound, after place's `crates/library/src/ir.rs`, `numbers.rs`'s `onset`
+  and its design's "The outside's space".
 
 - `crates/keep` (`as-keep`, 2026-10-29), after the way Dexter's export (`renameat2`'s
   `RENAME_NOREPLACE`), place's renders and scape's modules each kept from overwriting.

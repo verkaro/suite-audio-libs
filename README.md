@@ -31,6 +31,10 @@ tool's.
   and FIND.
 - `as-draw`: variation from a seed, a pure function of the seed, the voice and the pass.
 - `as-tilt`: TILT, one slope in dB an octave through 1 kHz.
+- `as-conv`: zero-latency convolution, the same at any block size.
+- `as-ir`: an IR made ready: true stereo folded, unit energy, its echoes without its direct
+  sound.
+- `as-opening`: an opening between the outside and a room: its stops, its wall, its routes.
 - `as-keep`: nothing overwritten: exclusive numbered files, folders made whole before they
   appear, write-and-rename.
 

@@ -1,0 +1,9 @@
+[package]
+name = "as-ir"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "An IR made ready: true stereo folded, its level at unit energy, its onset, its echoes without its direct sound"
+
+[dependencies]
