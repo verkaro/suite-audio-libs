@@ -13,6 +13,7 @@ as-conv = { path = "crates/conv" }
 as-draw = { path = "crates/draw" }
 as-flac = { path = "crates/flac" }
 as-ir = { path = "crates/ir" }
+as-jack-keeper = { path = "crates/jack-keeper" }
 as-keep = { path = "crates/keep" }
 as-opening = { path = "crates/opening" }
 as-resample = { path = "crates/resample" }
@@ -20,8 +21,10 @@ as-seam = { path = "crates/seam" }
 as-tilt = { path = "crates/tilt" }
 as-wav = { path = "crates/wav" }
 claxon = "0.4.3"
+jack = "0.13"
 libc = "0.2"
 realfft = "3.5"
+rtrb = "0.3"
 
 # FLAC written and read, and rates converted, are arithmetic a sample at a time: unoptimised, the
 # tests crawl.

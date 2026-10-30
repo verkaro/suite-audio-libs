@@ -36,6 +36,14 @@ for BRR's step 4:
 - `crates/core/src/opening.rs`, now `as-opening` (`crates/opening`): as it was. Its tests, from
   place's, and one more: between two stops, each route theirs crossfaded.
 
+- `crates/jack`, now `as-jack-keeper` (`crates/jack-keeper`), for BRR's step 5: `src/lib.rs`
+  (the keeper), `src/client.rs`, `src/sim.rs`, and the tests (`src/tests.rs`,
+  `tests/dummy.rs`, `SUITE_JACK_TEST=1`). Made generic: the client's name is the caller's, and
+  what plays is a `Player` the keeper makes each time it opens the client, sent messages
+  through one ring and handing back what it's done with through another; place's player, its
+  controls and its rule for clearing what's waiting stay place's. The tests play a steady
+  value of their own.
+
 Written here, not moved:
 
 - `as-flac`'s `read` (2026-10-29, at BRR's code review): FLAC read through `claxon`, whole,

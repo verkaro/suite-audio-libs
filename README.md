@@ -35,6 +35,8 @@ tool's.
 - `as-ir`: an IR made ready: true stereo folded, unit energy, its echoes without its direct
   sound.
 - `as-opening`: an opening between the outside and a room: its stops, its wall, its routes.
+- `as-jack-keeper`: a JACK client of two outputs, its player on JACK's thread, its
+  connections kept, reattaching to jackd; and `--sim`.
 - `as-keep`: nothing overwritten: exclusive numbered files, folders made whole before they
   appear, write-and-rename.
 
@@ -48,4 +50,7 @@ cargo clippy --all-targets -- -D warnings
 cargo test
 cargo test -p CRATE NAME     # one test
 BLESS=1 cargo test -p as-wav reference_files   # rewrites wav's testdata/, on purpose only
+SUITE_JACK_TEST=1 cargo test -p as-jack-keeper --test dummy   # on a dummy JACK of its own
 ```
+
+Building needs JACK2's dev package, `libjack-jackd2-dev`.
