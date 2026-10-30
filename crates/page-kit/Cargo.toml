@@ -1,0 +1,9 @@
+[package]
+name = "as-page-kit"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "The Dexter family's page kit: skins, LEDs, ladders, keys and readouts, as one script a page loads"
+
+[dependencies]

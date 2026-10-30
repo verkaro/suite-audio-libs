@@ -37,6 +37,9 @@ tool's.
 - `as-opening`: an opening between the outside and a room: its stops, its wall, its routes.
 - `as-jack-keeper`: a JACK client of two outputs, its player on JACK's thread, its
   connections kept, reattaching to jackd; and `--sim`.
+- `as-http`, `as-ws`, `as-meter`, `as-page-kit`: a tool's page: just enough HTTP, the
+  WebSocket, the LED ladders' ballistics, and the skins and drawing as one script the page
+  loads. `tools/cdp.py` drives a page in Falkon offscreen, for its tests.
 - `as-keep`: nothing overwritten: exclusive numbered files, folders made whole before they
   appear, write-and-rename.
 

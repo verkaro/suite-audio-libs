@@ -44,6 +44,18 @@ for BRR's step 4:
   controls and its rule for clearing what's waiting stay place's. The tests play a steady
   value of their own.
 
+For BRR's step 6, with `git show`:
+
+- From `dexter-foley` at `9e1ea22`: `crates/server/src/http.rs`, now `as-http`
+  (`crates/http`), with place's `listen` added; and `docs/dev/cdp.py`, the DevTools client
+  for testing a page in Falkon offscreen, now `tools/cdp.py`.
+- From `dexter-place` at `784f1ba`: `crates/ws`, now `as-ws`, and `crates/meter`, now
+  `as-meter`, as they were but for their first comments; and its page's skins and drawing
+  (`crates/server/page/index.html`: the skins, `onKey`, the LEDs, keys, ladders, readouts,
+  lamps and text), now `as-page-kit`'s `page-kit.js`: the page's state taken out of them (taps
+  land in `HITS`, the skin in `SKIN`), and `kitCanvas`, `chooseSkin` and `savedSkin` for a
+  page to use them.
+
 Written here, not moved:
 
 - `as-flac`'s `read` (2026-10-29, at BRR's code review): FLAC read through `claxon`, whole,
