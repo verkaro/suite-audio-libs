@@ -9,9 +9,12 @@ license = "MIT"
 repository = "https://github.com/verkaro/suite-audio-libs"
 
 [workspace.dependencies]
+as-draw = { path = "crates/draw" }
 as-flac = { path = "crates/flac" }
 as-keep = { path = "crates/keep" }
 as-resample = { path = "crates/resample" }
+as-seam = { path = "crates/seam" }
+as-tilt = { path = "crates/tilt" }
 as-wav = { path = "crates/wav" }
 claxon = "0.4.3"
 libc = "0.2"

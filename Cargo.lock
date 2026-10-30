@@ -3,6 +3,10 @@
 version = 4
 
 [[package]]
+name = "as-draw"
+version = "0.1.0"
+
+[[package]]
 name = "as-flac"
 version = "0.1.0"
 dependencies = [
@@ -18,6 +22,14 @@ dependencies = [
 
 [[package]]
 name = "as-resample"
+version = "0.1.0"
+
+[[package]]
+name = "as-seam"
+version = "0.1.0"
+
+[[package]]
+name = "as-tilt"
 version = "0.1.0"
 
 [[package]]

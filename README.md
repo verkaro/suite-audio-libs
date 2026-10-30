@@ -27,6 +27,10 @@ tool's.
 - `as-wav`: WAV written crash-safe (24-bit, 16-bit dithered, float) and read.
 - `as-flac`: FLAC written, 24-bit, with no dependencies. Reading is `claxon`'s.
 - `as-resample`: a whole sound converted to another rate, as sox's `rate -v`.
+- `as-seam`: a LOOP's seam: its join, the crossfade's law matched to how alike its sides are,
+  and FIND.
+- `as-draw`: variation from a seed, a pure function of the seed, the voice and the pass.
+- `as-tilt`: TILT, one slope in dB an octave through 1 kHz.
 - `as-keep`: nothing overwritten: exclusive numbered files, folders made whole before they
   appear, write-and-rename.
 

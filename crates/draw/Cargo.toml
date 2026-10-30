@@ -1,0 +1,9 @@
+[package]
+name = "as-draw"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Variation drawn from a seed: a number that depends only on the seed, the voice, the pass and what's drawn"
+
+[dependencies]

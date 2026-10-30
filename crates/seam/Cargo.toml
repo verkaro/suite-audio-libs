@@ -1,0 +1,9 @@
+[package]
+name = "as-seam"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "A LOOP's seam: joins, crossfade laws matched to how alike the sides are, and FIND"
+
+[dependencies]
