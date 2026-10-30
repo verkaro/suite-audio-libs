@@ -1,0 +1,26 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.97"
+license = "MIT"
+repository = "https://github.com/verkaro/suite-audio-libs"
+
+[workspace.dependencies]
+as-flac = { path = "crates/flac" }
+as-keep = { path = "crates/keep" }
+as-resample = { path = "crates/resample" }
+as-wav = { path = "crates/wav" }
+claxon = "0.4.3"
+libc = "0.2"
+
+# FLAC written and read, and rates converted, are arithmetic a sample at a time: unoptimised, the
+# tests crawl.
+[profile.dev.package.as-flac]
+opt-level = 3
+[profile.dev.package.claxon]
+opt-level = 3
+[profile.dev.package.as-resample]
+opt-level = 3

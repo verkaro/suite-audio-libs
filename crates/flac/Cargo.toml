@@ -1,0 +1,10 @@
+[package]
+name = "as-flac"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "A 24-bit FLAC encoder with no dependencies: fixed predictors, Rice coding, MD5."
+
+[dev-dependencies]
+claxon.workspace = true
