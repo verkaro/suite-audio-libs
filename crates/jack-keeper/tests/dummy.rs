@@ -148,7 +148,7 @@ fn on_a_dummy_server() {
     let to = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
     let both = || links("keeper", &to(&["probe:in_L"]), &to(&["probe:in_R"]));
 
-    let audio = Audio::jack("keeper", both(), || Steady(0.0));
+    let audio = Audio::jack("keeper", both(), |_| Steady(0.0));
     assert!(eventually(secs(5), || audio.attached()), "attached");
     assert_eq!(audio.rate(), 48_000);
     assert!(eventually(secs(3), || connected("keeper:out_L", "probe:in_L")

@@ -49,7 +49,7 @@ impl<P: Player> Session<P> {
         let reg =
             |name: &str| client.register_port(name, AudioOut::default()).map_err(|e| format!("{name}: {e}"));
         let out = [reg(OUT[0])?, reg(OUT[1])?];
-        let (rt, handle) = pair((k.make)());
+        let (rt, handle) = pair((k.make)(client.sample_rate()));
         let handler = Handler { out, rt };
         lock_memory(k);
         let notices = Arc::new(Notices { status: k.status.clone(), ..Notices::default() });

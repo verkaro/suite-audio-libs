@@ -88,7 +88,7 @@ fn the_simulation_plays_what_its_sent_and_hands_back_what_its_done_with() {
     let last = Arc::new(AtomicU32::new(0));
     let l2 = last.clone();
     let audio =
-        Audio::sim("brr", BTreeSet::new(), move || Steady { value: 0.0, last: l2.clone(), done: None });
+        Audio::sim("brr", BTreeSet::new(), move |_| Steady { value: 0.0, last: l2.clone(), done: None });
     let start = Instant::now();
     while !audio.attached() {
         assert!(start.elapsed() < Duration::from_secs(3));

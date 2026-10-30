@@ -60,7 +60,7 @@ pub(crate) fn keep<P: Player>(mut k: Keeper<P>) {
         ports.insert(format!("{}:{o}", k.name));
     }
     let mut graph = SimGraph { ports, links: BTreeSet::new() };
-    let (mut rt, mut handle) = pair((k.make)());
+    let (mut rt, mut handle) = pair((k.make)(RATE));
     k.status.attached.store(true, Ordering::Release);
     k.note(&format!("simulating JACK: {RATE} Hz, {PERIOD} frames"));
     let (mut l, mut r) = (vec![0.0f32; PERIOD], vec![0.0f32; PERIOD]);

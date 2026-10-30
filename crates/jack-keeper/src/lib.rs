@@ -5,7 +5,7 @@
 //! `JACK_DEFAULT_SERVER` names (never starting jackd, never opening a sound card), keeps the
 //! connections it's told are wanted (made whenever both their ports exist, cut only when taken
 //! out of the wanted ones, never someone else's), and opens the client again when jackd comes
-//! back. Each time it opens the client it makes a [`Player`], which plays on JACK's thread:
+//! back. Each time it opens the client it makes a [`Player`] at JACK's rate, which plays on JACK's thread:
 //! what's [`Audio::send`]t reaches it through a ring, and what it's done with comes back through
 //! another, to be dropped on the keeper's thread. What's sent while JACK is away is dropped:
 //! nothing plays when it comes back unasked. `--sim` ([`Audio::sim`]) runs the same player on a
@@ -184,11 +184,11 @@ pub struct Audio<P: Player> {
 
 impl<P: Player> Audio<P> {
     /// The JACK client `name`, opened now if JACK is there, else as soon as it is; `make` makes
-    /// its player each time it's opened.
+    /// its player each time it's opened, at JACK's rate.
     pub fn jack(
         name: &str,
         links: BTreeSet<(String, String)>,
-        make: impl FnMut() -> P + Send + 'static,
+        make: impl FnMut(u32) -> P + Send + 'static,
     ) -> Audio<P> {
         Audio::start(name, links, Box::new(make), client::keep)
     }
@@ -198,7 +198,7 @@ impl<P: Player> Audio<P> {
     pub fn sim(
         name: &str,
         links: BTreeSet<(String, String)>,
-        make: impl FnMut() -> P + Send + 'static,
+        make: impl FnMut(u32) -> P + Send + 'static,
     ) -> Audio<P> {
         Audio::start(name, links, Box::new(make), sim::keep)
     }
@@ -206,7 +206,7 @@ impl<P: Player> Audio<P> {
     fn start(
         name: &str,
         links: BTreeSet<(String, String)>,
-        make: Box<dyn FnMut() -> P + Send>,
+        make: Box<dyn FnMut(u32) -> P + Send>,
         keep: fn(Keeper<P>),
     ) -> Audio<P> {
         let status = Arc::new(Status::default());
@@ -318,7 +318,7 @@ struct Keeper<P: Player> {
     links: BTreeSet<(String, String)>,
     /// What's waiting for the player.
     waiting: VecDeque<P::In>,
-    make: Box<dyn FnMut() -> P + Send>,
+    make: Box<dyn FnMut(u32) -> P + Send>,
 }
 
 impl<P: Player> Keeper<P> {
