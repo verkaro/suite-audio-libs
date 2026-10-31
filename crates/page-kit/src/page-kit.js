@@ -93,6 +93,11 @@ function onKey(c) {
 
 
 // ---------- drawing ----------
+// The LEDs, as Dexter draws them: each drawn once per skin, size and scale into a small image,
+// stamped by the meters. A lit one is a hot core going out to the color, with bloom; an unlit
+// one a tinted lens with a glint.
+const LED = { key: "", cache: new Map() };
+const BLOOM_MARGIN = 5;
 function rgb(hex) { const n = parseInt(hex.slice(1, 7), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
 function css([r, g, b], a) { return "rgba(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + "," + (a === undefined ? 1 : a) + ")"; }
 function mix(a, b, t) { return a.map((v, i) => v + (b[i] - v) * t); }
