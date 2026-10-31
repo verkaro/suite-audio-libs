@@ -13,6 +13,28 @@ pub struct Flac {
     pub channels: Vec<Vec<f32>>,
 }
 
+/// What a FLAC is, from its STREAMINFO alone, without reading its samples (added at BRR's
+/// review, 2026-10-31: a library's listing had parsed the header itself).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Info {
+    pub rate: u32,
+    pub channels: u16,
+    pub bits: u32,
+    /// Frames (samples a channel), 0 when the stream doesn't say.
+    pub frames: u64,
+}
+
+/// Reads only the STREAMINFO of the FLAC at `path`.
+pub fn info(path: impl AsRef<Path>) -> Result<Info, claxon::Error> {
+    let s = claxon::FlacReader::open(path)?.streaminfo();
+    Ok(Info {
+        rate: s.sample_rate,
+        channels: s.channels as u16,
+        bits: s.bits_per_sample,
+        frames: s.samples.unwrap_or(0),
+    })
+}
+
 /// Reads the FLAC at `path` whole.
 pub fn read(path: impl AsRef<Path>) -> Result<Flac, claxon::Error> {
     let mut r = claxon::FlacReader::open(path)?;

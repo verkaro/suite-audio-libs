@@ -25,7 +25,7 @@ tool's.
 ## The crates
 
 - `as-wav`: WAV written crash-safe (24-bit, 16-bit dithered, float) and read.
-- `as-flac`: FLAC written, 24-bit, with no dependencies; and read, through `claxon`.
+- `as-flac`: FLAC written, 24-bit, with no dependencies; and read, or its header alone, through `claxon`.
 - `as-tar`: a tar written and read as it streams (ustar, with PAX for long paths and big
   files), for packing a tool's work.
 - `as-resample`: a whole sound converted to another rate, as sox's `rate -v`; and a stream

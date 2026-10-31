@@ -137,12 +137,22 @@ fn local_host(host: &str) -> bool {
 /// A query's parameter, percent-decoded (`+` as a space).
 pub fn param(query: &str, key: &str) -> Option<String> {
     let raw = query.split('&').find_map(|kv| kv.strip_prefix(key)?.strip_prefix('='))?;
+    Some(decode(raw, true))
+}
+
+/// A path's piece percent-decoded, `+` left as it is (it's a space only in a query): a name
+/// taken from [`Request::path`], which is kept as it came (added at BRR's review, 2026-10-31).
+pub fn unescape(s: &str) -> String {
+    decode(s, false)
+}
+
+fn decode(raw: &str, plus: bool) -> String {
     let b = raw.as_bytes();
     let mut out = Vec::new();
     let mut i = 0;
     while i < b.len() {
         match b[i] {
-            b'+' => out.push(b' '),
+            b'+' if plus => out.push(b' '),
             b'%' if i + 2 < b.len() => {
                 let h =
                     std::str::from_utf8(&b[i + 1..i + 3]).ok().and_then(|h| u8::from_str_radix(h, 16).ok());
@@ -158,7 +168,7 @@ pub fn param(query: &str, key: &str) -> Option<String> {
         }
         i += 1;
     }
-    Some(String::from_utf8_lossy(&out).into_owned())
+    String::from_utf8_lossy(&out).into_owned()
 }
 
 /// Writes a whole response and closes. HEAD gets the headers only.
@@ -305,6 +315,14 @@ mod tests {
             headers.push(("Origin".to_string(), origin.to_string()));
         }
         Request { method: "GET".into(), path: "/ws".into(), query: String::new(), headers, body: Vec::new() }
+    }
+
+    #[test]
+    fn unescape_decodes_percents_only() {
+        assert_eq!(unescape("Rain%20%C3%A9t%C3%A9+x.brr"), "Rain \u{e9}t\u{e9}+x.brr");
+        assert_eq!(unescape("50%"), "50%");
+        assert_eq!(unescape("%zz%41"), "%zzA");
+        assert_eq!(param("a=b+c%2B", "a").as_deref(), Some("b c+"));
     }
 
     #[test]
