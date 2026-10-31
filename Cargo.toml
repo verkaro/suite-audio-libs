@@ -20,6 +20,7 @@ as-meter = { path = "crates/meter" }
 as-opening = { path = "crates/opening" }
 as-page-kit = { path = "crates/page-kit" }
 as-resample = { path = "crates/resample" }
+as-tar = { path = "crates/tar" }
 as-seam = { path = "crates/seam" }
 as-tilt = { path = "crates/tilt" }
 as-wav = { path = "crates/wav" }
