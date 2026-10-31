@@ -17,6 +17,11 @@
 //! let at_48k = as_resample::convert(&tone, 96_000, 48_000);
 //! assert_eq!(at_48k.len(), 48_000);
 //! ```
+//!
+//! [`read`] reads a stream at any speed instead, as a sampler tunes: its place and speed free,
+//! its kernel from a table, about 100 dB clean.
+
+pub mod read;
 
 /// Where the passband ends, a part of the lower rate's Nyquist.
 pub const PASS: f64 = 0.91;
