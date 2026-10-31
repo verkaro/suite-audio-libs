@@ -31,6 +31,18 @@ impl Request {
 /// Reads one request. The body is read up to [`MAX_BODY`], and only when it has a
 /// Content-Length.
 pub fn read_request(r: &mut BufReader<TcpStream>) -> io::Result<Request> {
+    let mut req = read_head(r)?;
+    let len: usize = req.header("Content-Length").parse().unwrap_or(0);
+    if len > 0 {
+        r.get_ref().set_read_timeout(Some(Duration::from_secs(10)))?;
+        r.by_ref().take(len.min(MAX_BODY) as u64).read_to_end(&mut req.body)?;
+    }
+    Ok(req)
+}
+
+/// Reads one request's line and headers, and leaves its body to be read: by
+/// [`copy_body`], for a body too big to keep (a file sent from a page).
+pub fn read_head(r: &mut BufReader<TcpStream>) -> io::Result<Request> {
     r.get_ref().set_read_timeout(Some(Duration::from_secs(5)))?;
     let mut total = 0;
     let mut line = |r: &mut BufReader<TcpStream>| -> io::Result<String> {
@@ -64,19 +76,28 @@ pub fn read_request(r: &mut BufReader<TcpStream>) -> io::Result<Request> {
         headers.push((k.trim().to_string(), v.trim().to_string()));
     }
     let (path, query) = target.split_once('?').unwrap_or((target, ""));
-    let mut req = Request {
+    Ok(Request {
         method: method.to_string(),
         path: path.to_string(),
         query: query.to_string(),
         headers,
         body: Vec::new(),
-    };
-    let len: usize = req.header("Content-Length").parse().unwrap_or(0);
-    if len > 0 {
-        r.get_ref().set_read_timeout(Some(Duration::from_secs(10)))?;
-        r.by_ref().take(len.min(MAX_BODY) as u64).read_to_end(&mut req.body)?;
+    })
+}
+
+/// A request's body, all `Content-Length` of it, written to `w` as it comes, each read given
+/// 30 s; how much there was. Short of its length, an error: the sender gave up.
+pub fn copy_body(r: &mut BufReader<TcpStream>, req: &Request, w: &mut impl Write) -> io::Result<u64> {
+    let len: u64 = req
+        .header("Content-Length")
+        .parse()
+        .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "a body with no Content-Length"))?;
+    r.get_ref().set_read_timeout(Some(Duration::from_secs(30)))?;
+    let n = io::copy(&mut r.by_ref().take(len), w)?;
+    if n < len {
+        return Err(io::Error::new(io::ErrorKind::UnexpectedEof, format!("{n} bytes of {len}")));
     }
-    Ok(req)
+    Ok(n)
 }
 
 /// Whether a request may come from where it says: refuses a browser's request made by another
@@ -330,6 +351,41 @@ mod tests {
         assert_eq!(range("bytes=100-", 100), Some(None));
         assert_eq!(range("bytes=0-1,5-6", 100), None);
         assert_eq!(range("items=0-1", 100), None);
+    }
+
+    /// A request written to a socket of its own, read back by `read_head` and `copy_body`.
+    fn sent(raw: Vec<u8>) -> (Request, io::Result<Vec<u8>>) {
+        let l = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let at = l.local_addr().unwrap();
+        let t = std::thread::spawn(move || {
+            let mut s = TcpStream::connect(at).unwrap();
+            s.write_all(&raw).unwrap();
+        });
+        let (s, _) = l.accept().unwrap();
+        let mut r = BufReader::new(s);
+        let req = read_head(&mut r).unwrap();
+        let mut body = Vec::new();
+        let got = copy_body(&mut r, &req, &mut body).map(|_| body);
+        t.join().unwrap();
+        (req, got)
+    }
+
+    #[test]
+    fn a_body_bigger_than_kept_is_streamed_whole() {
+        let body: Vec<u8> = (0..3 * MAX_BODY).map(|k| (k % 251) as u8).collect();
+        let mut raw =
+            format!("PUT /upload?kind=sounds HTTP/1.1\r\nHost: x\r\nContent-Length: {}\r\n\r\n", body.len())
+                .into_bytes();
+        raw.extend_from_slice(&body);
+        let (req, got) = sent(raw);
+        assert_eq!(
+            (req.method.as_str(), req.path.as_str(), req.query.as_str()),
+            ("PUT", "/upload", "kind=sounds")
+        );
+        assert_eq!(got.unwrap(), body);
+        // Short of its length: the sender gave up.
+        let (_, got) = sent(b"PUT /u HTTP/1.1\r\nContent-Length: 10\r\n\r\nabc".to_vec());
+        assert_eq!(got.unwrap_err().kind(), io::ErrorKind::UnexpectedEof);
     }
 
     #[test]
