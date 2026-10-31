@@ -67,6 +67,9 @@ pub struct Status {
     pub attached: AtomicBool,
     pub rate: AtomicU32,
     pub period: AtomicU32,
+    /// How long after a period's written it's heard: the outputs' playback latency, frames (the
+    /// most of the two; 0 simulated, or connected nowhere).
+    pub latency: AtomicU32,
     /// xruns since it started.
     pub xruns: AtomicU64,
     /// Moves when the ports change.
@@ -245,6 +248,16 @@ impl<P: Player> Audio<P> {
 
     pub fn rate(&self) -> u32 {
         self.status.rate.load(Ordering::Relaxed)
+    }
+
+    /// A period, frames.
+    pub fn period(&self) -> u32 {
+        self.status.period.load(Ordering::Relaxed)
+    }
+
+    /// How long after a period's written it's heard, frames ([`Status::latency`]).
+    pub fn latency(&self) -> u32 {
+        self.status.latency.load(Ordering::Relaxed)
     }
 
     /// Where the outputs can go (in [`sort_ports`]' order), and the number that moves when they

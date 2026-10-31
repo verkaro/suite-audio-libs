@@ -90,6 +90,7 @@ impl<P: Player> Session<P> {
                 seen = g;
                 dirty = false;
                 k.status.set_ports(graph_ports(self.active.as_client()));
+                k.status.latency.store(latency(self.active.as_client(), &k.name), Ordering::Relaxed);
                 let mut graph = JackGraph(self.active.as_client());
                 for line in reconcile(&mut graph, &k.links, &cuts) {
                     k.note(&line);
@@ -102,6 +103,15 @@ impl<P: Player> Session<P> {
             }
         }
     }
+}
+
+/// The outputs' playback latency as JACK has it, frames: the most of the two.
+fn latency(c: &jack::Client, me: &str) -> u32 {
+    OUT.iter()
+        .filter_map(|o| c.port_by_name(&format!("{me}:{o}")))
+        .map(|p| p.get_latency_range(jack::LatencyType::Playback).1)
+        .max()
+        .unwrap_or(0)
 }
 
 /// Why the client couldn't be opened, in words.
