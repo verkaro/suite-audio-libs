@@ -55,6 +55,8 @@ tool's.
   suffix, a sidecar log, and refusing a tool's own output.
 - `as-defects`: clicks and single-sample errors found by where and how high, so they're fixed
   upstream.
+- `as-envelope`: acceptance tests for a process: test signals, a synthetic corpus of
+  speech-like and other sounds, and the measurements (tone, THD, products, nulls).
 - `as-keep`: nothing overwritten: exclusive numbered files, folders made whole before they
   appear, write-and-rename.
 

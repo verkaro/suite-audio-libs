@@ -13,6 +13,7 @@ as-biquad = { path = "crates/biquad" }
 as-conv = { path = "crates/conv" }
 as-defects = { path = "crates/defects" }
 as-draw = { path = "crates/draw" }
+as-envelope = { path = "crates/envelope" }
 as-flac = { path = "crates/flac" }
 as-http = { path = "crates/http" }
 as-ir = { path = "crates/ir" }
@@ -54,4 +55,6 @@ opt-level = 3
 [profile.dev.package.realfft]
 opt-level = 3
 [profile.dev.package.rustfft]
+opt-level = 3
+[profile.dev.package.as-envelope]
 opt-level = 3

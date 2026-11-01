@@ -28,6 +28,15 @@ name = "as-draw"
 version = "0.1.0"
 
 [[package]]
+name = "as-envelope"
+version = "0.1.0"
+dependencies = [
+ "as-biquad",
+ "libm",
+ "realfft",
+]
+
+[[package]]
 name = "as-flac"
 version = "0.1.0"
 dependencies = [

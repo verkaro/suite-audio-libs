@@ -1,0 +1,12 @@
+[package]
+name = "as-envelope"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Acceptance tests for audio processing: test signals, a synthetic corpus, and the measurements (gain, THD, aliasing, nulls) that say whether a process stayed subtle"
+
+[dependencies]
+as-biquad.workspace = true
+libm.workspace = true
+realfft.workspace = true
