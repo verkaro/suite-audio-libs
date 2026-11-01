@@ -69,31 +69,42 @@ pub fn calibrate(measured: Option<f64>, reference: f64) -> Calibration {
 pub fn integrated(channels: &[&[f64]], rate: u32) -> Loudness {
     let powers: Vec<Blocks> = channels.iter().map(|c| blocks(c, rate)).collect();
     let short = powers.first().is_some_and(|b| b.short);
-    let n = channels.len() as f64;
-    let combine = |scale: f64| -> Option<f64> {
-        let z = joint(&powers.iter().collect::<Vec<_>>());
-        gated(&z.iter().map(|v| v * scale).collect::<Vec<_>>(), short)
-    };
-    Loudness { mean: combine(1.0), sum: combine(n), short }
+    let z = joint(&powers.iter().collect::<Vec<_>>());
+    let summed: Vec<f64> = z.iter().map(|v| v * channels.len() as f64).collect();
+    Loudness { mean: gated(&z, short), sum: gated(&summed, short), short }
 }
 
 /// A linked group's loudness (Tape's RFC, S1): the mean power over every channel of every
 /// file, block by block in time, each file at its own rate. A file shorter than the others
-/// adds nothing past its end. Short only if every file is.
+/// adds nothing past its end; one shorter than a block is its one block, at the start. Gated,
+/// unless every file is shorter than a block.
 pub fn group(files: &[(&[&[f64]], u32)]) -> Option<f64> {
     let all: Vec<Blocks> =
         files.iter().flat_map(|(chs, rate)| chs.iter().map(|c| blocks(c, *rate))).collect();
     let short = all.iter().all(|b| b.short);
-    let all: Vec<Blocks> = if short { all } else { all.into_iter().filter(|b| !b.short).collect() };
     gated(&joint(&all.iter().collect::<Vec<_>>()), short)
 }
 
 /// The true peak of a channel at `rate` Hz, as a level (1.0 full scale): the largest magnitude
-/// of its samples at four times 48 kHz or more.
+/// of its samples at four times 48 kHz or more. Converted a piece at a time, each with the
+/// converter's reach either side (`as-resample`, `Converter::reach`), so a long file needs no
+/// more memory than a piece.
 pub fn true_peak(x: &[f64], rate: u32) -> f64 {
-    let up = (192_000u32).div_ceil(rate).max(1);
-    let over = if up > 1 { as_resample::convert(x, rate, rate * up) } else { vec![] };
-    x.iter().chain(&over).fold(0.0, |m, v| f64::max(m, v.abs()))
+    let sample = x.iter().fold(0.0, |m, v| f64::max(m, v.abs()));
+    let up = (192_000u32).div_ceil(rate).max(1) as usize;
+    if up == 1 || x.is_empty() {
+        return sample;
+    }
+    let c = as_resample::Converter::new(rate, rate * up as u32);
+    let (r, piece) = (c.reach(), 1 << 16);
+    let mut most = sample;
+    for a in (0..x.len()).step_by(piece) {
+        let b = (a + piece).min(x.len());
+        let lo = a.saturating_sub(r);
+        let part = c.run(&x[lo..(b + r).min(x.len())]);
+        most = part[(a - lo) * up..(b - lo) * up].iter().fold(most, |m, v| f64::max(m, v.abs()));
+    }
+    most
 }
 
 /// A level as dB (1.0 is 0 dB), −∞ for 0.
@@ -178,19 +189,12 @@ fn k_weight(x: &[f64], rate: u32) -> Vec<f64> {
         let (b, a) = (digital(n), digital(m));
         [b[0] / a[0], b[1] / a[0], b[2] / a[0], a[1] / a[0], a[2] / a[0]]
     };
-    biquad(&biquad(x, section(K48[0])), section(K48[1]))
-}
-
-/// Direct form I: `[b0, b1, b2, a1, a2]`.
-fn biquad(x: &[f64], c: [f64; 5]) -> Vec<f64> {
-    let (mut x1, mut x2, mut y1, mut y2) = (0.0, 0.0, 0.0, 0.0);
-    x.iter()
-        .map(|&v| {
-            let y = c[0] * v + c[1] * x1 + c[2] * x2 - c[3] * y1 - c[4] * y2;
-            (x2, x1, y2, y1) = (x1, v, y1, y);
-            y
-        })
-        .collect()
+    let mut y = x.to_vec();
+    for k in K48 {
+        let [b0, b1, b2, a1, a2] = section(k);
+        as_biquad::Biquad { b0, b1, b2, a1, a2 }.run(&mut y);
+    }
+    y
 }
 
 #[cfg(test)]

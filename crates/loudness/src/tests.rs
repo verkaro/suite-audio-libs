@@ -14,7 +14,10 @@ fn k_weighting_is_bs1770s_at_48k() {
     // Back and forth at the same rate is the standard's filter: its impulse response, as
     // the two sections give it straight.
     let x: Vec<f64> = std::iter::once(1.0).chain(std::iter::repeat_n(0.0, 99)).collect();
-    let want = biquad(&biquad(&x, K48[0]), K48[1]);
+    let mut want = x.clone();
+    for [b0, b1, b2, a1, a2] in K48 {
+        as_biquad::Biquad { b0, b1, b2, a1, a2 }.run(&mut want);
+    }
     let got = k_weight(&x, 48_000);
     assert!(got.iter().zip(&want).all(|(a, b)| (a - b).abs() < 1e-12), "{:?} {:?}", &got[..3], &want[..3]);
 }
@@ -118,4 +121,22 @@ fn true_peak_finds_the_peak_between_samples() {
     let tp = true_peak(&x, r);
     assert!((tp - 1.0).abs() < 0.001, "{tp}");
     assert_eq!(db(1.0), 0.0);
+}
+
+#[test]
+fn a_short_hit_in_a_group_counts() {
+    // A loud 300 ms hit and a long near-silent stem: the hit makes the group loud.
+    let r = 48_000;
+    let hit = sine(1000.0, -10.0, 0.3, r);
+    let quiet = sine(1000.0, -80.0, 5.0, r);
+    assert!(group(&[(&[&hit], r), (&[&quiet], r)]).is_some());
+}
+
+#[test]
+fn true_peak_in_pieces_is_the_whole() {
+    let r = 48_000;
+    let x: Vec<f64> =
+        (0..200_000).map(|k| libm::sin(k as f64 * 0.7) * libm::sin(k as f64 * 0.0003)).collect();
+    let whole = as_resample::convert(&x, r, 4 * r).iter().chain(&x).fold(0.0f64, |m, v| m.max(v.abs()));
+    assert_eq!(true_peak(&x, r), whole);
 }

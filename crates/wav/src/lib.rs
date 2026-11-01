@@ -386,8 +386,13 @@ impl Reader {
         let (mut format, mut channels, mut rate, mut bits) = (0u16, 0u16, 0u32, 0u16);
         let mut data = None;
         let mut others = vec![];
+        // Chunks are read only as far as the RIFF header says the file goes: past it lie a
+        // recorder's padding, or audio written after the header's last update (a crash), and
+        // neither is a chunk. A header that says nothing (never synced) ends at the data.
+        let riff = u32::from_le_bytes(hdr[4..8].try_into().unwrap()) as u64;
+        let end = if riff == 0 { size } else { size.min(8 + riff) };
         let mut off = 12u64;
-        while off + 8 <= size {
+        while off + 8 <= end {
             let mut ch = [0u8; 8];
             f.read_exact_at(&mut ch, off)?;
             let mut len = u32::from_le_bytes(ch[4..].try_into().unwrap()) as u64;
@@ -411,10 +416,14 @@ impl Reader {
                     // A file cut short by a crash may claim more than it has, and one never
                     // synced claims nothing.
                     let avail = size - body;
-                    if len > avail || len == 0 {
+                    let cut = len > avail || len == 0;
+                    if cut {
                         len = avail;
                     }
                     data = Some((body, len));
+                    if cut || riff == 0 {
+                        break; // nothing after the data can be trusted as a chunk
+                    }
                 }
                 b"fact" => {}
                 id => others.push((id.try_into().unwrap(), body, len.min(size - body))),
@@ -449,7 +458,7 @@ impl Reader {
     /// full scale (2^15, 2^23, 2^31), floats as they are.
     pub fn read_channels_f64(&mut self) -> io::Result<Vec<Vec<f64>>> {
         let (bps, ch) = (self.bits as usize / 8, self.channels as usize);
-        let mut outs = vec![Vec::with_capacity(self.frames as usize); ch];
+        let mut outs: Vec<Vec<f64>> = (0..ch).map(|_| Vec::with_capacity(self.frames as usize)).collect();
         let block = 1 << 16;
         let mut pos = 0u64;
         while pos < self.frames {

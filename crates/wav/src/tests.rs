@@ -497,3 +497,44 @@ fn s24_from_f64_rounds_once() {
     let got = Reader::open(&path).unwrap().read_channels_f64().unwrap();
     assert_eq!(got[0], [0.75 + step, 0.75, -0.75 - step, 8_388_607.0 * step]);
 }
+
+#[test]
+fn audio_past_a_stale_header_is_never_read_as_chunks() {
+    // A recording synced at 3 frames, then 1000 more frames written before a crash: the header
+    // still says 3 frames. What lies past is audio, not chunks.
+    let dir = TempDir::new("stale");
+    let path = dir.path("a.wav");
+    let mut w = Writer::create(&path, 48_000, Format::S16).unwrap();
+    w.write(&[0.1, 0.2, 0.3]).unwrap();
+    w.sync(false).unwrap();
+    let noise: Vec<f32> = (0..1000).map(|k| ((k * 7919) % 2000) as f32 / 1000.0 - 1.0).collect();
+    w.write(&noise).unwrap();
+    std::mem::forget(w); // the crash: no sync, no close
+    let bytes = fs::read(&path).unwrap();
+    let mut flushed = bytes.clone();
+    // Whatever made it to disk, the header says 3 frames.
+    flushed.extend_from_slice(b"fmt \x10\0\0\0garbage-garbage!");
+    fs::write(&path, &flushed).unwrap();
+    let r = Reader::open_any(&path).unwrap();
+    assert!(
+        r.chunks().unwrap().is_empty(),
+        "{:?}",
+        r.chunks().unwrap().iter().map(|c| c.id).collect::<Vec<_>>()
+    );
+    assert_eq!(r.channels(), 1);
+}
+
+#[test]
+fn a_processed_bext_clears_what_described_the_original() {
+    let mut body = vec![0u8; Bext::FIXED];
+    body[338] = 7; // TimeReference
+    body[346] = 2; // version 2
+    body[348..412].fill(0xAB); // UMID
+    body[412..414].copy_from_slice(&(-2300i16).to_le_bytes()); // LoudnessValue
+    let mut b = Bext::parse(&body);
+    b.processed();
+    let out = b.to_bytes();
+    assert_eq!(b.time_reference(), 7);
+    assert!(out[348..412].iter().all(|&v| v == 0));
+    assert_eq!(i16::from_le_bytes([out[412], out[413]]), 0x7FFF);
+}

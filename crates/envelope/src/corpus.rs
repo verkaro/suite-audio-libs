@@ -28,7 +28,8 @@ const VOWELS: [[(f64, f64); 3]; 4] = [
 pub fn voice(pitch: f64, amp: f64, secs: f64, syllable: f64, rate: u32, seed: u64) -> Vec<f64> {
     let n = (secs * rate as f64) as usize;
     let per = (syllable * rate as f64) as usize;
-    let nyquist = rate as f64 / 2.0;
+    // Harmonics up to 12 kHz, or nine tenths of Nyquist if that's lower.
+    let top = f64::min(12_000.0, 0.45 * rate as f64);
     let mut r = Rng::new(seed);
     let mut phase = 0.0;
     // The glottal source: harmonics falling at 12 dB an octave, band-limited, its pitch
@@ -38,10 +39,16 @@ pub fn voice(pitch: f64, amp: f64, secs: f64, syllable: f64, rate: u32, seed: u6
             let t = k as f64 / rate as f64;
             let f = pitch * (1.0 + 0.04 * libm::sin(TAU * t / (2.0 * syllable)));
             phase += f / rate as f64;
+            // sin(hθ) for every h by the recurrence s_h = 2 cos θ s_(h−1) − s_(h−2): one sin
+            // and one cos a sample, the rest multiplies and adds.
+            let theta = TAU * phase;
+            let (s1, c) = (libm::sin(theta), libm::cos(theta));
+            let (mut prev, mut cur) = (0.0, s1);
             let mut v = 0.0;
             let mut h = 1.0;
-            while h * f < 0.45 * nyquist.min(12_000.0) {
-                v += libm::sin(TAU * h * phase) / (h * h);
+            while h * f < top {
+                v += cur / (h * h);
+                (prev, cur) = (cur, 2.0 * c * cur - prev);
                 h += 1.0;
             }
             v
@@ -76,7 +83,7 @@ pub fn voice(pitch: f64, amp: f64, secs: f64, syllable: f64, rate: u32, seed: u6
         }
         out[start..end].copy_from_slice(&seg);
     }
-    let peak = out.iter().fold(0.0f64, |m, v| m.max(v.abs()));
+    let peak = crate::measure::peak(&out);
     out.iter().map(|v| v / peak * amp).collect()
 }
 
@@ -89,7 +96,10 @@ pub fn sibilants(amp: f64, secs: f64, burst: f64, every: f64, rate: u32, seed: u
     for _ in 0..2 {
         as_biquad::First::highpass(3500.0, rate as f64).run(&mut x);
         as_biquad::First::highpass(3500.0, rate as f64).run(&mut x);
-        Biquad::lowpass_matched(10_000.0 / 0.6436, 0.5, 10_000.0, rate as f64).run(&mut x);
+        // The fall past 10 kHz only where there's room above it.
+        if rate as f64 / 2.0 > 12_000.0 {
+            Biquad::lowpass_matched(10_000.0 / 0.6436, 0.5, 10_000.0, rate as f64).run(&mut x);
+        }
     }
     Biquad::peak(7000.0, 1.2, 4.0, rate as f64).run(&mut x);
     let (b, e) = ((burst * rate as f64) as usize, (every * rate as f64) as usize);
@@ -98,7 +108,7 @@ pub fn sibilants(amp: f64, secs: f64, burst: f64, every: f64, rate: u32, seed: u
         let g = if p < b { libm::sin(std::f64::consts::PI * p as f64 / b as f64) } else { 0.0 };
         *v *= g;
     }
-    let peak = x.iter().fold(0.0f64, |m, v| m.max(v.abs()));
+    let peak = crate::measure::peak(&x);
     x.iter().map(|v| v / peak * amp).collect()
 }
 
@@ -139,7 +149,7 @@ pub fn whisper(amp: f64, secs: f64, rate: u32, seed: u64) -> Vec<f64> {
     for (k, v) in acc.iter_mut().enumerate() {
         *v *= libm::sin(std::f64::consts::PI * (k % per) as f64 / per as f64);
     }
-    let peak = acc.iter().fold(0.0f64, |m, v| m.max(v.abs()));
+    let peak = crate::measure::peak(&acc);
     acc.iter().map(|v| v / peak * amp).collect()
 }
 
@@ -158,7 +168,7 @@ pub fn impacts(amp: f64, secs: f64, rate: u32, seed: u64) -> Vec<f64> {
                 libm::exp(-t / 0.12) * libm::sin(TAU * 60.0 * t) + 0.4 * libm::exp(-t / 0.02) * r.uniform();
         }
     }
-    let peak = x.iter().fold(0.0f64, |m, v| m.max(v.abs()));
+    let peak = crate::measure::peak(&x);
     x.iter().map(|v| v / peak * amp).collect()
 }
 
@@ -168,12 +178,18 @@ pub fn sweep(amp: f64, secs: f64, rate: u32) -> Vec<f64> {
     let n = (secs * rate as f64) as usize;
     let (f1, f2) = (20.0, f64::min(20_000.0, 0.45 * rate as f64));
     let l = secs / libm::log(f2 / f1);
-    crate::signal::faded(
-        (0..n)
-            .map(|k| amp * libm::sin(TAU * f1 * l * (libm::exp(k as f64 / rate as f64 / l) - 1.0)))
-            .collect(),
-        (0.01 * rate as f64) as usize,
-    )
+    let mut x: Vec<f64> = (0..n)
+        .map(|k| amp * libm::sin(TAU * f1 * l * (libm::exp(k as f64 / rate as f64 / l) - 1.0)))
+        .collect();
+    let (fade_in, fade_out) = ((0.1 * rate as f64) as usize, (0.01 * rate as f64) as usize);
+    let ramp = |k: usize, of: usize| 0.5 - 0.5 * libm::cos(std::f64::consts::PI * k as f64 / of as f64);
+    for (k, v) in x.iter_mut().enumerate().take(fade_in) {
+        *v *= ramp(k, fade_in);
+    }
+    for (k, v) in x.iter_mut().rev().enumerate().take(fade_out) {
+        *v *= ramp(k, fade_out);
+    }
+    x
 }
 
 /// A bed: a slow chord, stereo, its two sides a little apart.
@@ -187,7 +203,7 @@ pub fn bed(amp: f64, secs: f64, rate: u32) -> Vec<Vec<f64>> {
                 x[k] += v;
             }
         }
-        let peak = x.iter().fold(0.0f64, |m, v| m.max(v.abs()));
+        let peak = crate::measure::peak(&x);
         crate::signal::faded(x.iter().map(|v| v / peak * amp).collect(), rate as usize / 10)
     };
     vec![side(1.0), side(1.003)]
@@ -208,7 +224,7 @@ pub fn room_tone(amp: f64, secs: f64, rate: u32, seed: u64) -> Vec<f64> {
             b0 + b1 + b2 + v * 0.1848
         })
         .collect();
-    let peak = x.iter().fold(0.0f64, |m, v| m.max(v.abs()));
+    let peak = crate::measure::peak(&x);
     x.iter().map(|v| v / peak * amp).collect()
 }
 

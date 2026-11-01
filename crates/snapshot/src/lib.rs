@@ -208,12 +208,23 @@ impl Snapshot {
             format!("kind={}", self.kind),
             format!("schema={}", self.schema),
         ];
-        let ignored: Vec<&String> = table
-            .collapse
-            .iter()
-            .filter(|c| self.controls.get(&c.control) == Some(&c.detent))
-            .flat_map(|c| &c.ignored)
-            .collect();
+        // A collapse applies only from a control that isn't itself collapsed: worked out until
+        // nothing changes, so chains (A ignores B, B ignores C) give one ID to one sound.
+        let mut ignored: Vec<&String> = vec![];
+        for _ in 0..=table.collapse.len() {
+            let next: Vec<&String> = table
+                .collapse
+                .iter()
+                .filter(|c| {
+                    !ignored.contains(&&c.control) && self.controls.get(&c.control) == Some(&c.detent)
+                })
+                .flat_map(|c| &c.ignored)
+                .collect();
+            if next == ignored {
+                break;
+            }
+            ignored = next;
+        }
         for (k, v) in &self.controls {
             let v = if ignored.contains(&k) { "-" } else { v };
             lines.push(format!("controls.{k}={v}"));

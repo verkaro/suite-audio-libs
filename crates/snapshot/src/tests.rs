@@ -119,3 +119,22 @@ impl Snapshot {
         self
     }
 }
+
+#[test]
+fn chained_collapses_give_one_sound_one_id() {
+    let mut t = table();
+    // drive off ignores bias; bias under ignores hf.
+    t.collapse.push(Collapse { control: "bias".into(), detent: "under".into(), ignored: vec!["hf".into()] });
+    let snap = |drive: &str, bias: &str, hf: &str| {
+        let mut s = t.defaults("x");
+        s.controls.insert("drive".into(), drive.into());
+        s.controls.insert("bias".into(), bias.into());
+        s.controls.insert("hf".into(), hf.into());
+        s
+    };
+    // With drive off, bias does nothing, so neither does its collapse: hf counts.
+    assert_eq!(snap("off", "under", "on").id(&t), snap("off", "nominal", "on").id(&t));
+    assert_ne!(snap("off", "under", "on").id(&t), snap("off", "under", "off").id(&t));
+    // With drive on and bias under, hf does nothing.
+    assert_eq!(snap("1", "under", "on").id(&t), snap("1", "under", "off").id(&t));
+}

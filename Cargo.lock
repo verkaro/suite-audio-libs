@@ -71,6 +71,7 @@ dependencies = [
 name = "as-loudness"
 version = "0.1.0"
 dependencies = [
+ "as-biquad",
  "as-resample",
  "libm",
 ]

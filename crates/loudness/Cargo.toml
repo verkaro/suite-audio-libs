@@ -7,5 +7,6 @@ rust-version.workspace = true
 description = "Integrated loudness (ITU-R BS.1770-4, gated), its per-channel mean, true peak, and the trim to a reference"
 
 [dependencies]
+as-biquad.workspace = true
 as-resample.workspace = true
 libm.workspace = true

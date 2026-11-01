@@ -55,6 +55,20 @@ impl Bext {
         self.fixed[t..t + 8].copy_from_slice(&at.to_le_bytes());
     }
 
+    /// Made fit for a processed copy: the UMID (the original material's identity) cleared, and
+    /// in a version 2 the loudness fields marked unset (0x7FFF, as EBU Tech 3285 has it), since
+    /// they described the original's samples. Everything else (the description, originator,
+    /// dates, TimeReference, history) is kept.
+    pub fn processed(&mut self) {
+        self.fixed[348..412].fill(0);
+        let version = u16::from_le_bytes([self.fixed[346], self.fixed[347]]);
+        if version >= 2 {
+            for at in (412..422).step_by(2) {
+                self.fixed[at..at + 2].copy_from_slice(&0x7FFFi16.to_le_bytes());
+            }
+        }
+    }
+
     /// The CodingHistory's lines, without their endings.
     pub fn history(&self) -> Vec<String> {
         String::from_utf8_lossy(&self.history)
