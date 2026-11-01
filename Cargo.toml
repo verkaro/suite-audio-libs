@@ -11,6 +11,7 @@ repository = "https://github.com/verkaro/suite-audio-libs"
 [workspace.dependencies]
 as-biquad = { path = "crates/biquad" }
 as-conv = { path = "crates/conv" }
+as-defects = { path = "crates/defects" }
 as-draw = { path = "crates/draw" }
 as-flac = { path = "crates/flac" }
 as-http = { path = "crates/http" }
@@ -21,6 +22,7 @@ as-loudness = { path = "crates/loudness" }
 as-meter = { path = "crates/meter" }
 as-opening = { path = "crates/opening" }
 as-page-kit = { path = "crates/page-kit" }
+as-provenance = { path = "crates/provenance" }
 as-resample = { path = "crates/resample" }
 as-tar = { path = "crates/tar" }
 as-seam = { path = "crates/seam" }

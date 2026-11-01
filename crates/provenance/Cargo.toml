@@ -1,0 +1,10 @@
+[package]
+name = "as-provenance"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "What a processed file says about itself: a CodingHistory tag, its filename suffix, a sidecar log, and refusing a tool's own output"
+
+[dependencies]
+as-keep.workspace = true

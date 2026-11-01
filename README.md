@@ -51,6 +51,10 @@ tool's.
   machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass.
 - `as-snapshot`: detented settings: versioned detent tables with their plain words, strict TOML
   snapshots, and an ID that's the same for any two that sound the same.
+- `as-provenance`: what a processed file says about itself: a CodingHistory tag, a filename
+  suffix, a sidecar log, and refusing a tool's own output.
+- `as-defects`: clicks and single-sample errors found by where and how high, so they're fixed
+  upstream.
 - `as-keep`: nothing overwritten: exclusive numbered files, folders made whole before they
   appear, write-and-rename.
 

@@ -17,6 +17,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-defects"
+version = "0.1.0"
+dependencies = [
+ "libm",
+]
+
+[[package]]
 name = "as-draw"
 version = "0.1.0"
 
@@ -70,6 +77,13 @@ version = "0.1.0"
 [[package]]
 name = "as-page-kit"
 version = "0.1.0"
+
+[[package]]
+name = "as-provenance"
+version = "0.1.0"
+dependencies = [
+ "as-keep",
+]
 
 [[package]]
 name = "as-resample"
