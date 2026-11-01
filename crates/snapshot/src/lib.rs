@@ -177,6 +177,11 @@ impl Snapshot {
 
     /// Every control of `table` given one of its detents, and nothing else.
     pub fn check(&self, table: &Table) -> Result<(), Error> {
+        // A key it doesn't know first: a misspelt control is also a missing one, and the
+        // misspelling is the news.
+        if let Some(k) = self.controls.keys().find(|k| table.control(k).is_none()) {
+            return Err(Error(format!("[controls] has {k}, which isn't a control in {}", table.version)));
+        }
         for c in &table.controls {
             match self.controls.get(&c.key) {
                 None => return Err(Error(format!("[controls] has no {}", c.key))),
@@ -191,9 +196,6 @@ impl Snapshot {
                 }
                 Some(_) => {}
             }
-        }
-        if let Some(k) = self.controls.keys().find(|k| table.control(k).is_none()) {
-            return Err(Error(format!("[controls] has {k}, which isn't a control in {}", table.version)));
         }
         Ok(())
     }
