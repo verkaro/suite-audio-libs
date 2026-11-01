@@ -84,14 +84,14 @@ pub fn voice(pitch: f64, amp: f64, secs: f64, syllable: f64, rate: u32, seed: u6
 pub fn sibilants(amp: f64, secs: f64, burst: f64, every: f64, rate: u32, seed: u64) -> Vec<f64> {
     let n = (secs * rate as f64) as usize;
     let mut x = noise(n, 1.0, seed);
-    for hz in [4000.0, 4000.0] {
-        // Two first-order high-passes' worth: a steep enough slope for an "s".
-        as_biquad::First::highpass(hz, rate as f64).run(&mut x);
+    // An [s]: most of its energy 5–9 kHz, rising steeply from 3.5 kHz and falling steeply past
+    // 10 kHz (two second-order sections each way), as measured fricatives do.
+    for _ in 0..2 {
+        as_biquad::First::highpass(3500.0, rate as f64).run(&mut x);
+        as_biquad::First::highpass(3500.0, rate as f64).run(&mut x);
+        Biquad::lowpass_matched(10_000.0 / 0.6436, 0.5, 10_000.0, rate as f64).run(&mut x);
     }
-    Biquad::peak(7000.0, 1.5, 6.0, rate as f64).run(&mut x);
-    if rate as f64 / 2.0 > 12_000.0 {
-        Biquad::lowpass_matched(11_000.0, 0.5, 10_000.0, rate as f64).run(&mut x);
-    }
+    Biquad::peak(7000.0, 1.2, 4.0, rate as f64).run(&mut x);
     let (b, e) = ((burst * rate as f64) as usize, (every * rate as f64) as usize);
     for (k, v) in x.iter_mut().enumerate() {
         let p = k % e;
@@ -121,6 +121,28 @@ pub fn plosives(amp: f64, secs: f64, every: f64, rate: u32, seed: u64) -> Vec<f6
     x.iter().map(|v| v * amp).collect()
 }
 
+/// A whisper: noise through a vowel's formants, falling past 4 kHz as breath does, in
+/// syllables; `amp` its peak.
+pub fn whisper(amp: f64, secs: f64, rate: u32, seed: u64) -> Vec<f64> {
+    let n = (secs * rate as f64) as usize;
+    let w = noise(n, 1.0, seed);
+    let mut acc = vec![0.0; n];
+    for (i, &(hz, q)) in VOWELS[0].iter().enumerate() {
+        let mut f = w.clone();
+        Biquad::peak(hz, q / 2.0, 20.0 - 4.0 * i as f64, rate as f64).run(&mut f);
+        for (a, v) in acc.iter_mut().zip(&f) {
+            *a += v;
+        }
+    }
+    Biquad::lowpass_matched(4000.0, 0.5, 2500.0, rate as f64).run(&mut acc);
+    let per = (0.35 * rate as f64) as usize;
+    for (k, v) in acc.iter_mut().enumerate() {
+        *v *= libm::sin(std::f64::consts::PI * (k % per) as f64 / per as f64);
+    }
+    let peak = acc.iter().fold(0.0f64, |m, v| m.max(v.abs()));
+    acc.iter().map(|v| v / peak * amp).collect()
+}
+
 /// An LF-heavy impact (a door slam): a decaying thud at 60 Hz and its noise.
 pub fn impacts(amp: f64, secs: f64, rate: u32, seed: u64) -> Vec<f64> {
     let n = (secs * rate as f64) as usize;
@@ -140,7 +162,8 @@ pub fn impacts(amp: f64, secs: f64, rate: u32, seed: u64) -> Vec<f64> {
     x.iter().map(|v| v / peak * amp).collect()
 }
 
-/// A log sweep from 20 Hz to 20 kHz (or 0.45 of the rate), at `amp`.
+/// A log sweep from 20 Hz to 20 kHz (or 0.45 of the rate), at `amp`, faded in over two
+/// cycles of its first frequency (100 ms) and out over 10 ms.
 pub fn sweep(amp: f64, secs: f64, rate: u32) -> Vec<f64> {
     let n = (secs * rate as f64) as usize;
     let (f1, f2) = (20.0, f64::min(20_000.0, 0.45 * rate as f64));
@@ -210,13 +233,7 @@ pub fn all(rate: u32, secs: f64) -> Vec<Item> {
         mono("voice, low, conversational", voice(95.0, 0.2, secs, 0.3, rate, 2)),
         mono("voice, high, projected", voice(260.0, 0.45, secs, 0.28, rate, 3)),
         mono("voice, shouted, with esses", shout),
-        mono("whisper", {
-            let n = noise((secs * rate as f64) as usize, 1.0, 6);
-            let mut f = n.clone();
-            Biquad::peak(2000.0, 2.0, 18.0, rate as f64).run(&mut f);
-            let peak = f.iter().fold(0.0f64, |m, v| m.max(v.abs()));
-            f.iter().map(|v| v / peak * 0.02).collect()
-        }),
+        mono("whisper", whisper(0.03, secs, rate, 6)),
         mono("sibilants", sibilants(0.3, secs, 0.15, 0.5, rate, 7)),
         mono("plosives", plosives(0.5, secs, 0.4, rate, 8)),
         mono("boom", lowpass(one.clone())),
