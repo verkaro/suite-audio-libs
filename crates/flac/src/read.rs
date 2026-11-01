@@ -37,14 +37,39 @@ pub fn info(path: impl AsRef<Path>) -> Result<Info, claxon::Error> {
 
 /// Reads the FLAC at `path` whole.
 pub fn read(path: impl AsRef<Path>) -> Result<Flac, claxon::Error> {
+    let (rate, bits, channels) = read_as(path, |s, scale| (s as f64 * scale) as f32)?;
+    Ok(Flac { rate, bits, channels })
+}
+
+/// A FLAC read whole, exactly: its integers over their full scale, as `f64` (for Tape, whose
+/// processing is all `f64`; added 2026-11-01).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Flac64 {
+    pub rate: u32,
+    pub bits: u32,
+    pub channels: Vec<Vec<f64>>,
+}
+
+/// Reads the FLAC at `path` whole, exactly. `claxon` reads up to 24 bits a sample; a 32-bit
+/// stream is refused (its frames say so in a way `claxon` takes for a reserved value).
+pub fn read_f64(path: impl AsRef<Path>) -> Result<Flac64, claxon::Error> {
+    let (rate, bits, channels) = read_as(path, |s, scale| s as f64 * scale)?;
+    Ok(Flac64 { rate, bits, channels })
+}
+
+fn read_as<T>(
+    path: impl AsRef<Path>,
+    f: impl Fn(i32, f64) -> T,
+) -> Result<(u32, u32, Vec<Vec<T>>), claxon::Error> {
     let mut r = claxon::FlacReader::open(path)?;
     let info = r.streaminfo();
     let ch = info.channels as usize;
-    let scale = 1.0 / (1u64 << (info.bits_per_sample - 1)) as f32;
-    let mut channels = vec![Vec::with_capacity(info.samples.unwrap_or(0) as usize); ch];
+    let scale = 1.0 / (1u64 << (info.bits_per_sample - 1)) as f64;
+    let mut channels: Vec<Vec<T>> =
+        (0..ch).map(|_| Vec::with_capacity(info.samples.unwrap_or(0) as usize)).collect();
     for (k, s) in r.samples().enumerate() {
         match s {
-            Ok(s) => channels[k % ch].push(s as f32 * scale),
+            Ok(s) => channels[k % ch].push(f(s, scale)),
             // Cut short: what's whole so far.
             Err(claxon::Error::IoError(_)) => break,
             Err(e) => return Err(e),
@@ -54,5 +79,5 @@ pub fn read(path: impl AsRef<Path>) -> Result<Flac, claxon::Error> {
     for c in &mut channels {
         c.truncate(whole);
     }
-    Ok(Flac { rate: info.sample_rate, bits: info.bits_per_sample, channels })
+    Ok((info.sample_rate, info.bits_per_sample, channels))
 }

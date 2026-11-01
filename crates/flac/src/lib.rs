@@ -6,10 +6,11 @@
 //! than `flac -8` on a noisy recording, half again on a sweep (it also tries LPC). Read back by `claxon` in its tests, and passed by
 //! `flac -t`. The format: https://xiph.org/flac/format.html.
 //!
-//! Read with [`read::read`], through `claxon`; its header alone with [`read::info`].
+//! Read with [`read::read`] (or exactly, as `f64`, with [`read::read_f64`]), through `claxon`;
+//! its header alone with [`read::info`].
 
 pub mod read;
-pub use read::{Flac, Info, info, read};
+pub use read::{Flac, Flac64, Info, info, read, read_f64};
 
 /// Samples a frame.
 const BLOCK: usize = 4096;
@@ -508,6 +509,9 @@ mod tests {
         assert_eq!((f.rate, f.bits, f.channels.len()), (44100, 24, 2));
         assert_eq!(info(&p).unwrap(), Info { rate: 44100, channels: 2, bits: 24, frames: 10_000 });
         assert!(f.channels[0].iter().zip(&x).all(|(a, b)| *a == *b as f32 / 8_388_608.0));
+        let e = read_f64(&p).unwrap();
+        assert_eq!((e.rate, e.bits), (44100, 24));
+        assert!(e.channels[1].iter().zip(&x).all(|(a, b)| *a == -*b as f64 / 8_388_608.0));
         let q = dir.join("cut.flac");
         std::fs::write(&q, &bytes[..bytes.len() * 2 / 3]).unwrap();
         let g = read(&q).unwrap();

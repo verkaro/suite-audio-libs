@@ -24,7 +24,8 @@ tool's.
 
 ## The crates
 
-- `as-wav`: WAV written crash-safe (24-bit, 16-bit dithered, float) and read.
+- `as-wav`: WAV written crash-safe (24-bit, 16-bit dithered, float) and read, exactly into
+  `f64` if asked (64-bit float too), its other chunks kept and written back, BWF's `bext`.
 - `as-flac`: FLAC written, 24-bit, with no dependencies; and read, or its header alone, through `claxon`.
 - `as-tar`: a tar written and read as it streams (ustar, with PAX for long paths and big
   files), for packing a tool's work.

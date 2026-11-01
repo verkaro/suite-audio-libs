@@ -345,7 +345,7 @@ fn bench_convert() {
             (|s: &[f32], b: &mut Vec<u8>| b.extend(s.iter().flat_map(|v| v.to_le_bytes())))
                 as fn(&[f32], &mut Vec<u8>),
         ),
-        ("s24", |s, b| s24(s, b)),
+        ("s24", |s, b| s24(s.iter().map(|&v| v as f64), b)),
         ("s16", |s, b| {
             s16(s, DITHER_SEED, b);
         }),
@@ -384,4 +384,116 @@ fn stereo_round_trip() {
         assert_eq!(u16::from_le_bytes([b[22], b[23]]), 2);
         assert_eq!(u16::from_le_bytes([b[32], b[33]]) as u64, 2 * format.bytes());
     }
+}
+
+/// A RIFF file of these chunks, in order.
+fn riff(chunks: &[(&[u8; 4], Vec<u8>)]) -> Vec<u8> {
+    let mut body = b"WAVE".to_vec();
+    for (id, b) in chunks {
+        body.extend_from_slice(*id);
+        body.extend_from_slice(&(b.len() as u32).to_le_bytes());
+        body.extend_from_slice(b);
+        if b.len() % 2 == 1 {
+            body.push(0);
+        }
+    }
+    [b"RIFF".to_vec(), (body.len() as u32).to_le_bytes().to_vec(), body].concat()
+}
+
+fn fmt_chunk(format: u16, channels: u16, rate: u32, bits: u16) -> Vec<u8> {
+    let block = channels * bits / 8;
+    [
+        format.to_le_bytes().to_vec(),
+        channels.to_le_bytes().to_vec(),
+        rate.to_le_bytes().to_vec(),
+        (rate * block as u32).to_le_bytes().to_vec(),
+        block.to_le_bytes().to_vec(),
+        bits.to_le_bytes().to_vec(),
+    ]
+    .concat()
+}
+
+#[test]
+fn every_format_reads_into_f64_exactly() {
+    let dir = TempDir::new("f64");
+    // 64-bit float, stereo: values f32 can't hold come back as they were.
+    let vals = [0.1f64, -0.3, 1.0 / 3.0, 4.0];
+    let data: Vec<u8> = vals.iter().flat_map(|v| v.to_le_bytes()).collect();
+    let path = write(&dir, &riff(&[(b"fmt ", fmt_chunk(3, 2, 96_000, 64)), (b"data", data)]));
+    let mut r = Reader::open_any(&path).unwrap();
+    assert_eq!((r.bits(), r.channels(), r.rate(), r.frames()), (64, 2, 96_000, 2));
+    assert_eq!(r.read_channels_f64().unwrap(), vec![vec![0.1, 1.0 / 3.0], vec![-0.3, 4.0]]);
+    // 32-bit integer: every bit kept, where f32 would lose the low ones.
+    let ints = [i32::MAX, -7, 123_456_789];
+    let data: Vec<u8> = ints.iter().flat_map(|v| v.to_le_bytes()).collect();
+    let path = dir.path("i32.wav");
+    fs::write(&path, riff(&[(b"fmt ", fmt_chunk(1, 1, 48_000, 32)), (b"data", data)])).unwrap();
+    let got = Reader::open_any(&path).unwrap().read_channels_f64().unwrap();
+    let want: Vec<f64> = ints.iter().map(|&v| v as f64 / 2_147_483_648.0).collect();
+    assert_eq!(got, vec![want]);
+}
+
+#[test]
+fn other_chunks_are_kept_and_written_back() {
+    let dir = TempDir::new("chunks");
+    let mut bext = Bext::new();
+    bext.set_time_reference(48_000 * 3600);
+    bext.push_history("A=PCM,F=48000,W=24,M=mono");
+    let ixml = b"<BWFXML><PROJECT>ep04</PROJECT></BWFXML>".to_vec(); // odd length: padded
+    let data: Vec<u8> = [0i16, 1000, -1000].iter().flat_map(|v| v.to_le_bytes()).collect();
+    // iXML after the data, as some recorders put it.
+    let path = write(
+        &dir,
+        &riff(&[
+            (b"fmt ", fmt_chunk(1, 1, 48_000, 16)),
+            (b"bext", bext.to_bytes()),
+            (b"JUNK", vec![0; 6]),
+            (b"data", data),
+            (b"iXML", ixml.clone()),
+        ]),
+    );
+    let mut r = Reader::open_any(&path).unwrap();
+    assert_eq!(r.frames(), 3);
+    let chunks = r.chunks().unwrap();
+    let ids: Vec<_> = chunks.iter().map(|c| &c.id).collect();
+    assert_eq!(ids, [b"bext", b"JUNK", b"iXML"]);
+    assert_eq!(chunks[2].body, ixml);
+    let mut b = Bext::parse(&chunks[0].body);
+    assert_eq!(b.time_reference(), 48_000 * 3600);
+    b.push_history("T=dexter-tape/0.1.0");
+    assert_eq!(b.history(), ["A=PCM,F=48000,W=24,M=mono", "T=dexter-tape/0.1.0"]);
+
+    // Written back around new samples, read again the same.
+    let out = dir.path("out.wav");
+    let kept = vec![Chunk { id: *b"bext", body: b.to_bytes() }, chunks[2].clone()];
+    let f = OpenOptions::new().write(true).create_new(true).open(&out).unwrap();
+    let mut w = Writer::with_chunks(f, out.clone(), 48_000, Format::F32, 1, &kept).unwrap();
+    w.write_f64(&r.read_channels_f64().unwrap()[0]).unwrap();
+    w.close().unwrap();
+    let mut back = Reader::open_any(&out).unwrap();
+    assert_eq!(back.chunks().unwrap(), kept);
+    assert_eq!(back.read_channels_f64().unwrap(), vec![vec![0.0, 1000.0 / 32768.0, -1000.0 / 32768.0]]);
+}
+
+#[test]
+fn rf64_is_refused_by_name() {
+    let dir = TempDir::new("rf64");
+    let mut bytes = riff(&[(b"fmt ", fmt_chunk(1, 1, 48_000, 16)), (b"data", vec![0; 4])]);
+    bytes[..4].copy_from_slice(b"RF64");
+    let err = Reader::open_any(write(&dir, &bytes)).err().unwrap();
+    assert!(err.to_string().contains("RF64"), "{err}");
+}
+
+#[test]
+fn s24_from_f64_rounds_once() {
+    let dir = TempDir::new("s24f64");
+    let path = dir.path("a.wav");
+    // Just either side of half a step, closer than f32 can tell apart: each to its own nearest.
+    let step = 1.0 / 8_388_608.0;
+    let (above, below) = (0.75 + 0.5 * step + 1e-12, 0.75 + 0.5 * step - 1e-12);
+    let mut w = Writer::create(&path, 48_000, Format::S24).unwrap();
+    w.write_f64(&[above, below, -above, 2.0]).unwrap();
+    w.close().unwrap();
+    let got = Reader::open(&path).unwrap().read_channels_f64().unwrap();
+    assert_eq!(got[0], [0.75 + step, 0.75, -0.75 - step, 8_388_607.0 * step]);
 }

@@ -4,6 +4,14 @@
 //!
 //! Moved into the suite from dexter-foley's `foley-wav` (`VENDORED.md`), itself place's, scape's
 //! and Dexter's; scape's change is [`Writer::create_channels`], for stereo renders.
+//!
+//! For Tape (its RFC, S0 and file rule 5): 64-bit float read, every format read into `f64`
+//! exactly ([`Reader::read_channels_f64`]), a file's other chunks kept ([`Reader::chunks`]) and
+//! written back ([`Writer::with_chunks`]), BWF's `bext` read and written ([`Bext`]), and RF64
+//! refused by name.
+
+mod bext;
+pub use bext::Bext;
 
 use std::fmt;
 use std::fs::{File, OpenOptions};
@@ -62,6 +70,14 @@ impl fmt::Display for Format {
 /// The TPDF dither's starting state, so 16-bit files come out the same every time.
 const DITHER_SEED: u32 = 0x9E37_79B9;
 
+/// One of a file's chunks, other than the ones that make it a WAV (`fmt `, `fact`, `data`): its
+/// four-letter name and its bytes, as they were (`bext`, `iXML`, `LIST` and the rest).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Chunk {
+    pub id: [u8; 4],
+    pub body: Vec<u8>,
+}
+
 /// A WAV being written, mono or interleaved. Its header is kept up to date by [`Writer::sync`].
 ///
 /// Dropping a Writer without [`Writer::close`] syncs it (not durably) and leaves it unpadded,
@@ -94,9 +110,22 @@ impl Writer {
         format: Format,
         channels: u16,
     ) -> io::Result<Writer> {
-        assert!(channels >= 1);
         let path = path.as_ref().to_path_buf();
-        let mut f = OpenOptions::new().write(true).create_new(true).open(&path)?;
+        let f = OpenOptions::new().write(true).create_new(true).open(&path)?;
+        Writer::with_chunks(f, path, rate, format, channels, &[])
+    }
+
+    /// Writes into a file already made, new and empty (as `as-keep`'s `numbered` makes one, at
+    /// `path`), with `chunks` between the format and the samples, each as it was.
+    pub fn with_chunks(
+        mut f: File,
+        path: PathBuf,
+        rate: u32,
+        format: Format,
+        channels: u16,
+        chunks: &[Chunk],
+    ) -> io::Result<Writer> {
+        assert!(channels >= 1);
         let mut h = Vec::with_capacity(58);
         h.extend_from_slice(b"RIFF\0\0\0\0WAVEfmt ");
         let mut fact_at = None;
@@ -123,6 +152,14 @@ impl Writer {
             h.extend_from_slice(&rate.wrapping_mul(n * channels as u32).to_le_bytes());
             h.extend_from_slice(&(n as u16 * channels).to_le_bytes());
             h.extend_from_slice(&(8 * n as u16).to_le_bytes());
+        }
+        for c in chunks {
+            h.extend_from_slice(&c.id);
+            h.extend_from_slice(&(c.body.len() as u32).to_le_bytes());
+            h.extend_from_slice(&c.body);
+            if c.body.len() % 2 == 1 {
+                h.push(0); // RIFF pads a chunk to an even length
+            }
         }
         h.extend_from_slice(b"data\0\0\0\0");
         // The header goes straight to the file, so from the start it's a WAV file that readers
@@ -155,7 +192,25 @@ impl Writer {
         match self.format {
             Format::F32 => b.extend(s.iter().flat_map(|v| v.to_le_bytes())),
             Format::S16 => self.dither = s16(s, self.dither, &mut b),
-            Format::S24 => s24(s, &mut b),
+            Format::S24 => s24(s.iter().map(|&v| v as f64), &mut b),
+        }
+        let result = self.append(&b);
+        self.scratch = b;
+        result
+    }
+
+    /// [`Writer::write`], from `f64`: rounded once, straight to the format (float rounds to the
+    /// nearest `f32`; 24-bit to the nearest step, clipping at its limits).
+    pub fn write_f64(&mut self, s: &[f64]) -> io::Result<()> {
+        let mut b = std::mem::take(&mut self.scratch);
+        b.clear();
+        match self.format {
+            Format::F32 => b.extend(s.iter().flat_map(|&v| (v as f32).to_le_bytes())),
+            Format::S16 => {
+                let narrow: Vec<f32> = s.iter().map(|&v| v as f32).collect();
+                self.dither = s16(&narrow, self.dither, &mut b)
+            }
+            Format::S24 => s24(s.iter().copied(), &mut b),
         }
         let result = self.append(&b);
         self.scratch = b;
@@ -236,11 +291,11 @@ impl Drop for Writer {
 /// JACK hands a 24-bit converter's samples over as n / 2^23, so 2^23 gets them back exactly
 /// (f32 holds 24 bits, and the scaling is a power of two). Only a software source can go past
 /// full scale; that clips at the 24-bit limits.
-fn s24(s: &[f32], b: &mut Vec<u8>) {
+fn s24(s: impl ExactSizeIterator<Item = f64>, b: &mut Vec<u8>) {
     let start = b.len();
     b.resize(start + s.len() * 3, 0);
-    for (o, &v) in b[start..].as_chunks_mut::<3>().0.iter_mut().zip(s) {
-        let f = v as f64 * 8_388_608.0;
+    for (o, v) in b[start..].as_chunks_mut::<3>().0.iter_mut().zip(s) {
+        let f = v * 8_388_608.0;
         let x = if f >= 8_388_607.0 {
             8_388_607
         } else if f <= -8_388_608.0 {
@@ -299,6 +354,8 @@ pub struct Reader {
     data: u64,
     frames: u64,
     raw: Vec<u8>,
+    /// Every other chunk: its name, where its body starts, how long it is.
+    others: Vec<([u8; 4], u64, u64)>,
 }
 
 impl Reader {
@@ -320,11 +377,15 @@ impl Reader {
         let f = File::open(path)?;
         let size = f.metadata()?.len();
         let mut hdr = [0u8; 12];
+        if f.read_exact_at(&mut hdr, 0).is_ok() && &hdr[..4] == b"RF64" {
+            return Err(fail("an RF64 file (a WAV past 4 GB), which isn't read".into()));
+        }
         if f.read_exact_at(&mut hdr, 0).is_err() || &hdr[..4] != b"RIFF" || &hdr[8..] != b"WAVE" {
             return Err(fail("not a WAV file".into()));
         }
         let (mut format, mut channels, mut rate, mut bits) = (0u16, 0u16, 0u32, 0u16);
         let mut data = None;
+        let mut others = vec![];
         let mut off = 12u64;
         while off + 8 <= size {
             let mut ch = [0u8; 8];
@@ -354,9 +415,9 @@ impl Reader {
                         len = avail;
                     }
                     data = Some((body, len));
-                    break; // the data chunk is the last one needed
                 }
-                _ => {}
+                b"fact" => {}
+                id => others.push((id.try_into().unwrap(), body, len.min(size - body))),
             }
             off = body + len + len % 2;
         }
@@ -364,12 +425,45 @@ impl Reader {
         if channels == 0 || (channels != 1 && !any_channels) {
             return Err(fail(format!("{channels} channels; only mono files can be played")));
         }
-        let float = format == 3 && bits == 32;
+        let float = format == 3 && matches!(bits, 32 | 64);
         if !float && !(format == 1 && matches!(bits, 16 | 24 | 32)) {
             return Err(fail(format!("unsupported sample format ({format}, {bits} bits)")));
         }
         let frame = bits as u64 / 8 * channels as u64;
-        Ok(Reader { f, rate, float, bits, channels, data, frames: len / frame, raw: Vec::new() })
+        Ok(Reader { f, rate, float, bits, channels, data, frames: len / frame, raw: Vec::new(), others })
+    }
+
+    /// Every chunk but `fmt `, `fact` and `data`, in the file's order, each as it was.
+    pub fn chunks(&self) -> io::Result<Vec<Chunk>> {
+        self.others
+            .iter()
+            .map(|&(id, at, len)| {
+                let mut body = vec![0; len as usize];
+                self.f.read_exact_at(&mut body, at)?;
+                Ok(Chunk { id, body })
+            })
+            .collect()
+    }
+
+    /// The whole file, each channel's samples as `f64`, exactly as stored: integers over their
+    /// full scale (2^15, 2^23, 2^31), floats as they are.
+    pub fn read_channels_f64(&mut self) -> io::Result<Vec<Vec<f64>>> {
+        let (bps, ch) = (self.bits as usize / 8, self.channels as usize);
+        let mut outs = vec![Vec::with_capacity(self.frames as usize); ch];
+        let block = 1 << 16;
+        let mut pos = 0u64;
+        while pos < self.frames {
+            let n = (block as u64).min(self.frames - pos) as usize;
+            self.raw.resize(n * bps * ch, 0);
+            self.f.read_exact_at(&mut self.raw, self.data + pos * (bps * ch) as u64)?;
+            for frame in self.raw.chunks_exact(bps * ch) {
+                for (o, b) in outs.iter_mut().zip(frame.chunks_exact(bps)) {
+                    o.push(sample_f64(b, self.float));
+                }
+            }
+            pos += n as u64;
+        }
+        Ok(outs)
     }
 
     /// Converts frames from `pos` into outs, one per channel (as many frames as the first holds),
@@ -432,7 +526,7 @@ impl Reader {
         self.float
     }
 
-    /// Its bits a sample, as stored: 16, 24 or 32.
+    /// Its bits a sample, as stored: 16, 24 or 32, or 64 (float).
     pub fn bits(&self) -> u16 {
         self.bits
     }
@@ -454,15 +548,26 @@ impl Reader {
     }
 }
 
-/// One sample's bytes as a float: 16-, 24- or 32-bit PCM, or 32-bit float.
+/// One sample's bytes as a float: 16-, 24- or 32-bit PCM, or 32- or 64-bit float.
 fn sample(b: &[u8], float: bool) -> f32 {
     if float {
-        return f32::from_le_bytes([b[0], b[1], b[2], b[3]]);
+        return sample_f64(b, true) as f32;
     }
     match b.len() {
         2 => i16::from_le_bytes([b[0], b[1]]) as f32 / 32768.0,
         3 => (i32::from_le_bytes([0, b[0], b[1], b[2]]) >> 8) as f32 / 8_388_608.0,
         _ => i32::from_le_bytes([b[0], b[1], b[2], b[3]]) as f32 / 2_147_483_648.0,
+    }
+}
+
+/// One sample's bytes as an `f64`, exactly.
+fn sample_f64(b: &[u8], float: bool) -> f64 {
+    match (float, b.len()) {
+        (true, 4) => f32::from_le_bytes(b.try_into().unwrap()) as f64,
+        (true, _) => f64::from_le_bytes(b.try_into().unwrap()),
+        (false, 2) => i16::from_le_bytes([b[0], b[1]]) as f64 / 32768.0,
+        (false, 3) => (i32::from_le_bytes([0, b[0], b[1], b[2]]) >> 8) as f64 / 8_388_608.0,
+        (false, _) => i32::from_le_bytes(b.try_into().unwrap()) as f64 / 2_147_483_648.0,
     }
 }
 
