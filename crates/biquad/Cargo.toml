@@ -1,0 +1,10 @@
+[package]
+name = "as-biquad"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Minimum-phase first- and second-order filters in f64: shelves and their exact inverses, peaks, high-pass, a matched low-pass"
+
+[dependencies]
+libm.workspace = true

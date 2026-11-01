@@ -3,6 +3,13 @@
 version = 4
 
 [[package]]
+name = "as-biquad"
+version = "0.1.0"
+dependencies = [
+ "libm",
+]
+
+[[package]]
 name = "as-conv"
 version = "0.1.0"
 dependencies = [
