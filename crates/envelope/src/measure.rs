@@ -44,14 +44,16 @@ pub fn spectrum(x: &[f64]) -> Vec<f64> {
 
 /// The largest product in `x` that isn't `hz` or one of its harmonics, against `hz`'s own
 /// amplitude, as a ratio: `x` a whole number of `hz`'s periods, so every harmonic sits on a
-/// bin. Bins within `guard` of a harmonic, and DC, aren't counted.
+/// bin. Bins within `guard` of a harmonic aren't counted, nor anything below 20 Hz (DC, and a
+/// high-pass settling: not products anyone hears).
 pub fn worst_product(x: &[f64], hz: f64, rate: u32, guard: usize) -> (f64, f64) {
     let s = spectrum(x);
     let bin = rate as f64 / x.len() as f64;
     let h = (hz / bin).round() as usize;
     let fundamental = s[h];
+    let audible = (20.0 / bin).ceil() as usize;
     let mut worst = (0.0, 0.0);
-    for (k, &a) in s.iter().enumerate().skip(guard + 1) {
+    for (k, &a) in s.iter().enumerate().skip(audible.max(guard + 1)) {
         let m = (k + h / 2) / h;
         let harmonic = m >= 1 && k.abs_diff(m * h) <= guard;
         if !harmonic && a > worst.0 {
