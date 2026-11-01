@@ -94,10 +94,10 @@ impl Rng {
 pub fn torture(rate: u32, secs: f64) -> Vec<(&'static str, Vec<f64>)> {
     let n = (secs * rate as f64) as usize;
     let square: Vec<f64> =
-        (0..n).map(|k| if (k * 200 / rate as usize) % 2 == 0 { 1.0 } else { -1.0 }).collect();
+        (0..n).map(|k| if (k * 200 / rate as usize).is_multiple_of(2) { 1.0 } else { -1.0 }).collect();
     let mut impulses = vec![0.0; n];
     for k in (rate as usize / 10..n).step_by(rate as usize / 7) {
-        impulses[k] = if k % 2 == 0 { 1.0 } else { -1.0 };
+        impulses[k] = if k.is_multiple_of(2) { 1.0 } else { -1.0 };
     }
     let step: Vec<f64> = (0..n).map(|k| if k >= n / 3 { 0.9 } else { 0.0 }).collect();
     let mut spikes = sine(440.0, 0.1, n, rate);
