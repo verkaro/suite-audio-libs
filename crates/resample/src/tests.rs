@@ -94,24 +94,25 @@ fn taps_hash(c: &Converter) -> u64 {
 
 #[test]
 fn the_taps_are_the_same_on_every_machine() {
-    // Tape's oversampling, up and back for each of its six rates (its RFC, S2 and S6): the taps
+    // Tape's oversampling, up and back for each of its six rates (its RFC, S2 and S6, A20): the taps
     // come out of libm and IEEE arithmetic, so these hashes hold on x86_64 and aarch64 alike.
     // The taps depend on the ratio alone, so each factor's pair repeats. A change here changes
     // every sound converted, and Tape's detent tables with it.
     let pinned: [(u32, u32, u64); 12] = [
-        (44_100, 352_800, 0x1743cad5e6ff0dd),
-        (352_800, 44_100, 0x445da6e79e884835),
-        (48_000, 384_000, 0x1743cad5e6ff0dd),
-        (384_000, 48_000, 0x445da6e79e884835),
-        (88_200, 352_800, 0xd6e8773609c84c71),
-        (352_800, 88_200, 0xd438ba5a1b9aef25),
-        (96_000, 384_000, 0xd6e8773609c84c71),
-        (384_000, 96_000, 0xd438ba5a1b9aef25),
-        (176_400, 352_800, 0x348be144566dfe61),
-        (352_800, 176_400, 0x759f13122d80cd30),
-        (192_000, 384_000, 0x348be144566dfe61),
-        (384_000, 192_000, 0x759f13122d80cd30),
+        (44_100, 705_600, 0x6b5c1aaaccc87b6c),
+        (705_600, 44_100, 0x2d11b330fb9e84b4),
+        (48_000, 768_000, 0x6b5c1aaaccc87b6c),
+        (768_000, 48_000, 0x2d11b330fb9e84b4),
+        (88_200, 705_600, 0x1743cad5e6ff0dd),
+        (705_600, 88_200, 0x445da6e79e884835),
+        (96_000, 768_000, 0x1743cad5e6ff0dd),
+        (768_000, 96_000, 0x445da6e79e884835),
+        (176_400, 705_600, 0xd6e8773609c84c71),
+        (705_600, 176_400, 0xd438ba5a1b9aef25),
+        (192_000, 768_000, 0xd6e8773609c84c71),
+        (768_000, 192_000, 0xd438ba5a1b9aef25),
     ];
+
     let got: Vec<_> = pinned.iter().map(|&(f, t, _)| (f, t, taps_hash(&Converter::new(f, t)))).collect();
     for (want, got) in pinned.iter().zip(&got) {
         assert_eq!(want, got, "every pair now: {got:#x?}");
