@@ -117,3 +117,26 @@ fn the_taps_are_the_same_on_every_machine() {
         assert_eq!(want, got, "every pair now: {got:#x?}");
     }
 }
+
+#[test]
+fn a_piece_at_a_time_with_its_reach_is_the_whole_bit_for_bit() {
+    for (from, to) in [(48_000, 384_000), (384_000, 48_000), (96_000, 384_000), (352_800, 176_400)] {
+        let c = Converter::new(from, to);
+        let (up, down) = c.ratio();
+        let x = tone(997.0, from, 0.2, 0.5);
+        let whole = c.run(&x);
+        let (n, r) = (x.len(), c.reach());
+        // Pieces of 1000 inputs (a whole number of `down`s), each with `reach` either side.
+        let step = 1000 / down * down;
+        let mut got = vec![];
+        for a in (0..n).step_by(step) {
+            let b = (a + step).min(n);
+            let lo = a.saturating_sub(r) / down * down;
+            let hi = (b + r).min(n);
+            let part = c.run(&x[lo..hi]);
+            let (first, last) = (a * up / down, c.len(b));
+            got.extend_from_slice(&part[first - lo * up / down..last - lo * up / down]);
+        }
+        assert_eq!(got, whole, "{from} to {to}");
+    }
+}

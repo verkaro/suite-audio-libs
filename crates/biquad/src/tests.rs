@@ -115,3 +115,21 @@ fn run_and_gain_agree() {
     sh.run(&mut y);
     assert!((peak(&y) - sh.gain(hz, rate)).abs() < 1e-4);
 }
+
+#[test]
+fn pieces_with_their_state_are_the_whole() {
+    let x: Vec<f64> =
+        (0..10_000).map(|k| libm::sin(k as f64 * 0.37) + 0.1 * libm::cos(k as f64 * 0.011)).collect();
+    let (f, b) =
+        (First::shelf(3000.0, 6.0, 48_000.0), Biquad::lowpass_matched(25_000.0, 0.5, 16_000.0, 48_000.0));
+    let (mut wf, mut wb) = (x.clone(), x.clone());
+    f.run(&mut wf);
+    b.run(&mut wb);
+    let (mut pf, mut pb) = (x.clone(), x);
+    let (mut sf, mut sb) = ([0.0; 2], [0.0; 4]);
+    for (cf, cb) in pf.chunks_mut(777).zip(pb.chunks_mut(777)) {
+        f.process(cf, &mut sf);
+        b.process(cb, &mut sb);
+    }
+    assert_eq!((pf, pb), (wf, wb));
+}

@@ -73,6 +73,20 @@ impl Converter {
         Converter { up, down, shape, table }
     }
 
+    /// How far an output reads either side of where it lies, input samples. An output whose
+    /// reach lies wholly inside the samples given to [`Converter::run`] comes out the same, bit
+    /// for bit, whatever lies outside them, so a long sound can be converted a piece at a time
+    /// (each piece with this much of its neighbours, and starting on a whole number of the
+    /// ratio's steps).
+    pub fn reach(&self) -> usize {
+        self.shape.reach + 1
+    }
+
+    /// The ratio in lowest terms: `up` outputs for every `down` inputs.
+    pub fn ratio(&self) -> (usize, usize) {
+        (self.up, self.down)
+    }
+
     /// How many samples `n` at the input's rate come to at the output's.
     pub fn len(&self, n: usize) -> usize {
         (n * self.up).div_ceil(self.down)

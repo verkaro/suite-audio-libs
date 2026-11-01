@@ -12,7 +12,8 @@
 //!
 //! Coefficients go through `libm` and plain arithmetic, never `std`'s transcendentals, and
 //! filtering is direct form I with the same operations in the same order, so a filter gives
-//! the same bits on x86_64 and aarch64. Each `run` starts from rest.
+//! the same bits on x86_64 and aarch64. `run` starts from rest; `process` goes on from a state,
+//! so a long sound can be filtered a piece at a time.
 
 use std::f64::consts::PI;
 
@@ -58,15 +59,22 @@ impl First {
 
     /// Filters `x` in place, from rest.
     pub fn run(&self, x: &mut [f64]) {
+        self.process(x, &mut [0.0; 2]);
+    }
+
+    /// Filters `x` in place, going on from `state` (the last input and output) and leaving it
+    /// where this piece ends: pieces one after another give the same bits as the whole.
+    pub fn process(&self, x: &mut [f64], state: &mut [f64; 2]) {
         if *self == First::IDENTITY {
             return;
         }
-        let (mut x1, mut y1) = (0.0, 0.0);
+        let [mut x1, mut y1] = *state;
         for v in x {
             let y = self.b0 * *v + self.b1 * x1 - self.a1 * y1;
             (x1, y1) = (*v, y);
             *v = y;
         }
+        *state = [x1, y1];
     }
 
     /// The magnitude at `hz`, for a `rate` Hz filter.
@@ -147,15 +155,23 @@ impl Biquad {
 
     /// Filters `x` in place, from rest.
     pub fn run(&self, x: &mut [f64]) {
+        self.process(x, &mut [0.0; 4]);
+    }
+
+    /// Filters `x` in place, going on from `state` (the last two inputs and outputs) and
+    /// leaving it where this piece ends: pieces one after another give the same bits as the
+    /// whole.
+    pub fn process(&self, x: &mut [f64], state: &mut [f64; 4]) {
         if *self == Biquad::IDENTITY {
             return;
         }
-        let (mut x1, mut x2, mut y1, mut y2) = (0.0, 0.0, 0.0, 0.0);
+        let [mut x1, mut x2, mut y1, mut y2] = *state;
         for v in x {
             let y = self.b0 * *v + self.b1 * x1 + self.b2 * x2 - self.a1 * y1 - self.a2 * y2;
             (x2, x1, y2, y1) = (x1, *v, y1, y);
             *v = y;
         }
+        *state = [x1, x2, y1, y2];
     }
 
     /// The magnitude at `hz`, for a `rate` Hz filter.
