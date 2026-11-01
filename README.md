@@ -45,6 +45,8 @@ tool's.
 - `as-http`, `as-ws`, `as-meter`, `as-page-kit`: a tool's page: just enough HTTP, the
   WebSocket, the LED ladders' ballistics, and the skins and drawing as one script the page
   loads. `tools/cdp.py` drives a page in Falkon offscreen, for its tests.
+- `as-loudness`: integrated loudness (BS.1770-4, gated) at any rate, its per-channel mean
+  beside the standard's sum, a linked group's, true peak, and the trim to a reference.
 - `as-keep`: nothing overwritten: exclusive numbered files, folders made whole before they
   appear, write-and-rename.
 

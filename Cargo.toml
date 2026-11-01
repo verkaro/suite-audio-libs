@@ -16,6 +16,7 @@ as-http = { path = "crates/http" }
 as-ir = { path = "crates/ir" }
 as-jack-keeper = { path = "crates/jack-keeper" }
 as-keep = { path = "crates/keep" }
+as-loudness = { path = "crates/loudness" }
 as-meter = { path = "crates/meter" }
 as-opening = { path = "crates/opening" }
 as-page-kit = { path = "crates/page-kit" }

@@ -45,6 +45,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-loudness"
+version = "0.1.0"
+dependencies = [
+ "as-resample",
+ "libm",
+]
+
+[[package]]
 name = "as-meter"
 version = "0.1.0"
 
