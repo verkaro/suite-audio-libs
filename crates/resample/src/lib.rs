@@ -1,7 +1,7 @@
 //! Sample-rate conversion for the Dexter tools (`README.md`): a sound at another rate, up or
 //! down, through a windowed sinc, as sox's `rate -v` does it. Made for dexter-foley's exports
-//! and its JACK outs as `foley-rate`, and moved into the suite (`VENDORED.md`). It has no
-//! dependencies.
+//! and its JACK outs as `foley-rate`, and moved into the suite (`VENDORED.md`). It has
+//! one dependency, `libm`, so its taps are the same on every machine.
 //!
 //! Each output sample is read at its exact place between the input's: the rates' ratio in
 //! lowest terms gives every phase, each with taps of its own, worked out in full, so nothing is
@@ -11,6 +11,11 @@
 //!   moves in time.
 //! - **At least 140 dB down from that Nyquist up** (a Kaiser window, β 14.5): converting down
 //!   aliases nothing, and converting up adds no images.
+//! - **The same taps on every machine:** worked out through the pure-Rust `libm`, never `std`'s
+//!   `sin`, which calls the system's maths library and can differ between machines; with plain
+//!   multiplies, adds and square roots otherwise, each rounded the one way IEEE 754 allows. The
+//!   same sound converted gives the same bits on x86_64 and aarch64 (Tape's rule; a test pins
+//!   the taps' hash).
 //!
 //! ```
 //! let tone: Vec<f64> = (0..96_000).map(|k| (k as f64 * 0.05).sin() * 0.5).collect();
@@ -148,7 +153,8 @@ impl Shape {
                 if t.abs() >= self.half {
                     return 0.0;
                 }
-                let w = bessel_i0(self.beta * (1.0 - (t / self.half).powi(2)).sqrt());
+                let u = t / self.half;
+                let w = bessel_i0(self.beta * (1.0 - u * u).sqrt());
                 2.0 * self.cut * sinc(2.0 * self.cut * t) * w
             })
             .collect();
@@ -176,7 +182,7 @@ fn dot(h: &[f64], x: &[f64]) -> f64 {
 }
 
 fn sinc(x: f64) -> f64 {
-    if x == 0.0 { 1.0 } else { (std::f64::consts::PI * x).sin() / (std::f64::consts::PI * x) }
+    if x == 0.0 { 1.0 } else { libm::sin(std::f64::consts::PI * x) / (std::f64::consts::PI * x) }
 }
 
 /// The modified Bessel function of the first kind, order 0: the Kaiser window's.

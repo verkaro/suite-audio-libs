@@ -28,6 +28,8 @@ as-ws = { path = "crates/ws" }
 claxon = "0.4.3"
 jack = "0.13"
 libc = "0.2"
+# Transcendentals the same on every machine (Tape's determinism rules, RFC section 9).
+libm = "0.2"
 realfft = "3.5"
 rtrb = "0.3"
 

@@ -7,3 +7,4 @@ rust-version.workspace = true
 description = "Sample-rate conversion for the Dexter tools: an exact polyphase windowed sinc, as sox's rate -v"
 
 [dependencies]
+libm.workspace = true
