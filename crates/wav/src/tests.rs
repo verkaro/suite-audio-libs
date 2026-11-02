@@ -434,6 +434,36 @@ fn every_format_reads_into_f64_exactly() {
 }
 
 #[test]
+fn a_block_at_a_time_reads_what_whole_reads() {
+    let dir = TempDir::new("blocks");
+    // 24-bit stereo, 1000 frames of distinct values.
+    let data: Vec<u8> =
+        (0..2000i32).flat_map(|k| (k * 4099 - 4_000_000).to_le_bytes()[..3].to_vec()).collect();
+    let path = write(&dir, &riff(&[(b"fmt ", fmt_chunk(1, 2, 48_000, 24)), (b"data", data)]));
+    let whole = Reader::open_any(&path).unwrap().read_channels_f64().unwrap();
+    for block in [1, 7, 333, 1000, 4096] {
+        let mut r = Reader::open_any(&path).unwrap();
+        let mut outs = vec![vec![], vec![]];
+        let mut pos = 0;
+        loop {
+            let n = r.read_f64_at(pos, block, &mut outs).unwrap();
+            if n == 0 {
+                break;
+            }
+            assert!(n == block || pos + n as u64 == 1000, "short only at the end");
+            pos += n as u64;
+        }
+        assert_eq!(outs, whole, "block {block}");
+    }
+    // From the middle, and past the end.
+    let mut r = Reader::open_any(&path).unwrap();
+    let mut outs = vec![vec![], vec![]];
+    assert_eq!(r.read_f64_at(990, 50, &mut outs).unwrap(), 10);
+    assert_eq!(outs[1], whole[1][990..]);
+    assert_eq!(r.read_f64_at(5000, 50, &mut outs).unwrap(), 0);
+}
+
+#[test]
 fn other_chunks_are_kept_and_written_back() {
     let dir = TempDir::new("chunks");
     let mut bext = Bext::new();

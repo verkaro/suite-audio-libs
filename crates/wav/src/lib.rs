@@ -457,22 +457,32 @@ impl Reader {
     /// The whole file, each channel's samples as `f64`, exactly as stored: integers over their
     /// full scale (2^15, 2^23, 2^31), floats as they are.
     pub fn read_channels_f64(&mut self) -> io::Result<Vec<Vec<f64>>> {
-        let (bps, ch) = (self.bits as usize / 8, self.channels as usize);
+        let ch = self.channels as usize;
         let mut outs: Vec<Vec<f64>> = (0..ch).map(|_| Vec::with_capacity(self.frames as usize)).collect();
         let block = 1 << 16;
         let mut pos = 0u64;
         while pos < self.frames {
-            let n = (block as u64).min(self.frames - pos) as usize;
-            self.raw.resize(n * bps * ch, 0);
-            self.f.read_exact_at(&mut self.raw, self.data + pos * (bps * ch) as u64)?;
-            for frame in self.raw.chunks_exact(bps * ch) {
-                for (o, b) in outs.iter_mut().zip(frame.chunks_exact(bps)) {
-                    o.push(sample_f64(b, self.float));
-                }
-            }
-            pos += n as u64;
+            pos += self.read_f64_at(pos, block, &mut outs)? as u64;
         }
         Ok(outs)
+    }
+
+    /// Up to `n` frames from frame `pos`, each channel's samples as `f64` exactly as
+    /// [`Reader::read_channels_f64`] reads them, appended to `outs` (one a channel): a block at
+    /// a time, so a long file needs no more memory than a block (added for Tape, 2026-11-01).
+    /// Returns the frames read, fewer than `n` only at the end; an error if the file can't be
+    /// read there.
+    pub fn read_f64_at(&mut self, pos: u64, n: usize, outs: &mut [Vec<f64>]) -> io::Result<usize> {
+        let (bps, ch) = (self.bits as usize / 8, self.channels as usize);
+        let n = (n as u64).min(self.frames.saturating_sub(pos)) as usize;
+        self.raw.resize(n * bps * ch, 0);
+        self.f.read_exact_at(&mut self.raw, self.data + pos * (bps * ch) as u64)?;
+        for frame in self.raw.chunks_exact(bps * ch) {
+            for (o, b) in outs.iter_mut().zip(frame.chunks_exact(bps)) {
+                o.push(sample_f64(b, self.float));
+            }
+        }
+        Ok(n)
     }
 
     /// Converts frames from `pos` into outs, one per channel (as many frames as the first holds),

@@ -140,3 +140,59 @@ fn true_peak_in_pieces_is_the_whole() {
     let whole = as_resample::convert(&x, r, 4 * r).iter().chain(&x).fold(0.0f64, |m, v| m.max(v.abs()));
     assert_eq!(true_peak(&x, r), whole);
 }
+
+#[test]
+fn meters_fed_in_pieces_measure_what_the_whole_does() {
+    let r = 44_100;
+    let x: Vec<f64> = (0..r as usize * 7 + 1234)
+        .map(|k| {
+            0.3 * libm::sin(k as f64 * 0.05) * libm::sin(k as f64 * 0.00007)
+                + 1e-3 * libm::sin(k as f64 * 2.9)
+        })
+        .collect();
+    let y: Vec<f64> = x.iter().map(|v| v * 0.5 + 0.01).collect();
+    let short = &x[..r as usize / 5];
+    for piece in [1, 1000, 4410, 65_536, 1 << 20] {
+        let feed = |x: &[f64]| {
+            let (mut m, mut p) = (Meter::new(r), PeakMeter::new(r));
+            for c in x.chunks(piece) {
+                m.push(c);
+                p.push(c);
+            }
+            (m, p.finish())
+        };
+        let ((mx, px), (my, py), (ms, _)) = (feed(&x), feed(&y), feed(short));
+        assert_eq!(integrated_from(&[mx.clone(), my.clone()]), integrated(&[&x, &y], r), "{piece}");
+        assert_eq!(integrated_from(std::slice::from_ref(&ms)), integrated(&[short], r), "{piece}");
+        assert_eq!(group_from(&[&[mx, my], &[ms]]), group(&[(&[&x, &y], r), (&[short], r)]), "{piece}");
+        assert_eq!((px, py), (true_peak(&x, r), true_peak(&y, r)), "{piece}");
+    }
+}
+
+/// The blocks as they were measured whole before meters (2026-11-01): the oracle the meters
+/// are held to.
+fn whole_blocks(x: &[f64], rate: u32) -> (Vec<f64>, bool) {
+    let y = k_weight(x, rate);
+    let (len, step) = (rate as usize * 4 / 10, rate as usize / 10);
+    if y.is_empty() {
+        return (vec![], true);
+    }
+    let sq = |s: &[f64]| s.iter().fold(0.0, |a, v| a + v * v);
+    if y.len() < len {
+        return (vec![sq(&y) / y.len() as f64], true);
+    }
+    let steps: Vec<f64> = y.chunks(step).filter(|c| c.len() == step).map(sq).collect();
+    (steps.windows(4).map(|w| (((w[0] + w[1]) + w[2]) + w[3]) / len as f64).collect(), false)
+}
+
+#[test]
+fn a_meter_measures_the_blocks_as_they_were_measured_whole() {
+    for r in [44_100, 48_000, 96_000] {
+        for n in [0, 1, r as usize / 3, r as usize * 2 / 5, r as usize * 3 + 17] {
+            let x: Vec<f64> =
+                (0..n).map(|k| 0.4 * libm::sin(k as f64 * 0.031) + 0.1 * libm::sin(k as f64 * 1.7)).collect();
+            let b = Meter::whole(&x, r).blocks();
+            assert_eq!((b.z, b.short), whole_blocks(&x, r), "{r} Hz, {n} samples");
+        }
+    }
+}

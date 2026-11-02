@@ -7,10 +7,10 @@
 //! `flac -t`. The format: https://xiph.org/flac/format.html.
 //!
 //! Read with [`read::read`] (or exactly, as `f64`, with [`read::read_f64`]), through `claxon`;
-//! its header alone with [`read::info`].
+//! its header alone with [`read::info`]; a frame at a time, exactly, with [`read::Frames`].
 
 pub mod read;
-pub use read::{Flac, Flac64, Info, info, read, read_f64};
+pub use read::{Flac, Flac64, Frames, Info, Mark, info, read, read_f64};
 
 /// Samples a frame.
 const BLOCK: usize = 4096;
@@ -516,6 +516,46 @@ mod tests {
         std::fs::write(&q, &bytes[..bytes.len() * 2 / 3]).unwrap();
         let g = read(&q).unwrap();
         assert!(g.channels[0].len() == g.channels[1].len() && g.channels[0].len() < 10_000);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_frame_at_a_time_reads_what_whole_reads_and_reopens_at_a_mark() {
+        let dir = std::env::temp_dir().join(format!("as-flac-frames-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        // Three channels, not a whole number of frames.
+        let chs: Vec<Vec<i32>> = (0..3)
+            .map(|c| {
+                (0..20_001).map(|i| ((i as f64 * 0.013 * (c + 1) as f64).sin() * 3e6) as i32 - c).collect()
+            })
+            .collect();
+        let bytes = encode(&chs, 48_000);
+        let p = dir.join("a.flac");
+        std::fs::write(&p, &bytes).unwrap();
+        let whole = read_f64(&p).unwrap().channels;
+        for n in [1, 999, 4096, 50_000] {
+            let mut f = Frames::open(&p).unwrap();
+            let mut outs = vec![vec![]; 3];
+            while f.read(n, &mut outs).unwrap() == n {}
+            assert_eq!(outs, whole, "{n} at a time");
+            assert_eq!(f.at(), 20_001);
+            assert_eq!(f.marks().len(), 20_001usize.div_ceil(BLOCK));
+        }
+        // Opened again at each mark, it reads on from there.
+        let mut f = Frames::open(&p).unwrap();
+        f.read(usize::MAX, &mut vec![vec![]; 3]).unwrap();
+        for m in f.marks().to_vec() {
+            let mut g = Frames::open_at(&p, m).unwrap();
+            let mut outs = vec![vec![]; 3];
+            g.read(usize::MAX, &mut outs).unwrap();
+            assert_eq!(outs[2], whole[2][m.frame as usize..], "{m:?}");
+        }
+        // Cut short: its whole frames, as read_f64.
+        let q = dir.join("cut.flac");
+        std::fs::write(&q, &bytes[..bytes.len() / 2]).unwrap();
+        let mut outs = vec![vec![]; 3];
+        Frames::open(&q).unwrap().read(usize::MAX, &mut outs).unwrap();
+        assert_eq!(outs, read_f64(&q).unwrap().channels);
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
