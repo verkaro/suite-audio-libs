@@ -230,7 +230,9 @@ pub fn attachment(name: &str) -> String {
 }
 
 /// A file, whole or the one byte range asked for (`Range: bytes=A-B`, `A-` or `-N`), so a
-/// browser can seek in a sound while it plays.
+/// browser can seek in a sound while it plays. The body is read and sent a piece at a time
+/// (2026-11-02, for Tape's renders: a long stem's is over a gigabyte), so it takes no more
+/// memory than a piece, however long the file.
 pub fn file(w: &mut TcpStream, req: &Request, path: &std::path::Path, content_type: &str) {
     let head_only = req.method == "HEAD";
     let Ok(mut f) = std::fs::File::open(path) else { return error(w, 404, "not found", &[]) };
@@ -244,10 +246,7 @@ pub fn file(w: &mut TcpStream, req: &Request, path: &std::path::Path, content_ty
         None => (200, 0, len.saturating_sub(1)),
     };
     let n = if len == 0 { 0 } else { to + 1 - from };
-    let mut body = vec![0u8; n as usize];
-    if !head_only
-        && (io::Seek::seek(&mut f, io::SeekFrom::Start(from)).is_err() || f.read_exact(&mut body).is_err())
-    {
+    if !head_only && io::Seek::seek(&mut f, io::SeekFrom::Start(from)).is_err() {
         return error(w, 500, "unreadable", &[]);
     }
     let cr = format!("bytes {from}-{to}/{len}");
@@ -256,17 +255,22 @@ pub fn file(w: &mut TcpStream, req: &Request, path: &std::path::Path, content_ty
     if code == 206 {
         h.push(("Content-Range", &cr));
     }
-    if head_only {
-        // The length is the range's, with no body.
-        let mut out = format!("HTTP/1.1 {code} OK\r\n");
-        for (k, v) in &h {
-            out.push_str(&format!("{k}: {v}\r\n"));
-        }
-        out.push_str(&format!("Content-Length: {n}\r\nConnection: close\r\n\r\n"));
-        let _ = w.write_all(out.as_bytes());
+    let reason = if code == 206 { "Partial Content" } else { "OK" };
+    // The length is the range's; HEAD gets no body.
+    let mut out = format!("HTTP/1.1 {code} {reason}\r\n");
+    for (k, v) in &h {
+        out.push_str(&format!("{k}: {v}\r\n"));
+    }
+    out.push_str(&format!("Content-Length: {n}\r\nConnection: close\r\n\r\n"));
+    let _ = w.set_write_timeout(Some(Duration::from_secs(60)));
+    if w.write_all(out.as_bytes()).is_err() || head_only {
         return;
     }
-    respond(w, false, code, &h, &body);
+    // A file cut short while it's sent ends the connection early: the browser has fewer bytes
+    // than it was told, and says the download failed.
+    let _ = io::copy(&mut io::Read::by_ref(&mut f).take(n), w);
+    let _ = w.flush();
+    let _ = w.shutdown(std::net::Shutdown::Write);
 }
 
 /// A `Range` header's one byte range within `len` bytes: `None` for no range (or one this
@@ -369,6 +373,52 @@ mod tests {
         assert_eq!(range("bytes=100-", 100), Some(None));
         assert_eq!(range("bytes=0-1,5-6", 100), None);
         assert_eq!(range("items=0-1", 100), None);
+    }
+
+    /// A file served for `raw`, the answer read back whole.
+    fn served(path: &std::path::Path, raw: &str) -> Vec<u8> {
+        let l = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let at = l.local_addr().unwrap();
+        let raw = raw.to_string();
+        let t = std::thread::spawn(move || {
+            let mut s = TcpStream::connect(at).unwrap();
+            s.write_all(raw.as_bytes()).unwrap();
+            let mut got = Vec::new();
+            s.read_to_end(&mut got).unwrap();
+            got
+        });
+        let (s, _) = l.accept().unwrap();
+        let mut w = s.try_clone().unwrap();
+        let req = read_head(&mut BufReader::new(s)).unwrap();
+        file(&mut w, &req, path, "audio/wav");
+        drop(w);
+        t.join().unwrap()
+    }
+
+    #[test]
+    fn a_file_is_sent_whole_or_its_range_a_piece_at_a_time() {
+        let dir = std::env::temp_dir().join(format!("as-http-file-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("long.wav");
+        // Bigger than io::copy's piece, many times over.
+        let body: Vec<u8> = (0..1_000_003u32).map(|k| (k % 253) as u8).collect();
+        std::fs::write(&path, &body).unwrap();
+        let split = |got: &[u8]| {
+            let at = got.windows(4).position(|w| w == b"\r\n\r\n").unwrap();
+            (String::from_utf8_lossy(&got[..at]).into_owned(), got[at + 4..].to_vec())
+        };
+        let (head, got) = split(&served(&path, "GET /x HTTP/1.1\r\nHost: x\r\n\r\n"));
+        assert!(head.starts_with("HTTP/1.1 200 OK") && head.contains("Content-Length: 1000003"), "{head}");
+        assert!(got == body);
+        let (head, got) = split(&served(&path, "GET /x HTTP/1.1\r\nHost: x\r\nRange: bytes=10-19\r\n\r\n"));
+        assert!(
+            head.starts_with("HTTP/1.1 206") && head.contains("Content-Range: bytes 10-19/1000003"),
+            "{head}"
+        );
+        assert_eq!(got, body[10..20]);
+        let (head, got) = split(&served(&path, "HEAD /x HTTP/1.1\r\nHost: x\r\n\r\n"));
+        assert!(head.contains("Content-Length: 1000003") && got.is_empty(), "{head}");
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// A request written to a socket of its own, read back by `read_head` and `copy_body`.
