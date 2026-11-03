@@ -52,6 +52,8 @@ tool's.
   second-order section by the bilinear transform, with second-order high- and low-passes,
   cookbook shelves and shelves with their poles at the corner, Butterworth sections, and Q
   from a bandwidth in octaves.
+- `as-bands`: a sound's power in ERB-spaced bands (a Hann window of 2048 or 4096, a frame every
+  10 ms), computed a piece at a time: pieces of any size give the same bits as the whole.
 - `as-snapshot`: detented settings: versioned detent tables with their plain words, strict TOML
   snapshots, and an ID that's the same for any two that sound the same.
 - `as-provenance`: what a processed file says about itself: a CodingHistory tag, a filename

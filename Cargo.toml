@@ -9,6 +9,7 @@ license = "MIT"
 repository = "https://github.com/verkaro/suite-audio-libs"
 
 [workspace.dependencies]
+as-bands = { path = "crates/bands" }
 as-biquad = { path = "crates/biquad" }
 as-conv = { path = "crates/conv" }
 as-defects = { path = "crates/defects" }
@@ -57,4 +58,6 @@ opt-level = 3
 [profile.dev.package.rustfft]
 opt-level = 3
 [profile.dev.package.as-envelope]
+opt-level = 3
+[profile.dev.package.as-bands]
 opt-level = 3

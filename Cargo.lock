@@ -3,6 +3,15 @@
 version = 4
 
 [[package]]
+name = "as-bands"
+version = "0.1.0"
+dependencies = [
+ "as-envelope",
+ "libm",
+ "realfft",
+]
+
+[[package]]
 name = "as-biquad"
 version = "0.1.0"
 dependencies = [

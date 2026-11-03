@@ -81,6 +81,8 @@ named in its header:
   section, prewarped at a frequency), second-order high- and low-passes, the cookbook's shelves
   (Bristow-Johnson) and shelves whose poles sit at the corner, `butterworth` sections and
   `q_from_octaves`.
+- `crates/bands` (`as-bands`, 2026-11-02, for ducky): band powers on the ERB-number scale
+  (Glasberg and Moore, 1990), a frame every 10 ms, streamed a piece at a time. Written fresh.
 - `crates/snapshot` (`as-snapshot`): versioned detent tables, strict TOML snapshots, and an ID
   that's the same for any two that sound the same.
 - `crates/envelope` (`as-envelope`): test signals, a synthetic corpus of speech-like and other
