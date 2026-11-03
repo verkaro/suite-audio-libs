@@ -66,3 +66,22 @@ Written here, not moved:
 
 - `crates/keep` (`as-keep`, 2026-10-29), after the way Dexter's export (`renameat2`'s
   `RENAME_NOREPLACE`), place's renders and scape's modules each kept from overwriting.
+- `crates/tar` (`as-tar`, 2026-10-31, for BRR's packs, step 14): a tar written and read as it
+  streams, ustar with PAX for long paths and big files. Written fresh.
+
+For Tape (its RFC, section 9), 2026-11-01, each written fresh from its RFC and the standards
+named in its header:
+
+- `crates/loudness` (`as-loudness`): BS.1770-4 gated loudness at any rate, the per-channel mean
+  beside the standard's sum (Tape's A1), the short-file rule (A8), true peak through
+  `as-resample`, the trim to a reference; measured a piece at a time (`Meter`, `PeakMeter`).
+- `crates/biquad` (`as-biquad`): first- and second-order sections in `f64` through `libm`: a
+  first-order shelf and its exact inverse, a high-pass, the cookbook's peak, a matched low-pass
+  after Vicanek (2016).
+- `crates/snapshot` (`as-snapshot`): versioned detent tables, strict TOML snapshots, and an ID
+  that's the same for any two that sound the same.
+- `crates/envelope` (`as-envelope`): test signals, a synthetic corpus of speech-like and other
+  sounds from code, and the measurements (tone, THD, products, nulls).
+- `crates/provenance` (`as-provenance`): a CodingHistory line, a filename suffix, a sidecar
+  log, and refusing a tool's own output.
+- `crates/defects` (`as-defects`): clicks and single-sample errors found by where and how high.
