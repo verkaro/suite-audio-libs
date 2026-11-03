@@ -31,6 +31,7 @@ as-seam = { path = "crates/seam" }
 as-snapshot = { path = "crates/snapshot" }
 as-speech = { path = "crates/speech" }
 as-tilt = { path = "crates/tilt" }
+as-transport = { path = "crates/transport" }
 as-wav = { path = "crates/wav" }
 as-ws = { path = "crates/ws" }
 claxon = "0.4.3"

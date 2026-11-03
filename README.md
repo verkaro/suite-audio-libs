@@ -42,6 +42,9 @@ tool's.
 - `as-opening`: an opening between the outside and a room: its stops, its wall, its routes.
 - `as-jack-keeper`: a JACK client of two outputs, its player on JACK's thread, its
   connections kept, reattaching to jackd; and `--sim`.
+- `as-transport`: where JACK's transport is, read and never moved: a client of no ports and no
+  sync callback, polled from a thread of its own, `None` while the server is away and
+  reattaching when it returns; and a simulated clock of the same shape.
 - `as-http`, `as-ws`, `as-meter`, `as-page-kit`: a tool's page: just enough HTTP, the
   WebSocket, the LED ladders' ballistics, and the skins and drawing as one script the page
   loads. `tools/cdp.py` drives a page in Falkon offscreen, for its tests.
@@ -79,6 +82,7 @@ cargo test
 cargo test -p CRATE NAME     # one test
 BLESS=1 cargo test -p as-wav reference_files   # rewrites wav's testdata/, on purpose only
 SUITE_JACK_TEST=1 cargo test -p as-jack-keeper --test dummy   # on a dummy JACK of its own
+SUITE_JACK_TEST=1 cargo test -p as-transport --test dummy     # likewise
 ```
 
 Building needs JACK2's dev package, `libjack-jackd2-dev`.

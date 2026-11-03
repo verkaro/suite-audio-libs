@@ -85,6 +85,10 @@ named in its header:
   (Glasberg and Moore, 1990), a frame every 10 ms, streamed a piece at a time. Written fresh.
 - `crates/speech` (`as-speech`, 2026-11-02, for ducky): voiced frames and phrases from band
   powers against a percentile noise floor, held across short gaps. Written fresh.
+- `crates/transport` (`as-transport`, 2026-11-03, for ducky's task 24): JACK's transport read
+  and never moved (a client of no ports, active so a dead server is noticed, polled every 10 ms
+  into atomics; forgotten rather than closed when the server goes; reattached each second), and
+  a simulated clock. Written fresh, opening and losing the client after `as-jack-keeper`.
 - `crates/snapshot` (`as-snapshot`): versioned detent tables, strict TOML snapshots, and an ID
   that's the same for any two that sound the same.
 - `crates/envelope` (`as-envelope`): test signals, a synthetic corpus of speech-like and other
