@@ -125,6 +125,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-speech"
+version = "0.1.0"
+dependencies = [
+ "as-bands",
+ "as-envelope",
+ "libm",
+]
+
+[[package]]
 name = "as-tar"
 version = "0.1.0"
 

@@ -83,6 +83,8 @@ named in its header:
   `q_from_octaves`.
 - `crates/bands` (`as-bands`, 2026-11-02, for ducky): band powers on the ERB-number scale
   (Glasberg and Moore, 1990), a frame every 10 ms, streamed a piece at a time. Written fresh.
+- `crates/speech` (`as-speech`, 2026-11-02, for ducky): voiced frames and phrases from band
+  powers against a percentile noise floor, held across short gaps. Written fresh.
 - `crates/snapshot` (`as-snapshot`): versioned detent tables, strict TOML snapshots, and an ID
   that's the same for any two that sound the same.
 - `crates/envelope` (`as-envelope`): test signals, a synthetic corpus of speech-like and other

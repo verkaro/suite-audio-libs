@@ -54,6 +54,8 @@ tool's.
   from a bandwidth in octaves.
 - `as-bands`: a sound's power in ERB-spaced bands (a Hann window of 2048 or 4096, a frame every
   10 ms), computed a piece at a time: pieces of any size give the same bits as the whole.
+- `as-speech`: where a voice is speaking: voiced frames and phrases from a stem's band powers
+  (`as-bands`), against the stem's own noise floor.
 - `as-snapshot`: detented settings: versioned detent tables with their plain words, strict TOML
   snapshots, and an ID that's the same for any two that sound the same.
 - `as-provenance`: what a processed file says about itself: a CodingHistory tag, a filename

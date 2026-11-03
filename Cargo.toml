@@ -29,6 +29,7 @@ as-resample = { path = "crates/resample" }
 as-tar = { path = "crates/tar" }
 as-seam = { path = "crates/seam" }
 as-snapshot = { path = "crates/snapshot" }
+as-speech = { path = "crates/speech" }
 as-tilt = { path = "crates/tilt" }
 as-wav = { path = "crates/wav" }
 as-ws = { path = "crates/ws" }
