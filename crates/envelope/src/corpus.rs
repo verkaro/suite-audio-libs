@@ -87,6 +87,33 @@ pub fn voice(pitch: f64, amp: f64, secs: f64, syllable: f64, rate: u32, seed: u6
     out.iter().map(|v| v / peak * amp).collect()
 }
 
+/// A voice with the lip radiation speech has: [`voice`] through a first-order high shelf
+/// (zero at 250 Hz, +30 dB), then scaled to peak `amp`. Against 1 kHz its third-octave levels
+/// read about +15.5 dB at 250 Hz, +9.8 at 500, −3.5 at 2 kHz, −9.0 at 4, −12.0 at 6.3 and
+/// −13.9 at 8, near the long-term spectrum of real speech (a little heavy below 300 Hz). Added
+/// 2026-11-02, for ducky; `voice` itself is unchanged, because Tape's tests pin it.
+pub fn speech(pitch: f64, amp: f64, secs: f64, syllable: f64, rate: u32, seed: u64) -> Vec<f64> {
+    let mut x = voice(pitch, amp, secs, syllable, rate, seed);
+    as_biquad::First::shelf(250.0, 30.0, rate as f64).run(&mut x);
+    let peak = crate::measure::peak(&x);
+    x.iter().map(|v| v / peak * amp).collect()
+}
+
+/// [`speech`] gated into phrases: `on` s of voice, then `off` s of zeros, again and again,
+/// starting with voice. A phrase starts every `on + off` s (to the sample), so with `on` 2.5 and
+/// `off` 0.8, phrase `k` starts at `k · 3.3` s. The gate is hard, and the voice is the speech
+/// as it would have been, so no phrase is scaled to `amp` on its own.
+pub fn phrases(pitch: f64, amp: f64, secs: f64, on: f64, off: f64, rate: u32, seed: u64) -> Vec<f64> {
+    let mut x = speech(pitch, amp, secs, 0.22, rate, seed);
+    let (on_n, period) = ((on * rate as f64).round() as usize, ((on + off) * rate as f64).round() as usize);
+    for (i, v) in x.iter_mut().enumerate() {
+        if i % period >= on_n {
+            *v = 0.0;
+        }
+    }
+    x
+}
+
 /// Fricative noise: bursts of `burst` s, every `every` s, band-passed high (4–10 kHz).
 pub fn sibilants(amp: f64, secs: f64, burst: f64, every: f64, rate: u32, seed: u64) -> Vec<f64> {
     let n = (secs * rate as f64) as usize;
@@ -265,6 +292,68 @@ pub fn all(rate: u32, secs: f64) -> Vec<Item> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Third-octave band level (dB) of the first 2^18 samples, as the review's `ltass2` does.
+    fn third_octave_db(x: &[f64], centre: f64, rate: u32) -> f64 {
+        let n = 1 << 18;
+        let s = crate::measure::spectrum(&x[..n]);
+        let (lo, hi) = (centre * libm::pow(2.0, -1.0 / 6.0), centre * libm::pow(2.0, 1.0 / 6.0));
+        let p: f64 = s
+            .iter()
+            .enumerate()
+            .filter(|(k, _)| {
+                let f = *k as f64 * rate as f64 / n as f64;
+                f >= lo && f < hi
+            })
+            .map(|(_, a)| a * a)
+            .sum();
+        10.0 * libm::log10(p)
+    }
+
+    #[test]
+    fn speech_has_the_long_term_spectrum_of_speech() {
+        let x = speech(130.0, 0.5, 8.0, 0.22, 48_000, 7);
+        assert_eq!(x.len(), 8 * 48_000);
+        assert!((crate::measure::peak(&x) - 0.5).abs() < 1e-12, "scaled to peak amp");
+        let at_1k = third_octave_db(&x, 1000.0, 48_000);
+        for (hz, want) in
+            [(250.0, 15.5), (500.0, 9.8), (2000.0, -3.5), (4000.0, -9.0), (6300.0, -12.0), (8000.0, -13.9)]
+        {
+            let got = third_octave_db(&x, hz, 48_000) - at_1k;
+            assert!((got - want).abs() <= 0.2, "{hz} Hz: {got:+.1} dB against {want:+.1}");
+        }
+        // The same every time, and `voice` is as it was.
+        assert_eq!(x, speech(130.0, 0.5, 8.0, 0.22, 48_000, 7));
+        assert_ne!(x, speech(130.0, 0.5, 8.0, 0.22, 48_000, 8));
+    }
+
+    #[test]
+    fn phrases_are_speech_gated() {
+        let rate = 48_000;
+        let (on, off) = (2.5, 0.8);
+        let x = phrases(130.0, 0.5, 33.0, on, off, rate, 7);
+        let s = speech(130.0, 0.5, 33.0, 0.22, rate, 7);
+        assert_eq!(x.len(), 33 * rate as usize);
+        for (i, (a, b)) in x.iter().zip(&s).enumerate() {
+            let t = i as f64 / rate as f64;
+            let in_phrase = t - (t / 3.3).floor() * 3.3 < on - 1e-9;
+            if in_phrase {
+                assert_eq!(a, b, "sample {i}");
+            } else if t - (t / 3.3).floor() * 3.3 > on + 1e-9 {
+                assert_eq!(*a, 0.0, "sample {i}");
+            }
+        }
+        // Ten phrases, each starting with voice, with zeros between.
+        let loud = |from: f64, to: f64| {
+            x[(from * rate as f64) as usize..(to * rate as f64) as usize].iter().any(|v| v.abs() > 0.01)
+        };
+        for k in 0..10 {
+            let t0 = k as f64 * 3.3;
+            assert!(loud(t0 + 0.05, t0 + 0.5), "phrase {k} starts with voice");
+            assert!(!loud(t0 + on + 0.001, t0 + on + off - 0.001), "pause {k} is zeros");
+        }
+        assert!(crate::measure::peak(&x) <= 0.5 + 1e-12);
+    }
 
     #[test]
     fn the_corpus_is_the_same_every_time_and_sane() {

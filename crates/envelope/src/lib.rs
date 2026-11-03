@@ -8,7 +8,9 @@
 //! - [`signal`]: sines with whole cycles, stepped log sines, impulses, noise, the torture set.
 //! - [`measure`]: a tone's amplitude and phase, THD, products that aren't harmonics, nulls.
 //! - [`corpus`]: voices (pulse trains through formants, whispered to shouted), sibilants,
-//!   plosives, a boom and a lav of one voice, a sweep, impacts, a bed, room tone, silence.
+//!   plosives, a boom and a lav of one voice, a sweep, impacts, a bed, room tone, silence; and,
+//!   added 2026-11-02 for ducky, `speech` (a voice with speech's spectrum) and `phrases` (that,
+//!   gated into phrases).
 
 pub mod corpus;
 pub mod measure;

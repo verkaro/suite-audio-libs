@@ -86,7 +86,8 @@ named in its header:
 - `crates/snapshot` (`as-snapshot`): versioned detent tables, strict TOML snapshots, and an ID
   that's the same for any two that sound the same.
 - `crates/envelope` (`as-envelope`): test signals, a synthetic corpus of speech-like and other
-  sounds from code, and the measurements (tone, THD, products, nulls).
+  sounds from code, and the measurements (tone, THD, products, nulls). Added 2026-11-02, for
+  ducky: `corpus::speech` (`voice` through a +30 dB shelf at 250 Hz) and `corpus::phrases`.
 - `crates/provenance` (`as-provenance`): a CodingHistory line, a filename suffix, a sidecar
   log, and refusing a tool's own output.
 - `crates/defects` (`as-defects`): clicks and single-sample errors found by where and how high.
