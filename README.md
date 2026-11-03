@@ -48,7 +48,10 @@ tool's.
 - `as-loudness`: integrated loudness (BS.1770-4, gated) at any rate, its per-channel mean
   beside the standard's sum, a linked group's, true peak, and the trim to a reference.
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every
-  machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass.
+  machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass; any analog
+  second-order section by the bilinear transform, with second-order high- and low-passes,
+  cookbook shelves and shelves with their poles at the corner, Butterworth sections, and Q
+  from a bandwidth in octaves.
 - `as-snapshot`: detented settings: versioned detent tables with their plain words, strict TOML
   snapshots, and an ID that's the same for any two that sound the same.
 - `as-provenance`: what a processed file says about itself: a CodingHistory tag, a filename

@@ -77,7 +77,10 @@ named in its header:
   `as-resample`, the trim to a reference; measured a piece at a time (`Meter`, `PeakMeter`).
 - `crates/biquad` (`as-biquad`): first- and second-order sections in `f64` through `libm`: a
   first-order shelf and its exact inverse, a high-pass, the cookbook's peak, a matched low-pass
-  after Vicanek (2016).
+  after Vicanek (2016). Added 2026-11-02, for ducky: `bilinear` (any analog second-order
+  section, prewarped at a frequency), second-order high- and low-passes, the cookbook's shelves
+  (Bristow-Johnson) and shelves whose poles sit at the corner, `butterworth` sections and
+  `q_from_octaves`.
 - `crates/snapshot` (`as-snapshot`): versioned detent tables, strict TOML snapshots, and an ID
   that's the same for any two that sound the same.
 - `crates/envelope` (`as-envelope`): test signals, a synthetic corpus of speech-like and other
