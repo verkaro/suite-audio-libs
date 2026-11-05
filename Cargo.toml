@@ -19,6 +19,7 @@ as-flac = { path = "crates/flac" }
 as-http = { path = "crates/http" }
 as-ir = { path = "crates/ir" }
 as-jack-keeper = { path = "crates/jack-keeper" }
+as-jack-capture = { path = "crates/jack-capture" }
 as-keep = { path = "crates/keep" }
 as-loudness = { path = "crates/loudness" }
 as-meter = { path = "crates/meter" }

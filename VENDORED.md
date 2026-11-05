@@ -105,3 +105,6 @@ named in its header:
 - `crates/sfz` (`as-sfz`, 2026-11-04, for dexter-like110): an SFZ written as text and checked.
   Written fresh.
 - `as-seam`'s `sameness` made public (2026-11-04, for dexter-like110's splice).
+- `crates/jack-capture` (`as-jack-capture`, 2026-11-04, for dexter-like110): a JACK client of two
+  inputs, a ring read off JACK's thread, its connections kept, reattaching to jackd with a new
+  ring (said as a gap). Written fresh, opening and losing the client after `as-jack-keeper`.

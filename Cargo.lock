@@ -61,6 +61,15 @@ name = "as-ir"
 version = "0.1.0"
 
 [[package]]
+name = "as-jack-capture"
+version = "0.1.0"
+dependencies = [
+ "jack",
+ "libc",
+ "rtrb",
+]
+
+[[package]]
 name = "as-jack-keeper"
 version = "0.1.0"
 dependencies = [

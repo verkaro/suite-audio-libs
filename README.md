@@ -42,6 +42,8 @@ tool's.
 - `as-opening`: an opening between the outside and a room: its stops, its wall, its routes.
 - `as-jack-keeper`: a JACK client of two outputs, its player on JACK's thread, its
   connections kept, reattaching to jackd; and `--sim`.
+- `as-jack-capture`: a JACK client of two inputs read into a ring off JACK's thread, its
+  connections kept, reattaching to jackd; it says when frames were lost or a new ring began.
 - `as-transport`: where JACK's transport is, read and never moved: a client of no ports and no
   sync callback, polled from a thread of its own, `None` while the server is away and
   reattaching when it returns; and a simulated clock of the same shape.
@@ -88,6 +90,7 @@ cargo test -p CRATE NAME     # one test
 BLESS=1 cargo test -p as-wav reference_files   # rewrites wav's testdata/, on purpose only
 SUITE_JACK_TEST=1 cargo test -p as-jack-keeper --test dummy   # on a dummy JACK of its own
 SUITE_JACK_TEST=1 cargo test -p as-transport --test dummy     # likewise
+SUITE_JACK_TEST=1 cargo test -p as-jack-capture --test dummy    # likewise
 ```
 
 Building needs JACK2's dev package, `libjack-jackd2-dev`.
