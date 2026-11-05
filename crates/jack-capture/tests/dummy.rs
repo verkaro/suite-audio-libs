@@ -223,3 +223,18 @@ fn dummy_reattach() {
         drop(src);
     });
 }
+
+#[test]
+fn dummy_sources() {
+    with_server(|_jackd, _| {
+        let src = source();
+        let found = as_jack_capture::sources().unwrap();
+        assert!(found.contains(&"system:capture_1".to_string()), "{found:?}");
+        assert!(found.contains(&"src:out_L".to_string()) && found.contains(&"src:out_R".to_string()));
+        assert!(!found.iter().any(|p| p.ends_with(":in_L")), "inputs aren't sources");
+        let physical = found.iter().position(|p| p.starts_with("system:")).unwrap();
+        let ours = found.iter().position(|p| p.starts_with("src:")).unwrap();
+        assert!(physical < ours, "the sound card's first");
+        drop(src);
+    });
+}

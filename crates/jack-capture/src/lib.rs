@@ -24,6 +24,7 @@ mod tests;
 
 /// The client's inputs.
 pub const IN: [&str; 2] = ["in_L", "in_R"];
+const AUDIO_TYPE: &str = "32 bit float mono audio";
 /// How often the keeper looks at the graph.
 const TICK: Duration = Duration::from_millis(100);
 /// How often it tries to open the client while JACK is away.
@@ -63,6 +64,20 @@ pub fn links(name: &str, left: &[String], right: &[String]) -> BTreeSet<(String,
         }
     }
     out
+}
+
+/// The audio ports of the JACK server that give audio out, which the inputs can be connected
+/// to, in the server's order (the sound card's first). A client is opened to look and closed at
+/// once; `Err` says why if JACK isn't there.
+pub fn sources() -> Result<Vec<String>, String> {
+    let opts = ClientOptions::NO_START_SERVER;
+    let (c, _) =
+        jack::Client::new("as-jack-capture-ports", opts).map_err(|_| "JACK isn't running".to_string())?;
+    let all = c.ports(None, Some(AUDIO_TYPE), jack::PortFlags::IS_OUTPUT);
+    let physical = c.ports(None, Some(AUDIO_TYPE), jack::PortFlags::IS_OUTPUT | jack::PortFlags::IS_PHYSICAL);
+    let mut out = physical.clone();
+    out.extend(all.into_iter().filter(|p| !physical.contains(p)));
+    Ok(out)
 }
 
 enum Msg {
