@@ -97,3 +97,11 @@ named in its header:
 - `crates/provenance` (`as-provenance`): a CodingHistory line, a filename suffix, a sidecar
   log, and refusing a tool's own output.
 - `crates/defects` (`as-defects`): clicks and single-sample errors found by where and how high.
+- `crates/rawmidi` (`as-rawmidi`, 2026-11-04, for dexter-like110): raw MIDI ports found under
+  `/dev/snd` by card id, opened write-only, the messages a keyboard needs, and panic. Written
+  fresh, after the way dexter-surface's `mcu` finds its ports.
+- `crates/pitch` (`as-pitch`, 2026-11-04, for dexter-like110): YIN (de Cheveigne and Kawahara,
+  2002) with a staged long-lag refinement, and a per-frame track. Written fresh.
+- `crates/sfz` (`as-sfz`, 2026-11-04, for dexter-like110): an SFZ written as text and checked.
+  Written fresh.
+- `as-seam`'s `sameness` made public (2026-11-04, for dexter-like110's splice).

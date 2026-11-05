@@ -232,10 +232,11 @@ pub fn find(s: &[Vec<f32>], j: &Join, xf: usize, point: Point, window: usize, w:
     if was >= best.score - 0.005 { Found { at: now, score: was, was } } else { best }
 }
 
-/// How much the `w` frames around e are like those around l, from −1 to 1: 1 − their squared
+/// Public for dexter-like110's splice (2026-11-04), which looks for the point a release joins a
+/// held tone best. How much the `w` frames around e are like those around l, from −1 to 1: 1 − their squared
 /// difference over their energy (so a match in shape but not in level scores less). Silence
 /// matches silence.
-fn sameness(s: &[Vec<f32>], l: usize, e: usize, w: usize) -> f64 {
+pub fn sameness(s: &[Vec<f32>], l: usize, e: usize, w: usize) -> f64 {
     let n = frames(s);
     let half = (w / 2).max(1);
     let before = half.min(l).min(e);

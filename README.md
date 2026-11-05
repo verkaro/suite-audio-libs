@@ -68,6 +68,11 @@ tool's.
 - `as-envelope`: acceptance tests for a process: test signals, a synthetic corpus of
   speech-like and other sounds (including `speech`, a voice with speech's long-term spectrum,
   and `phrases`, that gated into phrases), and the measurements (tone, THD, products, nulls).
+- `as-rawmidi`: ALSA raw MIDI out: ports found by card under `/dev/snd`, a port opened for
+  writing, note on and off, program change, controllers and panic as bytes.
+- `as-pitch`: a tone's pitch by YIN and a staged long-lag refinement, good to a few cents from
+  A0 to C8; and a frame-by-frame track for vibrato.
+- `as-sfz`: an SFZ instrument written as text, its headers, opcodes and values checked.
 - `as-keep`: nothing overwritten: exclusive numbered files, folders made whole before they
   appear, write-and-rename.
 

@@ -137,3 +137,19 @@ fn find_matches_levels_in_noise() {
     let f = find(&s, &j, 1_000, Point::Loop, 3_000, 96);
     assert!(!(5_500..9_500).contains(&f.at) && f.score > f.was + 0.2, "{f:?}");
 }
+
+#[test]
+fn sameness_public() {
+    // A 1 kHz sine, then the same sine inverted: windows 200 cycles apart in the first half are
+    // alike, and against the inverted half they are opposite.
+    let n = 19_200;
+    let x: Vec<f32> = (0..n)
+        .map(|i| {
+            let v = (std::f64::consts::TAU * 1000.0 * i as f64 / RATE as f64).sin() as f32;
+            if i < n / 2 { v } else { -v }
+        })
+        .collect();
+    let s = vec![x];
+    assert!(sameness(&s, 2400, 4800, 480) > 0.999);
+    assert!(sameness(&s, 2400, 12_000, 480) < 0.5);
+}

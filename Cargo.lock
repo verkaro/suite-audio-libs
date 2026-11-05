@@ -98,10 +98,21 @@ name = "as-page-kit"
 version = "0.1.0"
 
 [[package]]
+name = "as-pitch"
+version = "0.1.0"
+
+[[package]]
 name = "as-provenance"
 version = "0.1.0"
 dependencies = [
  "as-keep",
+]
+
+[[package]]
+name = "as-rawmidi"
+version = "0.1.0"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
@@ -113,6 +124,10 @@ dependencies = [
 
 [[package]]
 name = "as-seam"
+version = "0.1.0"
+
+[[package]]
+name = "as-sfz"
 version = "0.1.0"
 
 [[package]]
