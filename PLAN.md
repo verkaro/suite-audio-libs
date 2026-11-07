@@ -102,10 +102,11 @@ tool's folder), each step its own commit:
    never the way through a move).
 4. Move this file's table.
 
-For Dexter, in this order: `wav` (the reference files are the gate: the suite's came from
-Dexter's), `meter`, `ws`, then `http`. The page's script last, against `as-page-kit`, since
-the page is what the others copied and its tests are in the browser. Dexter's own JACK client
-is the engine's and isn't the keeper; it stays.
+For Dexter, in this order: `meter` (the code is the same apart from comments, so it proves the
+pin, the patch and CI at no risk), `ws`, `wav` (the reference files are the gate: the suite's
+came from Dexter's), then `http` (the server's upload changes). The page's script is a decision
+for after, against `as-page-kit`. Dexter's own JACK client is the engine's, not the keeper, and
+it stays. The path, step by step, with what proves each step: `Dexter.md`.
 
 ## Next for the suite
 
