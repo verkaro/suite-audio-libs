@@ -1,8 +1,8 @@
 # suite-audio-libs
 
 The libraries the Dexter family shares (Dexter, dexter-scape, dexter-place, dexter-foley, BRR):
-audio engineering, and the plumbing every sibling had written for itself. MIT. Its plan is
-BRR's `suite-plan.md`.
+audio engineering, and the plumbing every sibling had written for itself. MIT. Its plan, and
+where each tool stands, is `PLAN.md`.
 
 A tool depends on a crate by this repository's git address, pinned to a commit:
 
