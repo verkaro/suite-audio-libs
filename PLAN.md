@@ -159,7 +159,8 @@ every panel). Settled, 6 names the tools.
 
 - **Each tool's panel** is its own binary, kept in the tool, as dexter-kms is for the deck,
   speaking the tool's page protocol (so each protocol's clients list grows by one).
-- **The frame** is in `suite-light-panel`, and stays running: a menu of the tools, each one's
+- **The frame** is `muntin` (named 2026-11-07), its own repository on `suite-light-panel`'s
+  crates, and stays running: a menu of the tools, each one's
   state (running or not, JACK's state). It starts a tool's panel and gives it the screen
   (dropping DRM master), and takes the screen back when the panel exits. A key every panel
   shares (in `lp-keys`) leaves the panel for the frame.
