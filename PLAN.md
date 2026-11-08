@@ -84,7 +84,7 @@ The suite's HEAD is `4131d73`. A pin behind it is fine: a tool moves its pin whe
 | BRR | conv, draw, flac, http, ir, jack-keeper, keep, meter, opening, page-kit, resample, seam, tar, tilt, wav, ws | `72cba31` | none |
 | dexter-tape | biquad, defects, envelope, flac, http, jack-keeper, keep, loudness, page-kit, provenance, resample, snapshot, wav, ws | `7643374` | none |
 | dexter-ducky | bands, biquad, envelope, flac, http, keep, loudness, page-kit, provenance, speech, transport, wav, ws | `ae58a71` | none |
-| Dexter | nothing yet | — | `crates/wav`, `crates/ws`, `crates/meter`, `crates/server/src/http.rs`; its page is page-kit's original |
+| Dexter | meter | `debde16` | `crates/wav`, `crates/ws`, `crates/server/src/http.rs`; its page is page-kit's original |
 | dexter-place | nothing yet (after Dexter) | — | `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), `server/src/http.rs`, `core`'s tilt |
 | dexter-foley | nothing yet (after place) | — | `wav`, `flac`, `jack` (the keeper and the resampler), `server/src/http.rs` |
 | dexter-scape | nothing yet (after foley) | — | `wav`, `ws`, `meter`, `jack`, `server/src/http.rs` |
