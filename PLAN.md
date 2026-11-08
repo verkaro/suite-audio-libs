@@ -94,7 +94,7 @@ Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `
 
 ## Where each tool stands (2026-11-07)
 
-The suite's HEAD is `4131d73`. A pin behind it is fine: a tool moves its pin when it's ready.
+The suite's HEAD is `390588f`. A pin behind it is fine: a tool moves its pin when it's ready.
 
 | Tool | On the suite | Pin | Its own copies still |
 |---|---|---|---|
@@ -105,7 +105,7 @@ The suite's HEAD is `4131d73`. A pin behind it is fine: a tool moves its pin whe
 | dexter-place | nothing yet (after Dexter) | — | `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), `server/src/http.rs`; in `core`: `conv.rs`, `opening.rs`, `tilt.rs`, `convert.rs` (a resampler of its own); in `library`: `ir.rs` and the onset in `numbers.rs`, and its save-and-rename (`as-keep`) |
 | dexter-foley | nothing yet (after place) | — | `wav`, `flac`, `jack` (the keeper and the resampler), `server/src/http.rs`, `library/src/loudness.rs` (BS.1770-4, now `as-loudness`) |
 | dexter-scape | nothing yet (after foley) | — | `wav`, `ws`, `meter`, `jack`, `server/src/http.rs`; in `core`: `seam.rs`, `tilt.rs`, draw and mix (`as-draw`); `module/src/carry.rs` (a tar of its own, now `as-tar`) |
-| dexter-kms | on `suite-light-panel` (`f3ed49b`) | — | `src/ws.rs`, a WebSocket *client* (`as-ws` is the server's half) |
+| dexter-kms | ws (its client half); and `suite-light-panel`'s four crates (`82da6e5`) | `390588f` | none: its WebSocket client, screen loop, snapshot harness, `Pen` and palette went into the suites, 2026-11-07 (its `VENDORED.md`) |
 
 Each tool's `VENDORED.md` says where its copies came from and how they've drifted. The rows for
 place, foley and scape were checked against the suite's crates on 2026-11-07 by module and
@@ -135,9 +135,6 @@ it stays. The path, step by step, with what proves each step: `Dexter.md`.
 Found 2026-11-07, most wanted first. Each comes in through the tool that has it, in that tool's
 move, never copied from one tool to another.
 
-- **`as-ws`'s client half**, from dexter-kms's `src/ws.rs` (the handshake, masked frames out,
-  fragments in, ping answered). Every KMS panel after the deck's needs it (Settled, 6), and so
-  would a tool that talks to the deck server.
 - **TUNE**, a sample read faster or slower through a windowed sinc: written twice, in scape's
   `core/src/tune.rs` and BRR's `core/src/play.rs`. One crate, and BRR moves onto it.
   (`as-resample` is for fixed ratios of whole-number rates; this isn't.)
@@ -170,6 +167,10 @@ every panel). Settled, 6 names the tools.
   shares (in `lp-keys`) leaves the panel for the frame.
 - **The shared face:** `lp-paint` drawing what `page-kit.js` draws, the same keys meaning the
   same things, the same skins, and the ws client (`as-ws`'s client half).
+- **What a panel is built on** (moved out of dexter-kms, 2026-11-07, so Tape's panel, the
+  second, starts on them): `as-ws::client` for its server; `lp-panel`'s `run` for the screen
+  loop and `snapshot` for testing it without a screen; `lp_paint::Pen` and `lp_paint::dark`,
+  page-kit's dark skin, for drawing.
 
 Starting a tool when it's needed, as a sketch to settle when the frame is built:
 
