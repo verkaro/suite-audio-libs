@@ -17,32 +17,43 @@ What was found when this was written (Dexter at `c7ebba3`, the suite at `a176062
 ## Step 0: before any code (yours, then one Dexter session)
 
 1. **Choose the time.** Dexter's `main` should be clean with no PR open. Pick a stretch with no
-   sessions booked: the installed `dexter` is what you record with.
-2. **Push the suite.** `a176062` (this plan) and whatever comes after must be on GitHub before
-   any Dexter pin names them: `git -C ~/Documents/Github/suite-audio-libs push origin main`
-   (and to `soft`).
-3. **Overturn two of Dexter's rules, in Dexter, in writing.** This is a Dexter session with
-   docs only, as a PR:
-   - `docs/dev/PLAN.md` section 6 and `CLAUDE.md` say "a clone from GitHub builds with nothing
-     else" (2026-09-29). It becomes "a clone builds with the network: the suite is fetched,
-     pinned" (Warren, 2026-11-07). The bay's vendoring stays as it is: bay-rs isn't the suite.
-   - `CLAUDE.md`'s "Never modify anything in a directory outside this one" becomes "... outside
-     this one and `../suite-audio-libs`". Add a "The suite" section like `../dexter-tape/CLAUDE.md`'s:
-     the pin, the local patch, and the suite pushed first.
+   sessions booked: the installed `dexter` is what you record with. (Checked 2026-11-07: `main`
+   clean at `c7ebba3`, level with GitHub, CI green, no PR open.)
+2. **Push the suite.** Done 2026-11-07: the suite is on GitHub (the only remote now), so a
+   Dexter pin can name any commit on its `main`.
+3. **One Dexter session, docs only, as a PR.** Started from Dexter's folder:
+   `cd ~/Documents/Github/dexter && claude --add-dir ../suite-audio-libs`. It does four things:
+   - **Rule: the suite.** `docs/dev/PLAN.md` section 6 and `CLAUDE.md` say "a clone from GitHub
+     builds with nothing else" (2026-09-29). It becomes "a clone builds with the network: the
+     suite is fetched, pinned" (Warren, 2026-11-07). The bay's vendoring stays as it is: bay-rs
+     isn't the suite.
+   - **Rule: what it may change.** `CLAUDE.md`'s "Never modify anything in a directory outside
+     this one" becomes "... outside this one and `../suite-audio-libs`", as `../CLAUDE.md`
+     (the family's) has it. Add a "The suite" section like `../dexter-tape/CLAUDE.md`'s: the
+     pin, the local patch, `CHANGES.md` read before a pin moves, the suite pushed first.
+   - **The handoffs.** Read the four `Dexter.md` files listed in `../HANDOFFS.md`, and say for
+     each ask whether the suite now meets it (the FLAC encoder is `as-flac`; foley's
+     conversion is `as-resample`; `bext` is in `as-wav`) and whether it changes this path.
+     Record that in `docs/dev/TODO.md`. Building any of them isn't part of step 0.
+   - **The page protocol's clients.** `docs/page-protocol.md` names who reads it: the page,
+     the remote, and `dexter-kms` (`verkaro/dexter-kms`, protocol 60). A protocol change then
+     says who has to follow.
 
    Prompt:
-   > Dexter adopts suite-audio-libs (Warren, 2026-11-07). Read ../suite-audio-libs/Dexter.md,
-   > step 0. Make the docs change it describes, in PLAN.md section 6 and CLAUDE.md, as a PR. No
-   > code.
+   > Dexter adopts suite-audio-libs (Warren, 2026-11-07). Read ../CLAUDE.md, then
+   > ../suite-audio-libs/Dexter.md, step 0. Do item 3's four parts as one PR, docs only, no
+   > code. Then take item 4's baseline and put it in the PR's description. Stop there for my
+   > go-ahead; step 1 is a separate session.
 
-4. **Take the baseline** in Dexter on `main`, and keep the output (paste it into the PR, or
-   into `docs/dev/TODO.md`):
+4. **Take the baseline** in Dexter on `main`, and keep the output in the PR's description:
    ```sh
    cargo test 2>&1 | tail -3
    DEXTER_JACK_TEST=1 cargo test -p dexter-jack -p dexter-engine 2>&1 | tail -3
    DEXTER_BROWSER_TEST=1 cargo test -p dexter --test page 2>&1 | tail -3
    cargo test --release -p dexter-wav bench_convert -- --ignored --nocapture   # step 3's yardstick
    ```
+5. **Yours:** read the PR, merge it, and update step 0's line in `../HANDOFFS.md`
+   (`./family.sh` pushes nothing: commit and push the family folder by hand).
 
 ## How every step after runs
 
