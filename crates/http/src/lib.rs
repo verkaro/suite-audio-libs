@@ -32,12 +32,21 @@ impl Request {
 /// Content-Length.
 pub fn read_request(r: &mut BufReader<TcpStream>) -> io::Result<Request> {
     let mut req = read_head(r)?;
+    read_body(r, &mut req, MAX_BODY)?;
+    Ok(req)
+}
+
+/// Reads the body of a request read by [`read_head`] into [`Request::body`], up to `max`
+/// bytes, and only when it has a Content-Length; the rest is left unread. For a server that
+/// reads the head first, to keep the body only on the paths that want it, each with its own
+/// cap (added for Dexter, 2026-11-07: 4 KiB for its commands, its uploads streamed).
+pub fn read_body(r: &mut BufReader<TcpStream>, req: &mut Request, max: usize) -> io::Result<()> {
     let len: usize = req.header("Content-Length").parse().unwrap_or(0);
     if len > 0 {
         r.get_ref().set_read_timeout(Some(Duration::from_secs(10)))?;
-        r.by_ref().take(len.min(MAX_BODY) as u64).read_to_end(&mut req.body)?;
+        r.by_ref().take(len.min(max) as u64).read_to_end(&mut req.body)?;
     }
-    Ok(req)
+    Ok(())
 }
 
 /// Reads one request's line and headers, and leaves its body to be read: by
@@ -454,6 +463,34 @@ mod tests {
         // Short of its length: the sender gave up.
         let (_, got) = sent(b"PUT /u HTTP/1.1\r\nContent-Length: 10\r\n\r\nabc".to_vec());
         assert_eq!(got.unwrap_err().kind(), io::ErrorKind::UnexpectedEof);
+    }
+
+    /// A request written to a socket of its own, its head read, then its body up to `max`.
+    fn kept(raw: &'static [u8], max: usize) -> Request {
+        let l = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let at = l.local_addr().unwrap();
+        let t = std::thread::spawn(move || {
+            let mut s = TcpStream::connect(at).unwrap();
+            s.write_all(raw).unwrap();
+            s // held open: a body short of its length would be waited for, not cut
+        });
+        let (s, _) = l.accept().unwrap();
+        let mut r = BufReader::new(s);
+        let mut req = read_head(&mut r).unwrap();
+        assert!(req.body.is_empty(), "read_head leaves the body");
+        read_body(&mut r, &mut req, max).unwrap();
+        drop(t.join().unwrap());
+        req
+    }
+
+    #[test]
+    fn a_body_is_kept_up_to_its_cap() {
+        let cmd = b"POST /cmd HTTP/1.1\r\nContent-Length: 10\r\n\r\n0123456789";
+        assert_eq!(kept(cmd, 4).body, b"0123");
+        assert_eq!(kept(cmd, 4096).body, b"0123456789");
+        // No Content-Length, no body: nothing is waited for.
+        let get = kept(b"GET /none HTTP/1.1\r\nHost: x\r\n\r\n", 4096);
+        assert!(get.path == "/none" && get.body.is_empty());
     }
 
     #[test]
