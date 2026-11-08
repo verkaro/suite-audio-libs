@@ -74,6 +74,19 @@ Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `
    still being worked on, so it moves too, overturning 2026-10-30's "stays as it is").
 3. **A clone builds with the network**, not with nothing else: cargo fetches the pinned suite.
    That's fine for public code.
+4. **Rooms get a tool of their own** (Warren, 2026-11-07): recording an IR and convolution are
+   broken out of dexter-place into a new tool (its name to come). It's born on the suite, so
+   place's `measure` crate and `numbers.rs` come into the suite first (`as-measure`, and the
+   numbers into `as-ir`); `as-conv` is here already. What place keeps when they leave is for
+   place's next session to settle with Warren.
+5. **JACK and the patch bay are a tool of their own,** `dexter-jack` (Warren, 2026-11-07):
+   starting and stopping jackd, the rigs, finding the interfaces, and the bay. Dexter keeps its
+   own, as JACK is part of the deck, but both run on the same suite crates, which come out of
+   Dexter (`crates/jack`'s `jackd.rs`, the rigs, `focusrite`, `bay-core`, `bay-jack`, `patch`).
+   No other tool controls JACK.
+6. **KMS panels** (Warren, 2026-11-07): place and scape stay on their pages, with no KMS panel.
+   BRR, foley, Tape, ducky, `dexter-jack` and the rooms tool are candidates for one: a panel a
+   tool, run from one frame (see "Panels for the rest of the family" below).
 
 ## Where each tool stands (2026-11-07)
 
@@ -85,12 +98,14 @@ The suite's HEAD is `4131d73`. A pin behind it is fine: a tool moves its pin whe
 | dexter-tape | biquad, defects, envelope, flac, http, jack-keeper, keep, loudness, page-kit, provenance, resample, snapshot, wav, ws | `7643374` | none |
 | dexter-ducky | bands, biquad, envelope, flac, http, keep, loudness, page-kit, provenance, speech, transport, wav, ws | `ae58a71` | none |
 | Dexter | http, meter, wav, ws | `ebe1e3e` | none; its page is page-kit's original |
-| dexter-place | nothing yet (after Dexter) | — | `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), `server/src/http.rs`, `core`'s tilt |
-| dexter-foley | nothing yet (after place) | — | `wav`, `flac`, `jack` (the keeper and the resampler), `server/src/http.rs` |
-| dexter-scape | nothing yet (after foley) | — | `wav`, `ws`, `meter`, `jack`, `server/src/http.rs` |
+| dexter-place | nothing yet (after Dexter) | — | `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), `server/src/http.rs`; in `core`: `conv.rs`, `opening.rs`, `tilt.rs`, `convert.rs` (a resampler of its own); in `library`: `ir.rs` and the onset in `numbers.rs`, and its save-and-rename (`as-keep`) |
+| dexter-foley | nothing yet (after place) | — | `wav`, `flac`, `jack` (the keeper and the resampler), `server/src/http.rs`, `library/src/loudness.rs` (BS.1770-4, now `as-loudness`) |
+| dexter-scape | nothing yet (after foley) | — | `wav`, `ws`, `meter`, `jack`, `server/src/http.rs`; in `core`: `seam.rs`, `tilt.rs`, draw and mix (`as-draw`); `module/src/carry.rs` (a tar of its own, now `as-tar`) |
 | dexter-kms | on `suite-light-panel` (`f3ed49b`) | — | `src/ws.rs`, a WebSocket *client* (`as-ws` is the server's half) |
 
-Each tool's `VENDORED.md` says where its copies came from and how they've drifted.
+Each tool's `VENDORED.md` says where its copies came from and how they've drifted. The rows for
+place, foley and scape were checked against the suite's crates on 2026-11-07 by module and
+import, not yet diffed.
 
 ## Moving a tool in
 
@@ -113,6 +128,56 @@ it stays. The path, step by step, with what proves each step: `Dexter.md`.
 
 ## Next for the suite
 
+Found 2026-11-07, most wanted first. Each comes in through the tool that has it, in that tool's
+move, never copied from one tool to another.
+
 - **`as-ws`'s client half**, from dexter-kms's `src/ws.rs` (the handshake, masked frames out,
-  fragments in, ping answered). Any second KMS panel needs it, and so would a tool that talks
-  to the deck server.
+  fragments in, ping answered). Every KMS panel after the deck's needs it (Settled, 6), and so
+  would a tool that talks to the deck server.
+- **TUNE**, a sample read faster or slower through a windowed sinc: written twice, in scape's
+  `core/src/tune.rs` and BRR's `core/src/play.rs`. One crate, and BRR moves onto it.
+  (`as-resample` is for fixed ratios of whole-number rates; this isn't.)
+- **FLAC tags** (Vorbis comments rewritten without risking the audio), from foley's
+  `crates/tags`, into `as-flac`. Place asked for it, and Dexter's DATE_RECORDED on export
+  needs it.
+- **WALK**, the distance law (quieter, duller, to the side), from scape's `core/src/walk.rs`.
+  Place's `core/src/distance.rs` is a copy of it.
+- **Measuring a room and its numbers**, from place's `measure` crate and `numbers.rs`, for the
+  rooms tool (Settled, 4).
+- **JACK control, the rigs, the interfaces and the bay**, out of Dexter, for `dexter-jack`
+  (Settled, 5). In Dexter's own steps, after `Dexter.md`'s, at Dexter's pace.
+- **`noise`**, a recording's floor matched, from scape's `core/src/noise.rs`, when a second tool
+  wants it.
+
+Staying in their tools: foley's UCS table, place's positions and its opening played by hand,
+and Tape's and ducky's engines.
+
+## Panels for the rest of the family
+
+**A panel a tool, and a frame that runs them** (Warren, 2026-11-07, over one client linking
+every panel). Settled, 6 names the tools.
+
+- **Each tool's panel** is its own binary, kept in the tool, as dexter-kms is for the deck,
+  speaking the tool's page protocol (so each protocol's clients list grows by one).
+- **The frame** is in `suite-light-panel`, and stays running: a menu of the tools, each one's
+  state (running or not, JACK's state). It starts a tool's panel and gives it the screen
+  (dropping DRM master), and takes the screen back when the panel exits. A key every panel
+  shares (in `lp-keys`) leaves the panel for the frame.
+- **The shared face:** `lp-paint` drawing what `page-kit.js` draws, the same keys meaning the
+  same things, the same skins, and the ws client (`as-ws`'s client half).
+
+Starting a tool when it's needed, as a sketch to settle when the frame is built:
+
+- The frame reads what it knows of each tool from one file: its server's binary and port, its
+  panel's binary, and whether it needs JACK. It asks the port whether the server is up.
+- Choosing a tool that isn't running starts its server, headless, connected to nothing, then
+  its panel once the server answers.
+- A tool that needs JACK, with JACK down, opens `dexter-jack`'s panel first. The frame itself
+  never starts jackd (the baseline's rule).
+- Leaving a panel leaves its tool running, so what's playing keeps playing. Stopping a tool is
+  its own choice in the frame, asked first.
+
+**The frame comes early** (Warren, 2026-11-07): it's small beside the tools, and built now it
+stays tested as the family grows. Its first version runs the one panel there is, dexter-kms,
+and starts the deck's server when it's down; the screen handed over and taken back is the part
+to prove first, on a real screen (Warren's gate). Each new panel is added to it as it comes.
