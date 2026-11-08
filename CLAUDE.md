@@ -7,7 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The audio libraries the Dexter family shares (`as-wav`, `as-ws`, `as-jack-keeper`, …): audio
 engineering, and the plumbing each tool used to write for itself. The README describes every
 crate. `PLAN.md` is the plan: which tool is on which crate, which tools still keep their own
-copies, and how a tool moves in. `VENDORED.md` records where each crate came from.
+copies, and how a tool moves in. `Dexter.md` is Dexter's path onto the suite. `CHANGES.md` lists
+what changed, for tools moving their pins. `VENDORED.md` records where each crate came from.
+The family's rules are `../CLAUDE.md`.
 
 Tools depend on this repository by git address, pinned to a commit. While working, each tool
 has a `.cargo/config.toml`, kept out of git, that patches that address to this folder. A change
@@ -43,8 +45,11 @@ Building needs JACK2's dev package (`libjack-jackd2-dev`).
 - **Moving a tool in:** first bring anything the tool's copy has that the suite lacks into the
   suite, with a test. The tool's reference files must still match byte for byte (see
   `PLAN.md`, "Moving a tool in"). Update `PLAN.md`'s table when a tool moves.
-- **Pushing:** the suite is pushed to GitHub before any tool whose pin moves to it, so a fresh
-  clone of the tool builds. Cargo fetches the pinned commit before applying the local patch.
+- **`CHANGES.md`:** a change to an interface or a behaviour gets a line there in the same
+  commit, newest first, naming the crate and what a tool has to do about it.
+- **Pushing:** to GitHub only (soft-serve retired, 2026-11-07), before any tool whose pin moves
+  to it, so a fresh clone of the tool builds. Cargo fetches the pinned commit before applying
+  the local patch.
 - **Watch for breakage:** changing a public interface breaks every tool patched to this folder.
   Run the affected tools' tests too (`../brr`, `../dexter-tape`, `../dexter-ducky`, and Dexter
   as it moves in), or note the change for their next pin bump.

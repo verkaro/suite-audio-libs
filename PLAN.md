@@ -19,8 +19,9 @@ a whole screen through KMS, under the same rules.
 
 ## Working locally (Warren, 2026-10-30)
 
-Development is local, with Claude Code on Warren's machine. Work is pushed to his soft-serve
-on the LAN between milestones, and to GitHub at milestones. A tool names the suite by its
+Development is local, with Claude Code, on whichever of Warren's computers he's at. GitHub is
+the only remote (his soft-serve retired, 2026-11-07), so work is pushed at the end of a session
+and `../family.sh pull` brings a computer up to date. A tool names the suite by its
 GitHub address and a pinned commit, so it builds as pushed. Locally, a `.cargo/config.toml`
 kept out of git patches that address to the folder beside it:
 
@@ -30,8 +31,9 @@ as-wav = { path = "../suite-audio-libs/crates/wav" }
 # one line for each crate the tool uses
 ```
 
-A change to the suite is then live in the tool at once. At a milestone the suite is pushed
-first, then the tool's pin is moved to that commit and the tool pushed.
+A change to the suite is then live in the tool at once. The suite is pushed first, then the
+tool's pin is moved to that commit and the tool pushed. A change to an interface or a behaviour
+gets a line in `CHANGES.md`, which a tool reads before moving its pin.
 
 ## The first crates, most-copied first
 
@@ -68,7 +70,8 @@ Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `
 2. **Moving in.** BRR was built on the suite from its first step, and Tape and ducky after it.
    **Dexter adopts the suite** (Warren, 2026-11-07). Dexter and place move over one crate at a
    time through their own sessions, each move a handoff, so neither is disturbed mid-work.
-   dexter-scape stays as it is (2026-10-30; not revisited).
+   **After Dexter: dexter-place, dexter-foley, then dexter-scape** (Warren, 2026-11-07; scape is
+   still being worked on, so it moves too, overturning 2026-10-30's "stays as it is").
 3. **A clone builds with the network**, not with nothing else: cargo fetches the pinned suite.
    That's fine for public code.
 
@@ -82,9 +85,9 @@ The suite's HEAD is `4131d73`. A pin behind it is fine: a tool moves its pin whe
 | dexter-tape | biquad, defects, envelope, flac, http, jack-keeper, keep, loudness, page-kit, provenance, resample, snapshot, wav, ws | `7643374` | none |
 | dexter-ducky | bands, biquad, envelope, flac, http, keep, loudness, page-kit, provenance, speech, transport, wav, ws | `ae58a71` | none |
 | Dexter | nothing yet | — | `crates/wav`, `crates/ws`, `crates/meter`, `crates/server/src/http.rs`; its page is page-kit's original |
-| dexter-place | nothing yet | — | `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), `server/src/http.rs`, `core`'s tilt |
-| dexter-foley | nothing yet | — | `wav`, `flac`, `jack` (the keeper and the resampler), `server/src/http.rs` |
-| dexter-scape | nothing (stays as it is) | — | `wav`, `ws`, `meter`, `jack`, `server/src/http.rs` |
+| dexter-place | nothing yet (after Dexter) | — | `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), `server/src/http.rs`, `core`'s tilt |
+| dexter-foley | nothing yet (after place) | — | `wav`, `flac`, `jack` (the keeper and the resampler), `server/src/http.rs` |
+| dexter-scape | nothing yet (after foley) | — | `wav`, `ws`, `meter`, `jack`, `server/src/http.rs` |
 | dexter-kms | on `suite-light-panel` (`f3ed49b`) | — | `src/ws.rs`, a WebSocket *client* (`as-ws` is the server's half) |
 
 Each tool's `VENDORED.md` says where its copies came from and how they've drifted.
