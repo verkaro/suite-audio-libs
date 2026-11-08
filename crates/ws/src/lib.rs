@@ -1,12 +1,16 @@
-//! A small server-side WebSocket (RFC 6455) over `std::net`: the handshake, text and binary
-//! messages, fragments, ping and pong, and close. No extensions.
+//! A small WebSocket (RFC 6455) over `std::net`: the handshake, text and binary messages,
+//! fragments, ping and pong, and close. No extensions.
 //!
-//! Moved into the suite from place's `place-ws`, itself Dexter's by way of the mixer
-//! (`VENDORED.md`).
+//! The server's half is here at the top. Moved into the suite from place's `place-ws`, itself
+//! Dexter's by way of the mixer (`VENDORED.md`). The HTTP request is read by the caller (a
+//! tool's server), which hands over its method, its headers and the connection. [`upgrade`]
+//! answers the handshake and splits the connection into a [`Reader`], for one thread, and a
+//! [`Writer`] that any thread can use.
 //!
-//! The HTTP request is read by the caller (a tool's server), which hands over its method, its
-//! headers and the connection. [`upgrade`] answers the handshake and splits the connection into
-//! a [`Reader`], for one thread, and a [`Writer`] that any thread can use.
+//! The client's half is [`client`]: a panel's way to a tool's server (from dexter-kms,
+//! 2026-11-07).
+
+pub mod client;
 
 use std::io::{self, BufReader, Read, Write};
 use std::net::TcpStream;

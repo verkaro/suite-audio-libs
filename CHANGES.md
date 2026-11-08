@@ -6,6 +6,10 @@ the git log.
 
 ## 2026-11-07
 
+- `as-ws`: `client`, the client's half (`connect`, `Reader::read`, `Writer::send_text`,
+  `send_binary`, `close`), from dexter-kms. Reading waits for ever unless
+  `Reader::set_read_timeout` says otherwise. Nothing to do for a server; a panel uses it in
+  place of a copy of its own.
 - `as-http`: `read_body(r, &mut req, max)`, a body read after `read_head` up to a cap of the
   caller's. `read_request` is `read_head` and `read_body` at `MAX_BODY`, as before. Nothing to do.
 - `as-ws`: `tests/echo.rs` from Dexter (an echo server over a real socket). Nothing changed in

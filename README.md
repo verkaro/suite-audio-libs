@@ -50,6 +50,8 @@ tool's.
 - `as-http`, `as-ws`, `as-meter`, `as-page-kit`: a tool's page: just enough HTTP, the
   WebSocket, the LED ladders' ballistics, and the skins and drawing as one script the page
   loads. `tools/cdp.py` drives a page in Falkon offscreen, for its tests.
+- `as-ws::client`: the WebSocket's other end, for a panel (or anything else) talking to a
+  tool's server: the handshake checked, fragments joined, pings answered, frames out masked.
 - `as-loudness`: integrated loudness (BS.1770-4, gated) at any rate, its per-channel mean
   beside the standard's sum, a linked group's, true peak, and the trim to a reference.
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every

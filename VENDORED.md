@@ -57,6 +57,12 @@ For BRR's step 6, with `git show`:
   page to use them.
 - From Dexter at `7ae6dbd` (2026-11-07, Dexter's step 2): `crates/ws/tests/echo.rs`, now
   `as-ws`'s `tests/echo.rs`, as it was but for `dexter_ws` renamed `as_ws`.
+- From dexter-kms at `b7ca423` (2026-11-07, for Tape's panel): `src/ws.rs`, the client, now
+  `as-ws`'s `client` module. Changed on the way: `next` is `read`; the handshake's answer is
+  checked and must come within 5 s; the key and the masks differ each time, where they were
+  fixed; reading waits for ever unless the reader is given a timeout (dexter-kms's 5 s is now
+  its own); a close is answered, and an opcode out of place is an error, where it was taken as
+  a message; `send_binary` and `close` added. Its tests written here.
 
 Written here, not moved:
 
