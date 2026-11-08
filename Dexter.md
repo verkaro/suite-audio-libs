@@ -159,5 +159,86 @@ have moved on with it. Before deciding anything, survey it in a session from thi
 page-kit has that Dexter's page lacks, and the reverse. Dexter's browser tests and the Nexus 7's
 old Chromium (`the_remote_needs_no_new_css`) are the constraints.
 
-**Not on this path:** Dexter's JACK client (the engine's, not the keeper), the bay crates, and
-anything of dexter-mixer's.
+**Not on this path:** Dexter's JACK client (the engine's, not the keeper), and anything of
+dexter-mixer's. The bay crates were here too, until steps 7 to 10.
+
+## Steps 7 to 10: JACK, the interface and the bay, as libraries (Warren, 2026-11-07)
+
+Added 2026-11-07, after step 5, in the family's session. JACK control and the patch bay become a
+tool of their own, **jackbay** (PLAN.md, Settled 5), and a Focusrite app may follow. Both need
+what Dexter has: starting jackd, the rigs, the interface, the bay. That code reaches them only
+through the suite, so Dexter makes it into libraries first and uses them itself. There's never
+a second copy, and the libraries are proved by Dexter's tests and the real rig before jackbay
+leans on them. jackbay starts once step 10 is done.
+
+They start after step 5 and don't wait for step 6. Each runs as "How every step after runs"
+says, with one difference: the crate is *moved into* the suite from Dexter (the suite's
+`VENDORED.md` saying so, as for place's and scape's), rather than Dexter's copy being swapped for
+one already there. Dexter's engine (`crates/jack`'s `rt.rs`, `engine.rs`, `feeder.rs`,
+`client.rs`, `measure`) and its own JACK client stay Dexter's. The crate names below are
+proposals: the session settles them.
+
+Found when this was written (Dexter's `main` at `26be596`):
+
+| Dexter's | What ties it to Dexter | Proposed |
+|---|---|---|
+| `crates/focusrite` | Nothing: no dependencies of Dexter's | `as-focusrite` |
+| `crates/jack`'s `jackd.rs` | Starts jackd from a project's settings | `as-jackd` |
+| `crates/bay-core`, `crates/bay-jack`, `crates/jack`'s `graph.rs`, `crates/patch` | `patch` uses `dexter-protocol` and `dexter-eventlog`; the bay was vendored from bay-rs (`crates/bay-core/VENDORED.md`) | `as-bay` (the core and JACK's backend), the session perhaps beside it |
+| `crates/project`'s `rig.rs` | A rig is half JACK's (the interface, how JACK runs, the setup commands) and half the deck's (the tracks, the monitor, the loopback, the latencies) | the JACK half only, its name to settle |
+
+## Step 7: focusrite (the move proved)
+
+Self-contained, so anything that goes wrong is the move itself. Its tests take a fake card read
+from Warren's 18i20 (`testdata/18i20-gen3.txt`), which is a list of controls, not a recording.
+
+> Read ../suite-audio-libs/Dexter.md, steps 7 to 10, then do step 7: move crates/focusrite into
+> the suite as as-focusrite, and Dexter onto it, as a PR.
+
+**Yours:** the page's INTERFACE tab and the monitor mixes on the 18i20 and the Clarett 2Pre, as
+before.
+
+## Step 8: jackd
+
+Starting, watching, finding and stopping jackd, found by `JACK_DEFAULT_SERVER`, and the
+dummy-server harness the tests use. What it's started *with* comes from the caller, not from a
+Dexter project, so the session first separates the settings from `dexter.yaml`.
+
+> Read ../suite-audio-libs/Dexter.md, step 8. Propose how jackd.rs stops depending on Dexter's
+> project before moving it, then move it into the suite as as-jackd, and Dexter onto it, as a PR.
+
+**What proves it, on top of the usual:** `DEXTER_JACK_TEST=1` and the suite's
+`SUITE_JACK_TEST=1` both pass, on dummy servers of their own.
+
+**Yours:** start and stop JACK from the page with each rig, and `dexter --stop` leaves no jackd
+behind.
+
+## Step 9: the bay
+
+The bay's core and its JACK backend (`bay-core`, `bay-jack`, `graph.rs`) are the library.
+`crates/patch`'s session (the names, bundles, undo, a view and staged edits a client) is what
+jackbay needs most, but it speaks Dexter's protocol and log: the session proposes where it
+divides, and what stays Dexter's. bay-rs is Warren's own: the move is recorded in the suite's
+`VENDORED.md` with bay-rs's commit (`af5c0c7`), and from then on the bay is changed in the suite.
+
+> Read ../suite-audio-libs/Dexter.md, step 9. Propose how the bay divides between the suite and
+> Dexter before moving anything, then do it as a PR.
+
+**What proves it, on top of the usual:** `BAY_JACK_TEST=1` (as the suite names it) and the
+golden test pass as they are; the page protocol doesn't change.
+
+**Yours:** the PATCH tab on the real graph: a connection made, staged, applied and undone.
+
+## Step 10: the rig's JACK half
+
+Last, since it needs a decision first: what a rig is outside Dexter. jackbay needs the
+interface, how JACK runs it and the setup commands; the tracks, monitor, loopback and
+latencies stay the deck's. Old rig files must still read.
+
+> Read ../suite-audio-libs/Dexter.md, step 10. Propose how a rig divides, with how old rig files
+> keep reading, before moving anything; then do it as a PR.
+
+**Yours:** each of your rigs opens, starts JACK, and a new project made from one is as before.
+
+**Done:** Dexter's `CLAUDE.md` names these as the suite's, `PLAN.md`'s row for Dexter lists them,
+and jackbay can start.

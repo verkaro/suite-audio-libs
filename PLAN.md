@@ -79,13 +79,17 @@ Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `
    place's `measure` crate and `numbers.rs` come into the suite first (`as-measure`, and the
    numbers into `as-ir`); `as-conv` is here already. What place keeps when they leave is for
    place's next session to settle with Warren.
-5. **JACK and the patch bay are a tool of their own,** `dexter-jack` (Warren, 2026-11-07):
-   starting and stopping jackd, the rigs, finding the interfaces, and the bay. Dexter keeps its
-   own, as JACK is part of the deck, but both run on the same suite crates, which come out of
-   Dexter (`crates/jack`'s `jackd.rs`, the rigs, `focusrite`, `bay-core`, `bay-jack`, `patch`).
-   No other tool controls JACK.
+5. **JACK and the patch bay are a tool of their own,** **jackbay** (Warren, 2026-11-07; named
+   so, not `dexter-jack`, which is Dexter's own JACK crate): starting and stopping jackd, the
+   rigs, finding the interfaces, and the bay. Dexter keeps its own, as JACK is part of the deck,
+   but both run on the same suite crates. **Dexter makes them first and uses them itself**
+   (`Dexter.md`, steps 7 to 10: `focusrite`, `jackd.rs`, the bay, the rig's JACK half), so
+   there's never a second copy; jackbay starts once they're done. A Focusrite app of its own
+   may follow on `as-focusrite`. No other tool controls JACK.
+   - jackbay has a panel, and it's the one muntin sends you to when JACK is down, so it runs
+     without JACK: it's what starts it.
 6. **KMS panels** (Warren, 2026-11-07): place and scape stay on their pages, with no KMS panel.
-   BRR, foley, Tape, ducky, `dexter-jack` and the rooms tool are candidates for one: a panel a
+   BRR, foley, Tape, ducky, jackbay and the rooms tool are candidates for one: a panel a
    tool, run from one frame (see "Panels for the rest of the family" below).
 
 ## Where each tool stands (2026-11-07)
@@ -144,8 +148,8 @@ move, never copied from one tool to another.
   Place's `core/src/distance.rs` is a copy of it.
 - **Measuring a room and its numbers**, from place's `measure` crate and `numbers.rs`, for the
   rooms tool (Settled, 4).
-- **JACK control, the rigs, the interfaces and the bay**, out of Dexter, for `dexter-jack`
-  (Settled, 5). In Dexter's own steps, after `Dexter.md`'s, at Dexter's pace.
+- **JACK control, the rigs, the interfaces and the bay**, out of Dexter, for jackbay
+  (Settled, 5): `Dexter.md`'s steps 7 to 10, after step 5, at Dexter's pace.
 - **`noise`**, a recording's floor matched, from scape's `core/src/noise.rs`, when a second tool
   wants it.
 
@@ -173,7 +177,7 @@ Starting a tool when it's needed, as a sketch to settle when the frame is built:
   panel's binary, and whether it needs JACK. It asks the port whether the server is up.
 - Choosing a tool that isn't running starts its server, headless, connected to nothing, then
   its panel once the server answers.
-- A tool that needs JACK, with JACK down, opens `dexter-jack`'s panel first. The frame itself
+- A tool that needs JACK, with JACK down, opens jackbay's panel first. The frame itself
   never starts jackd (the baseline's rule).
 - Leaving a panel leaves its tool running, so what's playing keeps playing. Stopping a tool is
   its own choice in the frame, asked first.
