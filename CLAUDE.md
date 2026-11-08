@@ -51,5 +51,6 @@ Building needs JACK2's dev package (`libjack-jackd2-dev`).
   to it, so a fresh clone of the tool builds. Cargo fetches the pinned commit before applying
   the local patch.
 - **Watch for breakage:** changing a public interface breaks every tool patched to this folder.
-  Run the affected tools' tests too (`../brr`, `../dexter-tape`, `../dexter-ducky`, and Dexter
-  as it moves in), or note the change for their next pin bump.
+  Run the affected tools' tests too (`../brr`, `../dexter-tape`, `../dexter-ducky`,
+  `../dexter-kms` for `as-ws`'s client, and Dexter as it moves in), or note the change for
+  their next pin bump.
