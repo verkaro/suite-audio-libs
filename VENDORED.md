@@ -55,6 +55,8 @@ For BRR's step 6, with `git show`:
   lamps and text), now `as-page-kit`'s `page-kit.js`: the page's state taken out of them (taps
   land in `HITS`, the skin in `SKIN`), and `kitCanvas`, `chooseSkin` and `savedSkin` for a
   page to use them.
+- From Dexter at `7ae6dbd` (2026-11-07, Dexter's step 2): `crates/ws/tests/echo.rs`, now
+  `as-ws`'s `tests/echo.rs`, as it was but for `dexter_ws` renamed `as_ws`.
 
 Written here, not moved:
 
