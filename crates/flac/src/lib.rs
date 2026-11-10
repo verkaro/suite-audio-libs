@@ -8,8 +8,11 @@
 //!
 //! Read with [`read::read`] (or exactly, as `f64`, with [`read::read_f64`]), through `claxon`;
 //! its header alone with [`read::info`]; a frame at a time, exactly, with [`read::Frames`].
+//!
+//! Its tags read, and rewritten without risking the audio, with [`tags`].
 
 pub mod read;
+pub mod tags;
 pub use read::{Flac, Flac64, Frames, Info, Mark, info, read, read_f64};
 
 /// Samples a frame.

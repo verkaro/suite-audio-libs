@@ -61,6 +61,8 @@ opt-level = 3
 opt-level = 3
 [profile.dev.package.as-conv]
 opt-level = 3
+[profile.dev.package.as-ir]
+opt-level = 3
 [profile.dev.package.realfft]
 opt-level = 3
 [profile.dev.package.rustfft]

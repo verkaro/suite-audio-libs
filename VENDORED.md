@@ -116,3 +116,19 @@ named in its header:
 - `crates/jack-capture` (`as-jack-capture`, 2026-11-04, for dexter-like110): a JACK client of two
   inputs, a ring read off JACK's thread, its connections kept, reattaching to jackd with a new
   ring (said as a gap). Written fresh, opening and losing the client after `as-jack-keeper`.
+
+From `dexter-foley` at `9e1ea2226362e43f786c1d781d510e536fccb0a2` (2026-11-09), with `git
+archive`, for dexter-irma's step 1:
+
+- `crates/tags` (`foley-tags`), now `as_flac::tags` (`crates/flac/src/tags`), with its tests.
+  Changed: the journal's JSON is written and read by its own code, where foley used
+  `serde_json`, and a line is byte for byte what `serde_json` wrote; setting `SERIAL` is no
+  longer refused here, since that rule is the tool's; the file written beside the old is
+  `.NAME.tags-…`, where it was `.NAME.foley-…`.
+
+From `dexter-place` at `784f1ba6ab09b492e68bde1aca56f5b724189664` (2026-11-09), with `git
+show`, for dexter-irma's step 1:
+
+- `crates/core/src/numbers.rs`, now `as_ir::numbers` (`crates/ir/src/numbers`): a sound is its
+  channels, `&[Vec<f32>]`, where place had its `Sound`, and its gain is `as_ir::unit_energy`; as
+  it was otherwise. Its tests, from place's `crates/library/src/tests.rs`.

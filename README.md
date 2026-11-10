@@ -27,6 +27,8 @@ tool's.
 - `as-wav`: WAV written crash-safe (24-bit, 16-bit dithered, float) and read, exactly into
   `f64` if asked (64-bit float too), its other chunks kept and written back, BWF's `bext`.
 - `as-flac`: FLAC written, 24-bit, with no dependencies; and read, or its header alone, through `claxon`.
+  `tags`: its Vorbis comments read, and rewritten without risking the audio (a new file, checked
+  against the old, journalled, renamed over).
 - `as-tar`: a tar written and read as it streams (ustar, with PAX for long paths and big
   files), for packing a tool's work.
 - `as-resample`: a whole sound converted to another rate, as sox's `rate -v`, its taps the
@@ -38,7 +40,7 @@ tool's.
 - `as-tilt`: TILT, one slope in dB an octave through 1 kHz.
 - `as-conv`: zero-latency convolution, the same at any block size.
 - `as-ir`: an IR made ready: true stereo folded, unit energy, its echoes without its direct
-  sound.
+  sound. `numbers`: what it measures as, after ISO 3382-1 (RT, EDT, clarity, by octave).
 - `as-opening`: an opening between the outside and a room: its stops, its wall, its routes.
 - `as-jack-keeper`: a JACK client of two outputs, its player on JACK's thread, its
   connections kept, reattaching to jackd; and `--sim`.

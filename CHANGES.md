@@ -6,6 +6,14 @@ the git log.
 
 ## 2026-11-09
 
+- `as-flac`: `tags`, a FLAC's Vorbis comments read (`tags::read`), set safely (`tags::set`,
+  `set_as`: a new file, every other block and every audio byte checked against the old,
+  journalled, renamed over) and put on a stream in memory (`tags::with_tags`), from dexter-foley's
+  `foley-tags`. No field is refused by name: foley, when it moves, keeps its own check that
+  `SERIAL` is never set. The journal's lines are as foley's. Nothing to do until a tool takes it.
+- `as-ir`: `numbers`, an IR's numbers after ISO 3382-1 (`numbers::describe`, `span`, `onset`,
+  `weight`, `BANDS`), from dexter-place's `core/src/numbers.rs`. It takes `&[Vec<f32>]`. `as-ir`
+  now depends on `realfft`. Nothing to do until a tool takes it.
 - `as-page-kit`: `kitBar`, the command bar (`STYLE.md`): `ask`, `offer`, `type` (a line, with a
   `check` that keeps it open), `choose`, and `screen` for the screen's levels. `key()` now keeps its
   name and section in `HITS`, and a disabled key lands in `HITS` too, with an empty rect, so the bar

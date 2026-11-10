@@ -140,11 +140,12 @@ move, never copied from one tool to another.
   (`as-resample` is for fixed ratios of whole-number rates; this isn't.)
 - **FLAC tags** (Vorbis comments rewritten without risking the audio), from foley's
   `crates/tags`, into `as-flac`. Place asked for it, and Dexter's DATE_RECORDED on export
-  needs it.
+  needs it. **Here, 2026-11-09** (`as_flac::tags`), brought by dexter-irma.
 - **WALK**, the distance law (quieter, duller, to the side), from scape's `core/src/walk.rs`.
   Place's `core/src/distance.rs` is a copy of it.
 - **Measuring a room and its numbers**, from place's `measure` crate and `numbers.rs`, for the
-  rooms tool (Settled, 4).
+  rooms tool (Settled, 4). **The numbers are here, 2026-11-09** (`as_ir::numbers`), brought by
+  dexter-irma. Measuring stays in place for now (Warren, 2026-11-09).
 - **JACK control, the rigs, the interfaces and the bay**, out of Dexter, for jackbay
   (Settled, 5): `Dexter.md`'s steps 7 to 10, after step 5, at Dexter's pace.
 - **`noise`**, a recording's floor matched, from scape's `core/src/noise.rs`, when a second tool

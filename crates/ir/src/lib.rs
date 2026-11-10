@@ -11,7 +11,9 @@
 //! - [`echoes`]: the IR from its onset, its direct sound left out (the first 2.5 ms, then faded
 //!   in over a millisecond), for a recording that is its own direct sound: sent through the IR's
 //!   too, it would reach the output twice, a little apart, and comb.
+//! - [`numbers`]: what it measures as, after ISO 3382-1: RT, EDT, clarity, by octave.
 
+pub mod numbers;
 #[cfg(test)]
 mod tests;
 
