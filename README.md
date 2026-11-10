@@ -52,6 +52,9 @@ tool's.
 - `as-http`, `as-ws`, `as-meter`, `as-page-kit`: a tool's page: just enough HTTP, the
   WebSocket, the LED ladders' ballistics, and the skins and drawing as one script the page
   loads. `tools/cdp.py` drives a page in Falkon offscreen, for its tests.
+- `as-serve`: a tool's server over the two: the listener, each connection's checks, the WebSocket
+  at `/ws`, the clients and what's sent to them, a tick. A tool brings its hello, its commands and
+  the words of a refusal.
 - `as-ws::client`: the WebSocket's other end, for a panel (or anything else) talking to a
   tool's server: the handshake checked, fragments joined, pings answered, frames out masked.
 - `as-loudness`: integrated loudness (BS.1770-4, gated) at any rate, its per-channel mean

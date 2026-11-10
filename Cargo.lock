@@ -139,6 +139,14 @@ name = "as-seam"
 version = "0.1.0"
 
 [[package]]
+name = "as-serve"
+version = "0.1.0"
+dependencies = [
+ "as-http",
+ "as-ws",
+]
+
+[[package]]
 name = "as-sfz"
 version = "0.1.0"
 

@@ -6,6 +6,12 @@ the git log.
 
 ## 2026-11-09
 
+- `as-serve`, a new crate: a tool's server over `as-http` and `as-ws`. `Server::serve` runs the
+  listener, the checks on each connection (`same_site`, `GET` and `HEAD` only), the WebSocket at
+  `/ws` and a tick; `Clients::send` and `send_to` reach the clients; a tool implements `Tool`
+  (`hello`, `command`, `refusal`, and `tick`, `get`, `note` if it wants them). A client whose
+  queue of 256 fills is closed. Nothing to do for a tool that has its own. BRR, Tape and ducky
+  can each replace theirs with it, in their own sessions (`../HANDOFFS.md`).
 - `as-flac`: `tags`, a FLAC's Vorbis comments read (`tags::read`), set safely (`tags::set`,
   `set_as`: a new file, every other block and every audio byte checked against the old,
   journalled, renamed over) and put on a stream in memory (`tags::with_tags`), from dexter-foley's

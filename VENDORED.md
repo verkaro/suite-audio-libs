@@ -132,3 +132,11 @@ show`, for dexter-irma's step 1:
 - `crates/core/src/numbers.rs`, now `as_ir::numbers` (`crates/ir/src/numbers`): a sound is its
   channels, `&[Vec<f32>]`, where place had its `Sound`, and its gain is `as_ir::unit_energy`; as
   it was otherwise. Its tests, from place's `crates/library/src/tests.rs`.
+
+Written here, not moved:
+
+- `crates/serve` (`as-serve`, 2026-11-09, for dexter-irma): a tool's server over `as-http` and
+  `as-ws`. Written fresh, after the shape BRR's, Tape's and ducky's servers share, each of which
+  holds its own until it moves. Two things differ from theirs: a client that can't take what
+  it's sent is closed, where theirs dropped the message and left it with part of the state;
+  and the order of the tool's lock and the clients' is fixed by how a client is admitted.

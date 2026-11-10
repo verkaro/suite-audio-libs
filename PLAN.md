@@ -60,6 +60,9 @@ All eight are here now. Then the DSP, as BRR and the others need it:
 - `onsets`: rigcheck's correlation;
 - `draw`: seeded variation (here).
 
+And `serve` (here, 2026-11-09, from dexter-irma): the server every tool with a page or a panel
+writes, over `http` and `ws`. BRR, Tape and ducky hold their own until they move onto it.
+
 Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `provenance`,
 `defects`, `bands`, `speech`, `transport`; and `jack-capture`, `pitch`, `sfz`, `rawmidi`, `tar`,
 `opening`. Where each came from is `VENDORED.md`.

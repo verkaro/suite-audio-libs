@@ -33,6 +33,7 @@ as-tar = { path = "crates/tar" }
 as-seam = { path = "crates/seam" }
 as-sfz = { path = "crates/sfz" }
 as-snapshot = { path = "crates/snapshot" }
+as-serve = { path = "crates/serve" }
 as-speech = { path = "crates/speech" }
 as-tilt = { path = "crates/tilt" }
 as-transport = { path = "crates/transport" }
