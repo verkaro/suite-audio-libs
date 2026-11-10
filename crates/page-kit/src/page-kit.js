@@ -327,6 +327,8 @@ const kitBar = {
     const b = this.s, k = e.key;
     if (!b) return false;
     if (KIT_NOT_KEYS.test(k)) return true;
+    // A held key's repeat isn't the next key: it would close what it just opened.
+    if (e.repeat && (b.use === "ask" || b.use === "offer")) return true;
     if (b.use === "ask") {
       this.s = null;
       if (k === "y") b.yes();
@@ -347,8 +349,7 @@ const kitBar = {
     }
     if (k === "Tab") {
       const n = this.matches().length;
-      if (n) b.sel = (b.sel + (e.shiftKey ? n - 1 : 1)) % n;
-      if (b.sel < 0) b.sel = 0;
+      if (n) b.sel = b.sel < 0 ? (e.shiftKey ? n - 1 : 0) : (b.sel + (e.shiftKey ? n - 1 : 1)) % n;
       return true;
     }
     // Backspace on an empty bar does nothing, so a held one can't run on into the tool's.
