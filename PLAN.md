@@ -196,7 +196,8 @@ to prove first, on a real screen (Warren's gate). Each new panel is added to it 
 
 What's wanted is in `../STYLE.md`: "Keys" (the common keys, and how they change) and "The command
 bar". This is how it gets built, and in what order. Items 1 to 4 below are built, and BRR is on them
-(2026-11-09, `661ffbf`). Items 5 and 6 aren't.
+(2026-11-09, `661ffbf`). Item 5 is built (2026-11-10, `suite-light-panel` `3e35a39`), and no panel
+is on it yet. Item 6 isn't.
 
 ### What's built, and where
 
@@ -221,7 +222,12 @@ bar". This is how it gets built, and in what order. Items 1 to 4 below are built
      column heads and counters, so it can't be the section).
    - A tool adds levels of its own for what has no place on the screen.
 5. **The panel's half,** in `suite-light-panel`: the table held by value and compared to
-   `page-kit.js` by a test, as `lp_paint::dark` is, and the bar drawn with `Pen`.
+   `page-kit.js` by a test, as `lp_paint::dark` is, and the bar drawn with `Pen`. **Built
+   2026-11-10,** brought by dexter-irma: `lp_keys::common` (the table, `check`, a key named as a
+   page names it), `lp_panel::bar::Bar` and `lp_panel::keys::keys_over`. A panel reads its
+   `keys.json` itself and hands the suite the entries. In place of the page's scan for key
+   comparisons, a panel's test presses every key there is (`lp_keys::common::every`) and fails on
+   one that does something and isn't listed.
 6. **The terminal's half,** for `--tty`: the same bar on the bottom row, in ASCII.
 
 Every change to the kit gets its line in `CHANGES.md`. A key that changes reaches a tool only when
@@ -236,9 +242,10 @@ is built by the first tool that needs it.
 |---|---|---|---|
 | 1 | BRR | The table, the declared list, the test and the bar (items 1 to 4); the note on a mark | On the kit, has vi's keys already, a time line to prove the note on, and its pace doesn't stop between steps. **Done 2026-11-09** (`../Brr.md`). |
 | 2 | ducky | Takes them up, with marks in time from the start | Early, so a change is cheap. |
-| 3 | Tape | The panel's half (item 5) | Has a panel, and its page has few keys of its own. |
-| 4 | foley's panel | Takes up the panel's half | When Warren wants it. Needs 70s in `lp-paint` first (`../Foley.md`). |
-| 5 | Dexter, then dexter-kms | The terminal's half (item 6) | Last: the recorder in use, one step at a time with Warren's go-ahead, and after its move onto the suite. |
+| 3 | dexter-irma | The panel's half (item 5), with its panel | Ahead of Tape (Warren, 2026-11-09): a new panel, with a list, a search and fields to prove the bar on. **Built 2026-11-10;** irma's panel takes it up next. |
+| 4 | Tape | Takes up the panel's half | Has a panel, and its page has few keys of its own. |
+| 5 | foley's panel | Takes up the panel's half | When Warren wants it. Needs 70s in `lp-paint` first (`../Foley.md`). |
+| 6 | Dexter, then dexter-kms | The terminal's half (item 6) | Last: the recorder in use, one step at a time with Warren's go-ahead, and after its move onto the suite. |
 | | place, scape | Nothing yet | Until `../NOTES.md`'s question of whether they stay is settled. |
 
 **Warren's gates:** the bar and the keys on a real screen. The two drafted details in "The command
