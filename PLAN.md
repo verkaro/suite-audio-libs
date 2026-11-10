@@ -239,4 +239,5 @@ is built by the first tool that needs it.
 
 **Warren's gates:** the bar and the keys on a real screen. The two drafted details in "The command
 bar", ignoring a click just after a level opens and how many levels, are settled by trying them.
-Tried on BRR, 2026-11-09, they stand as built.
+Both are still drafts, not yet Warren's decision: the first is in use on BRR, and the second is
+guidance only, not enforced by the kit.
