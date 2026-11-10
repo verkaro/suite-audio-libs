@@ -212,7 +212,8 @@ bar". Nothing here is built. This is how it gets built, and in what order.
    greyed options, levels, Esc up a level, a note on a mark. It's drawn along the footer and takes
    every key while it's open.
    - A level comes from the screen first, so `key()` keeps its label beside its place and id in
-     `HITS`, and `label()` gives the section it falls in.
+     `HITS`, and `kitSection()` says the section it falls in (BRR, 2026-11-09: `label()` is also
+     column heads and counters, so it can't be the section).
    - A tool adds levels of its own for what has no place on the screen.
 5. **The panel's half,** in `suite-light-panel`: the table held by value and compared to
    `page-kit.js` by a test, as `lp_paint::dark` is, and the bar drawn with `Pen`.

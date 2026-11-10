@@ -209,14 +209,24 @@ function lamp(cx, cy, r, color) {
 
 // A tappable region, the last added on top.
 function hit(rect, id) { HITS.push({ rect, id }); }
-// A key: lit (a color: filled with it), or plain.
+// The section the keys drawn next fall in, for the bar's levels; null for none.
+let KIT_SECTION = null;
+function kitSection(name) { KIT_SECTION = name; }
+// What the bar calls a key: its label without what's only drawn (arrows, "(Enter)").
+function kitBarName(label) { return label.replace(/\(.*?\)/g, "").replace(/[^\p{L}\p{N} ]/gu, "").trim().replace(/\s+/g, " ").toLowerCase(); }
+// A key: lit (a color: filled with it), or plain. o.name is what the bar calls it, for a key whose
+// label isn't a word; o.bar false leaves it out of the bar. A key disabled still lands in HITS,
+// empty, so the bar shows it dimmed; a pointer can't reach it.
 function key(r, label, id, o) {
   const opt = o || {};
   const lit = opt.lit;
   rrect(r, 3, lit || C.btn, lit || C.btnEdge);
   const color = lit ? C.onRed : onKey(opt.disabled ? C.faint : opt.color || C.text);
   text(label, r.x + r.w / 2, r.y + r.h / 2 + 0.5, opt.font || "700 10px sans-serif", color, "center");
-  if (id && !opt.disabled) hit(r, id);
+  if (id) {
+    hit(opt.disabled ? { x: r.x, y: r.y, w: 0, h: 0 } : r, id);
+    Object.assign(HITS[HITS.length - 1], { name: opt.name || kitBarName(label), section: KIT_SECTION, disabled: !!opt.disabled, bar: opt.bar !== false });
+  }
 }
 // `?`: a tool's keys (its keys.json) for the screens named, in that order, in the box r.
 // The page closes it; a click or Esc is the usual way.
@@ -241,6 +251,172 @@ function kitKeysOver(list, screens, r) {
     next();
   }
 }
+// ---------- the command bar ----------
+// STYLE.md, "The command bar": vi's command line, along the footer, in place of a pop-up. It takes
+// every key while it's open. The page calls kitBar.key first thing in its key handler, kitBar.tap
+// for a "bar:" hit, kitBar.letGo for a click anywhere else, and kitBar.draw last.
+//
+// An option is { name, faint (dimmed: refused as a mouse would be), act (a function), level (the
+// next level's options, or a function giving them), ask (words: asked first, y does it) }.
+const KIT_NOT_KEYS = /^(Shift|Control|Alt|AltGraph|Meta|CapsLock|NumLock|ScrollLock|Dead|Unidentified)$/;
+const kitBar = {
+  s: null,
+  isOpen() { return this.s !== null; },
+  use() { return this.s && this.s.use; },
+  close() { this.s = null; },
+  // One key: y does it, anything else lets it go.
+  ask(said, yes) { this.s = { use: "ask", said, yes }; },
+  // The very next key decides, with no timer: `letter` takes it up, Esc only closes it, and any
+  // other key goes on and does what it does. `said` may be a function, for what's still coming.
+  offer(said, letter, word, take) { this.s = { use: "offer", said, letter, word, take }; },
+  // A line typed. check(value) is what's wrong with it, or null; while wrong the bar stays open.
+  // It never closes by itself.
+  type(said, value, done, check) { this.s = { use: "type", said, value, done, check, wrong: null }; },
+  // A choice or a command: type to narrow, Tab the next, Enter does it, Esc up a level.
+  choose(options) { this.s = { use: "choose", levels: [options], path: [], typed: "", sel: -1, wrong: null, opened: performance.now() }; },
+  // The screen's levels, as the keys drawn last time: a section is a level and its keys the options
+  // in it; a key in no section is an option at the top. `extra`: levels of the tool's own, after.
+  // Called between draws, so HITS is the screen as it stands.
+  screen(tap, extra) {
+    const top = [], levels = new Map();
+    for (const h of HITS) {
+      if (!h.bar || !h.name) continue;
+      const o = { name: h.name, faint: h.disabled, act: () => tap(h.id) };
+      if (!h.section) { top.push(o); continue; }
+      if (!levels.has(h.section)) { const level = []; levels.set(h.section, level); top.push({ name: h.section, level }); }
+      levels.get(h.section).push(o);
+    }
+    return top.concat(extra || []);
+  },
+  matches() {
+    const b = this.s, level = b.levels[b.levels.length - 1], t = b.typed.toLowerCase();
+    return t ? level.filter((o) => o.name.startsWith(t)) : level;
+  },
+  take(o) {
+    const b = this.s;
+    if (o.faint) { b.wrong = o.name + ": not now"; return; }
+    if (o.level) {
+      b.levels.push(typeof o.level === "function" ? o.level() : o.level);
+      b.path.push(o.name); b.typed = ""; b.sel = -1; b.wrong = null; b.opened = performance.now();
+      return;
+    }
+    if (o.ask) { this.ask(o.ask, o.act); return; }
+    this.s = null;
+    o.act();
+  },
+  enter() {
+    const b = this.s;
+    if (b.use === "type") {
+      const why = b.check ? b.check(b.value) : null;
+      if (why) { b.wrong = why; return; }
+      this.s = null;
+      b.done(b.value);
+      return;
+    }
+    const m = this.matches();
+    if (b.typed && !m.length) { b.wrong = "no " + b.typed + " here"; return; }
+    if (b.typed || b.sel >= 0) this.take(m[Math.max(0, b.sel)]);
+  },
+  escape() {
+    const b = this.s;
+    if (b.use !== "choose" || !b.path.length) { this.s = null; return; }
+    b.levels.pop(); b.path.pop(); b.typed = ""; b.sel = -1; b.wrong = null; b.opened = performance.now();
+  },
+  // True when the bar took the key: only an offer lets one go on.
+  key(e) {
+    const b = this.s, k = e.key;
+    if (!b) return false;
+    if (KIT_NOT_KEYS.test(k)) return true;
+    if (b.use === "ask") {
+      this.s = null;
+      if (k === "y") b.yes();
+      return true;
+    }
+    if (b.use === "offer") {
+      this.s = null;
+      if (k === b.letter) { b.take(); return true; }
+      return k === "Escape";
+    }
+    if (k === "Escape") { this.escape(); return true; }
+    if (k === "Enter") { this.enter(); return true; }
+    if (b.use === "type") {
+      if (k === "Backspace") b.value = b.value.slice(0, -1);
+      else if (k.length === 1) b.value += k;
+      b.wrong = null;
+      return true;
+    }
+    if (k === "Tab") {
+      const n = this.matches().length;
+      if (n) b.sel = (b.sel + (e.shiftKey ? n - 1 : 1)) % n;
+      if (b.sel < 0) b.sel = 0;
+      return true;
+    }
+    // Backspace on an empty bar does nothing, so a held one can't run on into the tool's.
+    if (k === "Backspace") b.typed = b.typed.slice(0, -1);
+    else if (k.length === 1) b.typed += k;
+    else return true;
+    b.sel = -1; b.wrong = null;
+    return true;
+  },
+  // A click on the bar: true. For "bar:" hits. An option is ignored just after a level opens, so
+  // the second half of a double-click doesn't land on what's appeared under the pointer.
+  tap(id) {
+    const b = this.s, what = id.slice(4);
+    if (!b) return;
+    if (what === "yes") { this.s = null; b.yes(); }
+    else if (what === "offer") { this.s = null; b.take(); }
+    else if (what === "done") this.enter();
+    else if (what === "esc") this.escape();
+    else if (what.startsWith("opt:") && performance.now() - b.opened >= 300) this.take(b.levels[b.levels.length - 1][+what.slice(4)]);
+  },
+  // A click anywhere else: a line being typed stays; anything else is let go.
+  letGo() { if (this.s && this.s.use !== "type") this.s = null; },
+  // Along r. `idle`: what's said while it's closed.
+  draw(r, idle) {
+    const b = this.s, font = "700 13px monospace", y = r.y + r.h / 2 + 0.5, end = r.x + r.w - 10;
+    rrect(r, 3, C.well, b ? C.amber : C.rule);
+    if (!b) { if (idle) text(idle, r.x + 10, y, "700 11px sans-serif", C.faint); return; }
+    let x = r.x + 10;
+    const width = (str) => { ctx.font = font; return ctx.measureText(str).width; };
+    const say = (str, color, id) => {
+      const w = width(str);
+      text(str, x, y, font, color);
+      if (id) hit({ x: x - 5, y: r.y, w: w + 10, h: r.h }, id);
+      x += w;
+    };
+    const said = typeof b.said === "function" ? b.said() : b.said;
+    if (b.use === "ask") { say(said + "  ", C.text); say("y", C.amber, "bar:yes"); say("  anything else lets it go", C.faint); return; }
+    if (b.use === "offer") { say(said + "  ", C.text); say(b.letter + " " + b.word, C.dim, "bar:offer"); return; }
+    if (b.use === "type") {
+      say(said + "  ", C.dim); say(b.value + "▌", C.readout);
+      if (b.wrong) say("   " + b.wrong, C.red);
+      key({ x: r.x + r.w - 142, y: r.y + 2, w: 70, h: r.h - 4 }, "DONE", "bar:done", { bar: false });
+      key({ x: r.x + r.w - 68, y: r.y + 2, w: 64, h: r.h - 4 }, "CANCEL", "bar:esc", { bar: false });
+      return;
+    }
+    say(":" + b.path.join(" ") + (b.path.length ? " " : ""), C.amber);
+    if (b.typed) {
+      const m = this.matches()[Math.max(0, b.sel)];
+      say(b.typed + "▌", C.readout);
+      if (m) say(m.name.slice(b.typed.length), C.dim);
+      if (b.wrong) say("   " + b.wrong, C.red);
+      return;
+    }
+    // Greyed, and clickable; scrolled so the one Tab's on shows.
+    const level = b.levels[b.levels.length - 1], gap = 18;
+    if (!b.path.length) x += 8;
+    let first = 0;
+    const upTo = (a) => level.slice(a, b.sel + 1).reduce((t, o) => t + width(o.name) + gap, 0);
+    while (b.sel >= 0 && first < b.sel && x + upTo(first) > end - 20) first++;
+    for (let i = first; i < level.length; i++) {
+      if (x + width(level[i].name) > end - 20) { say("…", C.faint); break; }
+      say(level[i].name, i === b.sel ? C.text : level[i].faint ? C.faint : C.dim, "bar:opt:" + i);
+      x += gap;
+    }
+    if (b.wrong) { x += 4; say(b.wrong, C.red); }
+  },
+};
+
 // A ladder of 16 LEDs, bottom up.
 function ladder(r, m) {
   const gap = 2, h = (r.h - 15 * gap) / 16;

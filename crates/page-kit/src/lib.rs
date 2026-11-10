@@ -20,6 +20,8 @@ mod tests {
             "const HITS",
             "const KEYS",
             "function kitKeysOver",
+            "const kitBar",
+            "function kitSection",
         ] {
             assert!(super::JS.contains(f), "{f}");
         }
