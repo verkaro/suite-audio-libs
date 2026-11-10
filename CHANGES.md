@@ -4,6 +4,14 @@ What changed in an interface or a behaviour, newest first: a line for each, nami
 what a tool has to do about it. Read it before moving a pin. Begun 2026-11-07; for before that,
 the git log.
 
+## 2026-11-09
+
+- `as-page-kit`: `KEYS`, the family's common keys as data, and `check_keys(declared, pages)` for a
+  tool's tests: a common key meaning something else with no `differs`, and a key a page compares
+  against that isn't declared, both fail. `kitKeysOver(list, screens, r)` draws a tool's `?`. To take
+  it up: a `keys.json`, a test calling `check_keys`, and a `?` (`PLAN.md`, "The keys and the command
+  bar"). Nothing changes for a tool until then.
+
 ## 2026-11-07
 
 - `as-ws`: `client`, the client's half (`connect`, `Reader::read`, `Writer::send_text`,

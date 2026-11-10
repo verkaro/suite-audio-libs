@@ -4,6 +4,9 @@
 /// The script.
 pub const JS: &str = include_str!("page-kit.js");
 
+mod keys;
+pub use keys::check_keys;
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -15,6 +18,8 @@ mod tests {
             "function ladder(",
             "function readout(",
             "const HITS",
+            "const KEYS",
+            "function kitKeysOver",
         ] {
             assert!(super::JS.contains(f), "{f}");
         }

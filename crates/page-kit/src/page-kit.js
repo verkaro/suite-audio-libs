@@ -9,6 +9,38 @@ let ctx = null;
 const HITS = [];
 function kitCanvas(canvas) { ctx = canvas.getContext("2d"); }
 
+// ---------- the common keys ----------
+// The family's keys (STYLE.md, "Keys"), as data: each key by its KeyboardEvent.key, and what it
+// means. Not a handler: what s does is each tool's own. A tool lists its keys in keys.json, and
+// as_page_kit::check_keys holds that list to this table, which it reads from here as JSON.
+const KEYS = [
+  {"key": "?", "means": "the keys, over the screen"},
+  {"key": ":", "means": "the bar: what this screen does"},
+  {"key": "Escape", "means": "back out of what's open"},
+  {"key": " ", "means": "play and stop"},
+  {"key": "Tab", "means": "the next area or view"},
+  {"key": "ArrowLeft", "means": "along what's there"},
+  {"key": "ArrowRight", "means": "along what's there"},
+  {"key": "ArrowUp", "means": "along what's there"},
+  {"key": "ArrowDown", "means": "along what's there"},
+  {"key": "q", "means": "quit this client"},
+  {"key": "s", "means": "stop, then to the start"},
+  {"key": "j", "means": "the next"},
+  {"key": "k", "means": "the one before"},
+  {"key": "h", "means": "back, a nudge by ear"},
+  {"key": "l", "means": "on, a nudge by ear"},
+  {"key": "H", "means": "the first"},
+  {"key": "L", "means": "the last"},
+  {"key": "/", "means": "search"},
+  {"key": "x", "means": "take this away"},
+  {"key": "u", "means": "undo"},
+  {"key": "i", "means": "start changing this in place"},
+  {"key": "Enter", "means": "open or choose; keep what's typed"},
+  {"key": "y", "means": "yes to a question"}
+];
+const KEY_NAMES = { " ": "Space", Escape: "Esc", ArrowLeft: "←", ArrowRight: "→", ArrowUp: "↑", ArrowDown: "↓", Backspace: "⌫", PageUp: "PgUp", PageDown: "PgDn" };
+const keyName = (k) => KEY_NAMES[k] || k;
+
 // ---------- the skins ----------
 // dark; STUDIO, a 1970s multitrack's blue-grey with cream keys; 70s, a broadcast console's
 // olive with walnut cheeks; and a warm light one for daylight. key: on a skin with light keys,
@@ -185,6 +217,29 @@ function key(r, label, id, o) {
   const color = lit ? C.onRed : onKey(opt.disabled ? C.faint : opt.color || C.text);
   text(label, r.x + r.w / 2, r.y + r.h / 2 + 0.5, opt.font || "700 10px sans-serif", color, "center");
   if (id && !opt.disabled) hit(r, id);
+}
+// `?`: a tool's keys (its keys.json) for the screens named, in that order, in the box r.
+// The page closes it; a click or Esc is the usual way.
+function kitKeysOver(list, screens, r) {
+  const font = "700 11px sans-serif", col = (r.w - 32) / 3, line = 18;
+  ctx.fillStyle = C.shade; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  rrect(r, 6, C.overlay, C.rule);
+  text("THE KEYS", r.x + 16, r.y + 20, "800 13px sans-serif", C.text);
+  text("Esc or ? closes", r.x + r.w - 16, r.y + 20, "700 10px sans-serif", C.faint, "right");
+  let x = r.x + 16, y = r.y + 50;
+  const next = () => { y += line; if (y > r.y + r.h - 16) { y = r.y + 50; x += col; } };
+  for (const sc of screens) {
+    const here = list.filter((e) => e.screen === sc);
+    if (!here.length) continue;
+    text(sc.toUpperCase(), x, y, "800 10px sans-serif", C.amber);
+    next();
+    for (const e of here) {
+      text(keyName(e.key), x, y, "700 11px monospace", C.text);
+      text(fit(e.does + (e.note ? " · " + e.note : ""), col - 62, font), x + 48, y, font, C.dim);
+      next();
+    }
+    next();
+  }
 }
 // A ladder of 16 LEDs, bottom up.
 function ladder(r, m) {
