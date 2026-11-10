@@ -191,7 +191,8 @@ to prove first, on a real screen (Warren's gate). Each new panel is added to it 
 ## The keys and the command bar (Warren, 2026-11-09)
 
 What's wanted is in `../STYLE.md`: "Keys" (the common keys, and how they change) and "The command
-bar". Nothing here is built. This is how it gets built, and in what order.
+bar". This is how it gets built, and in what order. Items 1 to 4 below are built, and BRR is on them
+(2026-11-09, `661ffbf`). Items 5 and 6 aren't.
 
 ### What's built, and where
 
@@ -229,7 +230,7 @@ is built by the first tool that needs it.
 
 | | Tool | Brings | Why then |
 |---|---|---|---|
-| 1 | BRR | The table, the declared list, the test and the bar (items 1 to 4); the note on a mark | On the kit, has vi's keys already, a time line to prove the note on, and its pace doesn't stop between steps. `../Brr.md` has the handoff. |
+| 1 | BRR | The table, the declared list, the test and the bar (items 1 to 4); the note on a mark | On the kit, has vi's keys already, a time line to prove the note on, and its pace doesn't stop between steps. **Done 2026-11-09** (`../Brr.md`). |
 | 2 | ducky | Takes them up, with marks in time from the start | Early, so a change is cheap. |
 | 3 | Tape | The panel's half (item 5) | Has a panel, and its page has few keys of its own. |
 | 4 | foley's panel | Takes up the panel's half | When Warren wants it. Needs 70s in `lp-paint` first (`../Foley.md`). |
@@ -238,3 +239,4 @@ is built by the first tool that needs it.
 
 **Warren's gates:** the bar and the keys on a real screen. The two drafted details in "The command
 bar", ignoring a click just after a level opens and how many levels, are settled by trying them.
+Tried on BRR, 2026-11-09, they stand as built.
