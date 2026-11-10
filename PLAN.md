@@ -187,3 +187,53 @@ Starting a tool when it's needed, as a sketch to settle when the frame is built:
 stays tested as the family grows. Its first version runs the one panel there is, dexter-kms,
 and starts the deck's server when it's down; the screen handed over and taken back is the part
 to prove first, on a real screen (Warren's gate). Each new panel is added to it as it comes.
+
+## The keys and the command bar (Warren, 2026-11-09)
+
+What's wanted is in `../STYLE.md`: "Keys" (the common keys, and how they change) and "The command
+bar". Nothing here is built. This is how it gets built, and in what order.
+
+### What's built, and where
+
+1. **The table of common keys.** `KEYS` in `page-kit.js`, data only: each common key and what it
+   means. It's not a key handler. It starts with the keys already settled, and grows as where mute,
+   solo, loop, arm and record sit gets decided.
+2. **Each tool's declared list.** A tool says what its keys are, once, as data:
+   - `keys.json` in the tool, served to its page and included by its panel, so both read one list.
+   - An entry has the key, what it does, the screen it's on, and `differs`, the reason, when it
+     uses a common key for something else.
+   - **`?` and the command bar draw from it,** which is what keeps it honest: a key left out shows
+     up as help that's missing.
+3. **The test.** `as_page_kit::check_keys`, for a tool's own tests: it fails on a common key used
+   for something else with no `differs`, and on a page handling a key it hasn't declared. The second
+   is a scan for the page's literal key comparisons, so it's a net with holes in it. A session that
+   finds a better way says so.
+4. **The bar.** `kitBar` in `page-kit.js`: the two uses (a yes or no question, a choice or command),
+   greyed options, levels, Esc up a level, a note on a mark. It's drawn along the footer and takes
+   every key while it's open.
+   - A level comes from the screen first, so `key()` keeps its label beside its place and id in
+     `HITS`, and `label()` gives the section it falls in.
+   - A tool adds levels of its own for what has no place on the screen.
+5. **The panel's half,** in `suite-light-panel`: the table held by value and compared to
+   `page-kit.js` by a test, as `lp_paint::dark` is, and the bar drawn with `Pen`.
+6. **The terminal's half,** for `--tty`: the same bar on the bottom row, in ASCII.
+
+Every change to the kit gets its line in `CHANGES.md`. A key that changes reaches a tool only when
+its pin moves.
+
+### The order
+
+A session changes its own repository and the suites it depends on (`../CLAUDE.md`), so each piece
+is built by the first tool that needs it.
+
+| | Tool | Brings | Why then |
+|---|---|---|---|
+| 1 | BRR | The table, the declared list, the test and the bar (items 1 to 4); the note on a mark | On the kit, has vi's keys already, a time line to prove the note on, and its pace doesn't stop between steps. `../Brr.md` has the handoff. |
+| 2 | ducky | Takes them up, with marks in time from the start | Early, so a change is cheap. |
+| 3 | Tape | The panel's half (item 5) | Has a panel, and its page has few keys of its own. |
+| 4 | foley's panel | Takes up the panel's half | When Warren wants it. Needs 70s in `lp-paint` first (`../Foley.md`). |
+| 5 | Dexter, then dexter-kms | The terminal's half (item 6) | Last: the recorder in use, one step at a time with Warren's go-ahead, and after its move onto the suite. |
+| | place, scape | Nothing yet | Until `../NOTES.md`'s question of whether they stay is settled. |
+
+**Warren's gates:** the bar and the keys on a real screen. The two drafted details in "The command
+bar", ignoring a click just after a level opens and how many levels, are settled by trying them.
