@@ -49,7 +49,7 @@ Building needs JACK2's dev package (`libjack-jackd2-dev`).
   tools patched to this folder are run before it's pushed.
 - **Moving a tool in:** first bring anything the tool's copy has that the suite lacks into the
   suite, with a test. The tool's reference files must still match byte for byte (see
-  `PLAN.md`, "Moving a tool in"). Update `PLAN.md`'s table when a tool moves.
+  `PLAN.md`, "Moving a tool in"). Update `PLAN.md`'s "Where each tool stands" when a tool moves (its numbers are `../family.sh pins` and `copies`).
 - **`CHANGES.md`:** a change to an interface or a behaviour gets a line there in the same
   commit, newest first, naming the crate and what a tool has to do about it.
 - **Pushing:** to GitHub only (soft-serve retired, 2026-11-07), before any tool whose pin moves
