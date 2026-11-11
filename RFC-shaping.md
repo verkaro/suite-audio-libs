@@ -138,4 +138,5 @@ All five as recommended, and the sixth as written:
 5. The LA-4, with the LA-2A's single ratio reachable by the switch.
 6. The de-esser as above, and ducky renders it in its rough mix.
 
-Work starts with `as-eq`, in a suite session, after s1 and s2.
+Work starts with `as-eq`, in a suite session, after s1 and s2. **`RFC-eq-dynamics.md`** (2026-11-11)
+has the units in detail, for the spec.
