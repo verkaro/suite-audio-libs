@@ -2,7 +2,9 @@
 
 From the family's session, 2026-11-11, for jackbay (`../Jackbay.md`, step b) and Dexter's step 9
 (`Dexter.md`). Read from Dexter's `main` at `e98d44f`, with nothing run and nothing moved. Dexter
-isn't touched: its copies stay its own until its step 9, and this waits for Warren's go-ahead.
+isn't touched: its copies stay its own until its step 9.
+
+**Settled 2026-11-11** (see the end): all four as recommended. The move starts on 2026-11-12, with b1.
 
 ## What's there
 
@@ -105,3 +107,17 @@ Each has a recommendation, which the work goes on by once he gives the go-ahead.
    into `crates/bay/docs/` from bay-rs at `af5c0c7`, if you can put bay-rs beside the family
    (it's yours, so they're not copied from a sibling). Otherwise the pointers say they're bay-rs's,
    and `SYNTAX.md` is written fresh from `syntax.rs` when jackbay's panel first shows the syntax.
+
+## Settled (Warren, 2026-11-11)
+
+All four as recommended:
+
+1. Two crates, `as-bay` (no I/O) and `as-bay-jack`.
+2. `graph.rs` stays Dexter's. `Dexter.md`'s table is read with that.
+3. The grouping is the tool's setting. Dexter's stays mono. jackbay starts in pairs, with a key
+   to show one side alone, as focusrite-ctrl's `p`.
+4. bay-rs's `PLAN.md` and `SYNTAX.md` come into `crates/bay/docs/` from `af5c0c7` if bay-rs is
+   put beside the family. Until then, the pointers say they're bay-rs's, and `SYNTAX.md` is
+   written fresh from `syntax.rs` when jackbay's panel first shows the syntax.
+
+The move starts 2026-11-12: b1, then b2.
