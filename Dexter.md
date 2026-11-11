@@ -171,6 +171,12 @@ through the suite, so Dexter makes it into libraries first and uses them itself.
 a second copy, and the libraries are proved by Dexter's tests and the real rig before jackbay
 leans on them. jackbay starts once step 10 is done.
 
+**Changed (Warren, 2026-11-10):** as step 7's was for focusrite-ctrl, the suite's half of steps 8
+to 10 is done ahead of Dexter, for jackbay (`../Jackbay.md`). Each crate is moved in from Dexter and
+tested in the suite, with Dexter untouched. Dexter's half of each, moving onto it, stays here at its
+own pace, bringing in first anything its copy changed since the move. Until then Dexter's copy is
+a second one, and a fix either needs is made in the suite.
+
 They start after step 5 and don't wait for step 6. Each runs as "How every step after runs"
 says, with one difference: the crate is *moved into* the suite from Dexter (the suite's
 `VENDORED.md` saying so, as for place's and scape's), rather than Dexter's copy being swapped for

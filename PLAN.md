@@ -93,6 +93,10 @@ Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `
      focusrite-ctrl, the Focusrite app, without Dexter moving onto it yet. Until Dexter's step
      7, Dexter's `crates/focusrite` is a second copy: a fix either needs goes here, and Dexter's
      copy follows at its step 7.
+   - **The rest go first too** (Warren, 2026-11-10): the suite's half of steps 8 to 10
+     (`as-jackd`, `as-bay`, the rig's JACK half) is moved in for jackbay ahead of Dexter, the
+     same way, each proposed first. jackbay starts on them, not after Dexter's step 10.
+     `../Jackbay.md` has the order.
    - jackbay has a panel, and it's the one muntin sends you to when JACK is down, so it runs
      without JACK: it's what starts it.
 6. **KMS panels** (Warren, 2026-11-07): place and scape stay on their pages, with no KMS panel.
