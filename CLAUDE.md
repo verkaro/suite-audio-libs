@@ -42,6 +42,11 @@ Building needs JACK2's dev package (`libjack-jackd2-dev`).
 - **Third-party dependencies:** check `[workspace.dependencies]` first and reuse what is
   there. Otherwise vendor it and record it in `VENDORED.md`.
 - **Fixes:** a fix that a tool needs is made here, never in a tool's copy.
+- **One of each thing** (Warren, 2026-11-11): within the suite there is one copy of anything. A
+  second found is fixed in the session that finds it, with a `CHANGES.md` line, never invited to
+  move "when it wants". A crate's tests use the suite's own harness (`as_jackd::Dummy` for JACK).
+- **A session here ends with `../family.sh check suite-audio-libs`** (Warren, 2026-11-11): the
+  tools patched to this folder are run before it's pushed.
 - **Moving a tool in:** first bring anything the tool's copy has that the suite lacks into the
   suite, with a test. The tool's reference files must still match byte for byte (see
   `PLAN.md`, "Moving a tool in"). Update `PLAN.md`'s table when a tool moves.
