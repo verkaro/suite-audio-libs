@@ -6,6 +6,8 @@ can be built (`../Sonofader2.md`, the repository `verkaro/sonofader2`), and Dext
 replace its built-in crates with the shared ones. Read from Dexter's `main` at `e98d44f`, with
 nothing run and nothing moved. Dexter isn't touched: its copies stay its own until its step 11.
 
+**Settled 2026-11-11** (see the end): all six as recommended.
+
 ## What's there
 
 Two crates, both from `verkaro/dexter-surface` (archived; brought into Dexter 2026-10-18 at
@@ -124,6 +126,15 @@ Each has a recommendation, which the work goes on by once he gives the go-ahead.
 6. **The names:** `as-mcu` and `as-surface`, or `as-faderport` for the lot? Recommended: the two.
    The code is Mackie Control with one device's table so far; a second surface is a table.
 
-## Settled
+## Settled (Warren, 2026-11-11)
 
-Waiting on Warren.
+All six as recommended:
+
+1. `port` goes onto `as-rawmidi`, extended additively; `as-mcu` keeps `surface` over it.
+2. The taper is data, `Taper::DEXTER` the constant, `dexters_taper` pinning it.
+3. The testbed is public, `as_surface::testbed`.
+4. The lock moves, `as_surface::lock`, the path the tool's.
+5. Dexter's open surface asks are built in the suite's binding after s2; Dexter follows at step 11.
+6. The names are `as-mcu` and `as-surface`.
+
+s1 and s2 can start, after as-bay's b1 and b2.
