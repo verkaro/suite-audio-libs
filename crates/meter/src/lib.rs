@@ -81,6 +81,17 @@ impl Ladder {
         }
     }
 
+    /// The level the bar shows, dBFS (the floor, −120, for silence): for drawing something
+    /// other than LEDs, or working out a level after a gain.
+    pub fn level_db(&self) -> f64 {
+        self.level
+    }
+
+    /// The held peak, dBFS.
+    pub fn peak_db(&self) -> f64 {
+        self.peak
+    }
+
     /// The LEDs lit from the bottom, 0–16.
     pub fn lit(&self) -> i32 {
         count(self.level, self.b.deep)
@@ -158,5 +169,16 @@ mod tests {
         let mut n = Ladder::new(DEFAULT);
         n.update(-60.0, 0.01);
         assert_eq!(n.lit(), 0, "below the normal scale");
+    }
+
+    #[test]
+    fn the_levels_in_db() {
+        let mut l = Ladder::new(DEFAULT);
+        assert_eq!(l.level_db(), FLOOR_DB);
+        l.update(-12.0, 0.05);
+        assert_eq!((l.level_db(), l.peak_db()), (-12.0, -12.0));
+        l.update(-60.0, 0.1);
+        assert_eq!(l.level_db(), -16.0, "40 dB/s for 0.1 s");
+        assert_eq!(l.peak_db(), -12.0, "held");
     }
 }
