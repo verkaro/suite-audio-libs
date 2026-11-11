@@ -4,6 +4,8 @@ From the family's session, 2026-11-11, at Warren's asking (`../NOTES.md`, "wavef
 audio"). Read from the code, with nothing run and nothing moved. It spans both suites: the
 picture's numbers here, the view in `suite-light-panel` and `as-page-kit`.
 
+**Settled 2026-11-11** (see the end): all four as recommended.
+
 **What it's for (Warren, 2026-11-11):** a visual guide for fine work, not scrubbing. Dropping or
 moving a mark across a waveform, setting an IR's trim, seeing an IR. Dexter's `f` mode moves a
 mark by ear, a step at a time, and that's trial and error. A picture of where the quiet is would
@@ -90,3 +92,15 @@ Each has a recommendation, which the work goes on by once he gives the go-ahead.
 4. **The order.** Recommended: **w1 and w2 in a suite session after s1 and s2, ahead of `as-eq`.**
    It serves irma, foley, Dexter and Tape, and Dexter's everyday marking. Dexter can't take it
    before its step 5 in any case. w3 follows in irma's own session.
+
+## Settled (Warren, 2026-11-11)
+
+All four as recommended:
+
+1. The window follows the step: the digits set the nudge's step and the window's width together,
+   with no new keys. A tool's own zoom is a `differs`, later.
+2. A long file's overview is a cache in the tool's own state folder, keyed by path, size and time,
+   made the first time it's looked at, and deletable with nothing lost. Not written while
+   recording, at first.
+3. The page's half is in w2, in `as-page-kit`, beside the panel's.
+4. w1 and w2 in a suite session after s1 and s2, ahead of `as-eq`. w3 in irma's own session.
