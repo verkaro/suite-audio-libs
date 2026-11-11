@@ -219,6 +219,9 @@ Dexter project, so the session first separates the settings from `dexter.yaml`.
 > Read ../suite-audio-libs/Dexter.md, step 8. Propose how jackd.rs stops depending on Dexter's
 > project before moving it, then move it into the suite as as-jackd, and Dexter onto it, as a PR.
 
+**The suite's half** is proposed in `RFC-as-jackd.md` (2026-11-11, for jackbay), with
+`as-localtime` and `as-interfaces` beside it. Not moved yet: it waits for Warren's answers.
+
 **What proves it, on top of the usual:** `DEXTER_JACK_TEST=1` and the suite's
 `SUITE_JACK_TEST=1` both pass, on dummy servers of their own.
 
