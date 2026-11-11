@@ -241,6 +241,10 @@ divides, and what stays Dexter's. bay-rs is Warren's own: the move is recorded i
 > Read ../suite-audio-libs/Dexter.md, step 9. Propose how the bay divides between the suite and
 > Dexter before moving anything, then do it as a PR.
 
+**The suite's half** is proposed in `RFC-as-bay.md` (2026-11-11, for jackbay): `as-bay`,
+`as-bay-jack`, and the sheet from `crates/patch`, with Dexter's rules left in Dexter. Not moved
+yet: it waits for Warren's answers.
+
 **What proves it, on top of the usual:** `BAY_JACK_TEST=1` (as the suite names it) and the
 golden test pass as they are; the page protocol doesn't change.
 
