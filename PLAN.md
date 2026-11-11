@@ -103,20 +103,28 @@ Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `
    BRR, foley, Tape, ducky, jackbay and the rooms tool are candidates for one: a panel a
    tool, run from one frame (see "Panels for the rest of the family" below).
 
-## Where each tool stands (2026-11-07)
+## Where each tool stands
 
-The suite's HEAD is `390588f`. A pin behind it is fine: a tool moves its pin when it's ready.
+The numbers are never kept here (they were, until 2026-11-11, and were behind within days):
+`../family.sh pins` prints each tool's pin on each suite, the suite's head and how far behind;
+`../family.sh copies` lists the crates a tool still holds that a suite also has, by name; a
+tool's `Cargo.toml` says which crates it's on. A pin behind the head is fine: a tool moves its pin
+when it's ready, reading `CHANGES.md` on the way. What `pins` can't say:
 
-| Tool | On the suite | Pin | Its own copies still |
-|---|---|---|---|
-| BRR | conv, draw, flac, http, ir, jack-keeper, keep, meter, opening, page-kit, resample, seam, tar, tilt, wav, ws | `72cba31` | none |
-| dexter-tape | biquad, defects, envelope, flac, http, jack-keeper, keep, loudness, page-kit, provenance, resample, snapshot, wav, ws | `7643374` | none |
-| dexter-ducky | bands, biquad, envelope, flac, http, keep, loudness, page-kit, provenance, speech, transport, wav, ws | `ae58a71` | none |
-| Dexter | http, meter, wav, ws | `ebe1e3e` | none; its page is page-kit's original |
-| dexter-place | nothing yet (after Dexter) | — | `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), `server/src/http.rs`; in `core`: `conv.rs`, `opening.rs`, `tilt.rs`, `convert.rs` (a resampler of its own); in `library`: `ir.rs` and the onset in `numbers.rs`, and its save-and-rename (`as-keep`) |
-| dexter-foley | nothing yet (after place) | — | `wav`, `flac`, `jack` (the keeper and the resampler), `server/src/http.rs`, `library/src/loudness.rs` (BS.1770-4, now `as-loudness`) |
-| dexter-scape | nothing yet (after foley) | — | `wav`, `ws`, `meter`, `jack`, `server/src/http.rs`; in `core`: `seam.rs`, `tilt.rs`, draw and mix (`as-draw`); `module/src/carry.rs` (a tar of its own, now `as-tar`) |
-| dexter-kms | ws (its client half); and `suite-light-panel`'s four crates (`82da6e5`) | `390588f` | none: its WebSocket client, screen loop, snapshot harness, `Pen` and palette went into the suites, 2026-11-07 (its `VENDORED.md`) |
+- **BRR, Tape, ducky, irma, like110, focusrite-ctrl** were born on the suite and hold no copies.
+- **Dexter** is on `meter` (step 1); `ws`, `wav` and `http` are in PRs (#112 to #114, its step 2
+  to 4). Its `focusrite`, `jack`, `system` (the interfaces), `localtime`, `bay-core`, `bay-jack`,
+  `patch`, `mcu` and `surface` are second copies of suite crates by the "suite's half first"
+  decisions (2026-11-10 and 11), until its steps 7 to 11.
+- **dexter-place** holds `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), its server's `http.rs`,
+  and in `core` `conv.rs`, `opening.rs`, `tilt.rs`, `convert.rs` (a resampler of its own); in
+  `library` `ir.rs`, the onset in `numbers.rs`, and its save-and-rename (`as-keep`).
+- **dexter-foley** holds `wav`, `flac`, `jack` (the keeper and the resampler), its server's
+  `http.rs`, and `library/src/loudness.rs` (now `as-loudness`).
+- **dexter-scape** holds `wav`, `ws`, `meter`, `jack`, its server's `http.rs`; in `core` `seam.rs`,
+  `tilt.rs`, draw and mix (`as-draw`); `module/src/carry.rs` (a tar of its own, now `as-tar`).
+- **dexter-kms** holds none: its WebSocket client, screen loop, snapshot harness, `Pen` and
+  palette went into the suites on 2026-11-07 (its `VENDORED.md`).
 
 Each tool's `VENDORED.md` says where its copies came from and how they've drifted. The rows for
 place, foley and scape were checked against the suite's crates on 2026-11-07 by module and
