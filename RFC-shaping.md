@@ -90,7 +90,7 @@ of the saturation stage.
 
 | Tool | How | When |
 |---|---|---|
-| **A rack of its own** (Question 2) | in → EQ → de-esser → optical → FET → out, on one JACK path, with a page or panel and its settings; and the same chain over a file (`--render`, a new file). The first home, where Warren's ears judge the three, and the one every other tool points at | first, as sonofader2 is for the surface |
+| **sonorack** (Question 2) | in → EQ → de-esser → optical → FET → out, on one JACK path, with a page or panel and its settings; and the same chain over a file (`--render`, a new file). The first home, where Warren's ears judge the three, and the one every other tool points at | first, as sonofader2 is for the surface |
 | BRR | a lane's insert, EQ and one compressor, printed into the lane's stem as TILT is; a brief to BRR once the rack has passed Warren's ears | after the rack |
 | Tape | a stage before the tape, by Tape's RFC and its acceptance tests, if Tape wants it | Tape's decision |
 | place, irma | the voice before the room: a high-pass and the optical, as an option on the line | after the rack |
@@ -132,7 +132,7 @@ of the saturation stage.
 All five as recommended, and the sixth as written:
 
 1. One crate, `as-dynamics`: `fet`, `opto` and `deess`.
-2. A rack of its own is the first home, with a JACK path and a file mode. Its name is still Warren's.
+2. A rack of its own is the first home, with a JACK path and a file mode: **sonorack** (Warren, 2026-11-11; `../Sonorack.md`).
 3. Behavioural, named "style".
 4. The order: EQ, the rack, the de-esser, the optical, the FET.
 5. The LA-4, with the LA-2A's single ratio reachable by the switch.
