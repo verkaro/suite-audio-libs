@@ -104,6 +104,7 @@ impl Clients {
 pub struct Joining<'a> {
     clients: &'a Clients,
     id: Id,
+    from: &'a str,
     client: Option<Client>,
 }
 
@@ -111,6 +112,12 @@ impl Joining<'_> {
     /// Its number.
     pub fn id(&self) -> Id {
         self.id
+    }
+
+    /// The address it connected from (`127.0.0.1`, `192.168.1.20`), or `somewhere` when that
+    /// couldn't be had: for a tool that lets only some addresses change things.
+    pub fn from(&self) -> &str {
+        self.from
     }
 
     /// Sends the client `hello`, in order, and puts it among the clients. Call it holding the
@@ -246,7 +253,7 @@ impl<T: Tool> Server<T> {
         let (tx, rx) = sync_channel::<Arc<[u8]>>(QUEUE);
         let id = self.next.fetch_add(1, Ordering::Relaxed);
         let mut joining =
-            Joining { clients: &self.clients, id, client: Some(Client { tx, writer: writer.clone() }) };
+            Joining { clients: &self.clients, id, from, client: Some(Client { tx, writer: writer.clone() }) };
         self.tool.hello(&mut joining);
         // A tool that didn't admit it has turned it away: with nothing holding the queue's
         // sending end, the writer below ends at once.

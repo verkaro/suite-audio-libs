@@ -6,6 +6,8 @@ the git log.
 
 ## 2026-11-10
 
+- `as-serve`: `Joining::from`, the address a client connected from, for a tool that lets
+  only some addresses change things (focusrite-ctrl's `--controller`). Nothing to do.
 - `as-focusrite`, for focusrite-ctrl (its step 1). Nothing to do for a tool that doesn't use
   it; Dexter, moving onto it at its step 7, has the items marked *breaks* to follow:
   - **The meters:** `Focusrite::meter` (`Meter`: `db`, `full`), `meter_dests`, `meter_of`,
