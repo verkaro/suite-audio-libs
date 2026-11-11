@@ -36,7 +36,11 @@ const KEYS = [
   {"key": "u", "means": "undo"},
   {"key": "i", "means": "start changing this in place"},
   {"key": "Enter", "means": "open or choose; keep what's typed"},
-  {"key": "y", "means": "yes to a question"}
+  {"key": "y", "means": "yes to a question"},
+  {"key": "m", "means": "mark here"},
+  {"key": "-", "means": "mute"},
+  {"key": "=", "means": "solo"},
+  {"key": "o", "means": "the loop on or off"}
 ];
 const KEY_NAMES = { " ": "Space", Escape: "Esc", ArrowLeft: "←", ArrowRight: "→", ArrowUp: "↑", ArrowDown: "↓", Backspace: "⌫", PageUp: "PgUp", PageDown: "PgDn" };
 const keyName = (k) => KEY_NAMES[k] || k;

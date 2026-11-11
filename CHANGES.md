@@ -6,6 +6,14 @@ the git log.
 
 ## 2026-11-11
 
+- `as-page-kit`: the common keys gain tier 3's letters (Warren, 2026-11-11, `../STYLE.md`, "Keys"):
+  `m` "mark here", `-` "mute", `=` "solo", `o` "the loop on or off", as `lp-keys` has them. **What
+  a tool has to do** when its pin moves here: a `keys.json` that uses one of the four for
+  something else fails the keys test until it moves the key or says why in `differs`. BRR (mark
+  on `t`, mute and solo on `m` and `M`), foley (loop on `l`) and irma (LOOP with no key) have
+  moves listed in `../STYLE.md`, "Not yet the same", item 17. irma's `m` already reads "mark here". irma's `o` (the outs) and focusrite-ctrl's `o` (the scenes) move
+  off it (Warren, 2026-11-11). Patched to this folder, BRR, irma and focusrite-ctrl fail their keys
+  test at once, not only when their pins move; each deals with it in its next session.
 - `as-jackd`, `as-interfaces` and `as-localtime`, new crates, moved in from Dexter at `e98d44f`
   for jackbay (`RFC-as-jackd.md`). Nothing to do for a tool until it takes them. Dexter keeps
   its own copies until its step 8, which has these to follow:

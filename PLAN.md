@@ -73,8 +73,9 @@ Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `
 2. **Moving in.** BRR was built on the suite from its first step, and Tape and ducky after it.
    **Dexter adopts the suite** (Warren, 2026-11-07). Dexter and place move over one crate at a
    time through their own sessions, each move a handoff, so neither is disturbed mid-work.
-   **After Dexter: dexter-place, dexter-foley, then dexter-scape** (Warren, 2026-11-07; scape is
-   still being worked on, so it moves too, overturning 2026-10-30's "stays as it is").
+   **After Dexter: dexter-foley.** dexter-place and dexter-scape are held as they are, with no
+   suite move, until it's decided whether they retire (Warren, 2026-11-11, `../CLAUDE.md`; this
+   overturns 2026-11-07's place, foley, scape).
 3. **A clone builds with the network**, not with nothing else: cargo fetches the pinned suite.
    That's fine for public code.
 4. **Rooms get a tool of their own** (Warren, 2026-11-07): recording an IR and convolution are
