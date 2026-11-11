@@ -263,3 +263,13 @@ latencies stay the deck's. Old rig files must still read.
 
 **Done:** Dexter's `CLAUDE.md` names these as the suite's, `PLAN.md`'s row for Dexter lists them,
 and jackbay can start.
+
+## Step 11: the surface (Warren, 2026-11-11)
+
+`crates/mcu` and `crates/surface` go into the suite as `as-mcu` and `as-surface` ahead of Dexter,
+for sonofader2 and BRR, the way `as-focusrite` and `as-jackd` went: `RFC-as-surface.md` has what
+moves, what changes in the move (the taper as data, the testbed public, the lock) and what stays
+Dexter's (the adapter, `dexter --surface`, the program's tests). At this step, after step 5 and its
+gates: `crates/mcu` goes, `crates/surface` becomes the adapter alone on `as-surface`, and the
+pin is moved past the binding changes made in the suite meanwhile (`CHANGES.md`). The page
+protocol and the reference files don't change.
