@@ -22,6 +22,8 @@ pub struct Output {
 pub struct Line {
     /// From 1.
     pub n: usize,
+    /// What the driver calls it, if it says: `Monitor L`, `Headphones 1 R`.
+    pub label: Option<String>,
     pub control: Option<u32>,
     pub volume: Option<Volume>,
     pub mute: Option<u32>,
@@ -70,6 +72,34 @@ impl Volume {
         db.max(-80.0)
     }
 }
+
+/// The interface's meters (`Level Meter`): one value for each routing destination, in
+/// [`Focusrite::meter_dests`]' order, each the level of the source feeding it (0 where it plays
+/// `Off`), linear from 0 to `max` (4095: full scale). Read, never written.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Meter {
+    pub numid: u32,
+    pub count: usize,
+    pub max: i64,
+}
+
+impl Meter {
+    /// The dBFS a raw value is: `FLOOR_DB` for 0.
+    pub fn db(&self, raw: i64) -> f64 {
+        if raw <= 0 || self.max <= 0 {
+            return METER_FLOOR_DB;
+        }
+        (20.0 * (raw as f64 / self.max as f64).log10()).max(METER_FLOOR_DB)
+    }
+
+    /// Whether a raw value is full scale: a clip, or as near one as the meter can say.
+    pub fn full(&self, raw: i64) -> bool {
+        raw >= self.max
+    }
+}
+
+/// The bottom of a meter's dB, for silence (`as-meter`'s floor).
+pub const METER_FLOOR_DB: f64 = -120.0;
 
 /// An input's switches, as the interface has them: each a control, written 1 for on (an enum's
 /// first item past off).
@@ -127,6 +157,19 @@ pub struct Focusrite {
     /// The talkback mic, as a source in the mixer: the last analogue input (`Analogue 9` on the
     /// 18i20, the one Scarlett of the 3rd gen with a talkback).
     pub talkback_mic: Option<String>,
+    /// The meters, if the interface has them.
+    pub meter: Option<Meter>,
+    /// The routing destinations in the driver's own order, as the meters are: the analogue
+    /// outputs, S/PDIF's, ADAT's, the mixer's inputs, then the capture channels. Each its
+    /// routing enum. On the 2Pre 4 + 18 + 12, on the 18i20 10 + 2 + 8 + 25 + 20.
+    pub meter_dests: Vec<u32>,
+    /// The interface keeps its routing and mixes with no computer (`Standalone Switch`).
+    pub standalone: Option<u32>,
+    /// `Firmware Version`, read only.
+    pub firmware: Option<u32>,
+    /// Whether each clock source has a signal to lock to (`Internal Validity`, `S/PDIF
+    /// Validity`, `ADAT Validity`), by the clock's name.
+    pub validity: Vec<(String, u32)>,
 }
 
 /// The number in a name between prefix and suffix: `Mixer Input 07 Capture Enum` is 7.
@@ -175,6 +218,10 @@ impl Focusrite {
         let mut knob = None;
         let (mut clock, mut sync, mut phantom_persists, mut dim, mut mute) = (None, None, None, None, None);
         let mut digital_mode = None;
+        let (mut meter, mut standalone, mut firmware) = (None, None, None);
+        let mut validity: Vec<(String, u32)> = Vec::new();
+        // The outputs in the driver's order (analogue, S/PDIF, ADAT), for the meters.
+        let mut dests_out: Vec<(usize, u32)> = Vec::new();
         let mut inputs: Vec<InputControls> = Vec::new();
         let mut phantom: Vec<(String, u32)> = Vec::new();
         let input = |inputs: &mut Vec<InputControls>, n: usize| -> usize {
@@ -204,6 +251,24 @@ impl Focusrite {
             }
             if n == "Mute Playback Switch" {
                 mute = Some(k.numid);
+                continue;
+            }
+            if n == "Level Meter" {
+                if let Kind::Int { max, .. } = k.kind {
+                    meter = Some(Meter { numid: k.numid, count: k.count as usize, max });
+                }
+                continue;
+            }
+            if n == "Standalone Switch" {
+                standalone = Some(k.numid);
+                continue;
+            }
+            if n == "Firmware Version" {
+                firmware = Some(k.numid);
+                continue;
+            }
+            if let Some(clock) = n.strip_suffix(" Validity") {
+                validity.push((clock.to_string(), k.numid));
                 continue;
             }
             if n == "Sync Status" {
@@ -261,6 +326,9 @@ impl Focusrite {
             .iter()
             .find_map(|(p, out, o)| numbered(n, p, " Playback Enum").map(|i| (*o, *out, i)))
             {
+                // The driver's order is analogue, S/PDIF, ADAT; ours puts ADAT before S/PDIF.
+                let driver = [0, 2, 1][order];
+                dests_out.push((driver * 1000 + i, k.numid));
                 let out = Output { name: format!("{name} {i}"), numid: k.numid, source: first(k.numid) };
                 outputs.push((order * 1000 + i, out));
             } else if let Some(i) = numbered(n, "Line Out ", " Volume Control Playback Enum") {
@@ -278,7 +346,12 @@ impl Focusrite {
             } else if let Some((i, rest)) = line_of(n) {
                 if rest.ends_with(" Playback Volume") {
                     if let Kind::Int { min, max, db, .. } = k.kind {
-                        line(&mut lines, i).volume = Some(Volume { numid: k.numid, min, max, db });
+                        let l = line(&mut lines, i);
+                        l.volume = Some(Volume { numid: k.numid, min, max, db });
+                        l.label = rest
+                            .strip_prefix(" (")
+                            .and_then(|r| r.split_once(')'))
+                            .map(|(label, _)| label.to_string());
                     }
                 } else if rest == " Mute Playback Switch" {
                     line(&mut lines, i).mute = Some(k.numid);
@@ -298,6 +371,15 @@ impl Focusrite {
         }
         outputs.sort_by_key(|o| o.0);
         captures.sort();
+        dests_out.sort();
+        let meter_dests: Vec<u32> = dests_out
+            .iter()
+            .map(|d| d.1)
+            .chain(mixer_inputs.iter().map(|m| m.1))
+            .chain(captures.iter().map(|c| c.2))
+            .collect();
+        // The meters only mean something when there's one for each destination.
+        let meter = meter.filter(|m| m.count == meter_dests.len());
         lines.sort_by_key(|l| l.n);
         inputs.sort_by_key(|c| c.n);
         talkback_mixes.sort();
@@ -332,6 +414,11 @@ impl Focusrite {
             lines,
             speaker_switching,
             knob,
+            meter,
+            meter_dests,
+            standalone,
+            firmware,
+            validity,
         })
     }
 
@@ -390,7 +477,7 @@ fn line(lines: &mut Vec<Line>, n: usize) -> &mut Line {
     if let Some(i) = lines.iter().position(|l| l.n == n) {
         return &mut lines[i];
     }
-    lines.push(Line { n, control: None, volume: None, mute: None });
+    lines.push(Line { n, label: None, control: None, volume: None, mute: None });
     lines.last_mut().unwrap()
 }
 

@@ -11,10 +11,16 @@
 //! - [`plan`]: what's set on it for a project's mixes and tracks.
 //! - [`mixer`]: setting it, and keeping its gains with the deck on a thread of its own.
 //! - [`panel`]: its own controls beside the mixer: the inputs' switches, 48V, the clock, DIM
-//!   and MUTE (`docs/interface.md`).
+//!   and MUTE (`docs/interface.md`), the lines, standalone.
+//! - [`hand`]: routing and the mixer set by hand, a control at a time, the mixer's inputs
+//!   shared out by need (for focusrite-ctrl, 2026-11-10).
+//!
+//! The meters ([`Meter`]) are one value for each routing destination, in the driver's order
+//! ([`Focusrite::meter_dests`]), each the level of the source feeding it.
 
 pub mod card;
 pub mod controls;
+pub mod hand;
 pub mod interface;
 pub mod mixer;
 pub mod panel;
@@ -22,13 +28,18 @@ pub mod plan;
 
 pub use card::Card;
 pub use controls::{Control, Controls, Fake, Kind, format_line};
-pub use interface::{Focusrite, Line, Volume};
+pub use hand::{Dest, MixError, Mixing, route, routes};
+pub use interface::{Focusrite, Line, METER_FLOOR_DB, Meter, Volume};
 pub use mixer::{Levels, Link, Mixer, Watch, keep_found, put_back, targets, write_loop};
-pub use panel::{Change, InputNow, Now, Panel, SharedControls};
+pub use panel::{Change, InputNow, LineNow, Now, Panel, SharedControls};
 pub use plan::{Loop, Plan, Print, Request, Setting, Settings, Switches, Want};
 
 /// The 18i20 (3rd gen) as read from Warren's on 2026-10-13, for the tests.
 pub const SCARLETT_18I20_GEN3: &str = include_str!("../testdata/18i20-gen3.txt");
+
+/// The Clarett 2Pre USB as read from Warren's on 2026-11-10 (firmware 1246, kernel 6.12), for
+/// the tests.
+pub const CLARETT_2PRE: &str = include_str!("../testdata/clarett-2pre.txt");
 
 /// Every control's line in the text form ([`controls`]), with its values now.
 pub fn dump(c: &mut dyn Controls) -> std::io::Result<String> {
@@ -47,3 +58,5 @@ pub fn dump(c: &mut dyn Controls) -> std::io::Result<String> {
 
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod tests_hand;

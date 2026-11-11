@@ -6,6 +6,25 @@ the git log.
 
 ## 2026-11-10
 
+- `as-focusrite`, for focusrite-ctrl (its step 1). Nothing to do for a tool that doesn't use
+  it; Dexter, moving onto it at its step 7, has the items marked *breaks* to follow:
+  - **The meters:** `Focusrite::meter` (`Meter`: `db`, `full`), `meter_dests`, `meter_of`,
+    `read_meters`. One value for each routing destination in the driver's order (analogue,
+    S/PDIF, ADAT outputs, mixer inputs, captures), each the level of its source.
+  - **The Clarett 2Pre:** `CLARETT_2PRE`, `testdata/clarett-2pre.txt`, rewritten by the card
+    test's `BLESS=1` on a 2Pre as the 18i20's is on an 18i20.
+  - **`Focusrite`** gains `standalone`, `firmware`, `validity`, and `Line` gains `label`
+    (`Monitor L`). *Breaks* a `Line { … }` written out in full.
+  - **`Panel`:** `Now` gains `lines` (`LineNow`), `standalone`, `firmware` and `validity`;
+    `Change` gains `LineHw`, `LineVolume`, `LineMute` and `Standalone`. *Breaks* a `match` on
+    `Change` with no `_` arm.
+  - **`hand`, new:** `Dest`, `route`, `routes`, the destinations by name (`dest_named`:
+    `LINE 1`, `MIXER 3`, `CAPTURE 2`), and `Mixing`: a mix's sources added, cut or made the only
+    one, the mixer's inputs shared out by need and freed when no mix hears them, gains kept as
+    written and `write_all` after a panel scrambled the driver's copy. `MixError` says why not.
+  - **On the interface:** `sets_by_hand_and_puts_it_back`, under `SUITE_FOCUSRITE_TEST=1`, on
+    any Focusrite, touching only a mix nothing plays.
+
 - `as-focusrite`, a new crate: Dexter's `dexter-focusrite`, moved in for focusrite-ctrl. The
   same interface as Dexter's at `e98d44f`. Its tests on the interface itself are
   `SUITE_FOCUSRITE_TEST=1` (and `SUITE_FOCUSRITE_JACK=1` for `landing`); the fake's file is

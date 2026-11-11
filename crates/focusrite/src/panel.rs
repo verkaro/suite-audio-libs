@@ -58,6 +58,27 @@ pub enum Change {
     /// The talkback switched on (`On`), as the front panel's TALK button does, or off (`Off`:
     /// the button still works; never `Disabled`).
     Talk(bool),
+    /// A line (from 1) on the monitor knob (`HW`), or the program's (`SW`).
+    LineHw(usize, bool),
+    /// A line's volume, raw ([`crate::Volume`]); refused while it's on the knob.
+    LineVolume(usize, i64),
+    LineMute(usize, bool),
+    /// The interface keeps its routing and mixes with no computer.
+    Standalone(bool),
+}
+
+/// A line output as it is; each absent where the interface hasn't it.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct LineNow {
+    /// From 1.
+    pub n: usize,
+    /// The driver's name for it: `Monitor L`.
+    pub label: Option<String>,
+    /// On the monitor knob.
+    pub hw: Option<bool>,
+    /// Its volume, raw.
+    pub volume: Option<i64>,
+    pub mute: Option<bool>,
 }
 
 /// An input's switches as they are; each absent where the input hasn't it.
@@ -90,6 +111,11 @@ pub struct Now {
     pub captures: Vec<String>,
     /// The monitor knob's level, raw ([`Focusrite::knob`]).
     pub knob: Option<i64>,
+    pub lines: Vec<LineNow>,
+    pub standalone: Option<bool>,
+    pub firmware: Option<i64>,
+    /// Each clock source, and whether it has a signal to lock to.
+    pub validity: Vec<(String, bool)>,
 }
 
 /// The interface's own controls.
@@ -140,7 +166,25 @@ impl Panel {
             let v = self.get(Some(numid))?.unwrap_or(0) as usize;
             captures.push(self.f.sources.get(v).cloned().unwrap_or_default());
         }
+        let mut lines = Vec::new();
+        for l in self.f.lines.clone() {
+            lines.push(LineNow {
+                n: l.n,
+                label: l.label.clone(),
+                hw: on(self.get(l.control)?),
+                volume: self.get(l.volume.map(|v| v.numid))?,
+                mute: on(self.get(l.mute)?),
+            });
+        }
+        let mut validity = Vec::new();
+        for (clock, numid) in self.f.validity.clone() {
+            validity.push((clock, on(self.get(Some(numid))?).unwrap_or(false)));
+        }
         Ok(Now {
+            lines,
+            standalone: on(self.get(self.f.standalone)?),
+            firmware: self.get(self.f.firmware)?,
+            validity,
             inputs,
             phantom,
             persists: on(self.get(self.f.phantom_persists)?),
@@ -163,6 +207,16 @@ impl Panel {
             };
             return self.c.write(numid, &[if *on { TALK_ON } else { TALK_OFF }]);
         }
+        let line = |n: usize| self.f.lines.iter().find(|l| l.n == n);
+        if let Change::LineVolume(n, raw) = ch {
+            let Some(v) = line(*n).and_then(|l| l.volume) else {
+                return Err(io::Error::new(
+                    io::ErrorKind::NotFound,
+                    "the interface hasn't that line's volume",
+                ));
+            };
+            return self.c.write(v.numid, &[(*raw).clamp(v.min, v.max)]);
+        }
         let input = |n: usize| self.f.inputs.iter().find(|i| i.n == n);
         let numid = match ch {
             Change::Inst(n, _) => input(*n).and_then(|i| i.inst),
@@ -172,11 +226,17 @@ impl Panel {
             Change::Persists(_) => self.f.phantom_persists,
             Change::Dim(_) => self.f.dim,
             Change::Mute(_) => self.f.mute,
-            Change::Talk(_) => unreachable!("set above"),
+            Change::LineHw(n, _) => line(*n).and_then(|l| l.control),
+            Change::LineMute(n, _) => line(*n).and_then(|l| l.mute),
+            Change::Standalone(_) => self.f.standalone,
+            Change::Talk(_) | Change::LineVolume(..) => unreachable!("set above"),
         };
         let on = match ch {
             Change::Inst(_, b) | Change::Pad(_, b) | Change::Air(_, b) | Change::Phantom(_, b) => *b,
+            Change::LineHw(_, b) | Change::LineMute(_, b) => *b,
             Change::Persists(b) | Change::Dim(b) | Change::Mute(b) | Change::Talk(b) => *b,
+            Change::Standalone(b) => *b,
+            Change::LineVolume(..) => unreachable!("set above"),
         };
         let Some(numid) = numid else {
             return Err(io::Error::new(io::ErrorKind::NotFound, "the interface hasn't that switch"));

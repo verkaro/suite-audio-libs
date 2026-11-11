@@ -33,9 +33,14 @@ fn reads_the_interface() {
     eprintln!("{}: {name} ({driver})", path.display());
     let text = dump(&mut card).unwrap();
     assert!(text.contains("\tMix A Input 01 Playback Volume\t"), "{text}");
-    // BLESS=1 on an 18i20 3rd gen: its controls as the fake's.
-    if std::env::var("BLESS").is_ok_and(|v| v == "1") && name == "Scarlett 18i20 USB" {
-        let out = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/18i20-gen3.txt");
+    // BLESS=1 on an 18i20 3rd gen or a Clarett 2Pre: its controls as the fake's.
+    let fake = match name.as_str() {
+        "Scarlett 18i20 USB" => Some("18i20-gen3.txt"),
+        "Clarett 2Pre USB" => Some("clarett-2pre.txt"),
+        _ => None,
+    };
+    if let Some(file) = fake.filter(|_| std::env::var("BLESS").is_ok_and(|v| v == "1")) {
+        let out = format!("{}/testdata/{file}", env!("CARGO_MANIFEST_DIR"));
         std::fs::write(out, &text).unwrap();
     }
 }
@@ -195,6 +200,62 @@ fn sets_a_rigs_settings() {
         "Line In 3 Air Capture Switch",
         "Line In 1 Level Capture Enum",
     ] {
+        assert_eq!(now.get(name), was.get(name), "{name} put back");
+    }
+    let _ = std::fs::remove_dir_all(&scratch);
+    if let Err(e) = result {
+        std::panic::resume_unwind(e);
+    }
+}
+
+/// The mixer set by hand on whatever Focusrite is plugged in (the 2Pre: Warren, 2026-11-10),
+/// then everything put back as found. Only a mix that no output and no capture plays is
+/// touched, so nothing new is heard or recorded.
+#[test]
+fn sets_by_hand_and_puts_it_back() {
+    use as_focusrite::{Controls, Dest, Focusrite, Mixing, keep_found, put_back, routes};
+    if !wanted() {
+        return;
+    }
+    let path = focusrite().expect("no Focusrite in /dev/snd/by-id");
+    let mut card = Card::open(&path).unwrap();
+    let f = Focusrite::read(&mut card).unwrap().expect("a Focusrite");
+    let scratch = std::env::temp_dir().join(format!("as-focusrite-hand-{}", std::process::id()));
+    let kept_at = scratch.join("found.txt");
+    assert!(keep_found(&mut card, &kept_at).unwrap());
+    let kept = std::fs::read_to_string(&kept_at).unwrap();
+    let playing = routes(&mut card, &f).unwrap();
+    let heard: Vec<usize> = f
+        .dests()
+        .into_iter()
+        .zip(&playing)
+        .filter(|(d, _)| !matches!(d, Dest::MixerInput(_)))
+        .map(|(_, &s)| s)
+        .collect();
+    let mix = (0..f.gains.len())
+        .find(|&m| f.source(&Focusrite::mix_name(m)).is_some_and(|s| !heard.contains(&s)))
+        .expect("a mix nothing plays");
+    eprintln!("{}: using {}, which nothing plays", path.display(), Focusrite::mix_name(mix));
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let mut m = Mixing::read(&mut card, &f).unwrap();
+        let source = f.source("Analogue 1").unwrap();
+        let input = m.add(&mut card, &f, source, mix, f.gain(Some(-12.0))).unwrap();
+        let read = |c: &mut Card, numid: u32| c.read(numid).unwrap()[0];
+        assert_eq!(read(&mut card, f.mixer_inputs[input]), source as i64);
+        assert_eq!(read(&mut card, f.gains[mix][input]), f.gain(Some(-12.0)));
+        assert!(m.cut(&mut card, &f, source, mix).unwrap());
+        assert_eq!(read(&mut card, f.gains[mix][input]), f.gain_raw.0);
+        if let Some(meter) = f.meter {
+            let levels = f.read_meters(&mut card).unwrap();
+            assert_eq!(levels.len(), meter.count);
+        }
+    }));
+    let n = put_back(&mut card, &kept).unwrap();
+    eprintln!("{n} controls put back");
+    let now = Fake::parse(&dump(&mut card).unwrap()).unwrap();
+    let was = Fake::parse(&kept).unwrap();
+    for line in kept.lines().filter(|l| !l.starts_with('#')) {
+        let name = line.split('\t').nth(3).unwrap();
         assert_eq!(now.get(name), was.get(name), "{name} put back");
     }
     let _ = std::fs::remove_dir_all(&scratch);

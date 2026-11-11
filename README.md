@@ -79,9 +79,11 @@ tool's.
   and `phrases`, that gated into phrases), and the measurements (tone, THD, products, nulls).
 - `as-focusrite`: a Focusrite interface on the kernel's `scarlett2` driver, through its
   controls: the card's ioctls, the controls as text and a fake card from that text (the 18i20
-  3rd gen's), the interface as its controls describe it (inputs, mixer, outputs), its own
-  switches (48V, AIR, INST, the clock, DIM and MUTE), a plan of mixes set on it, the mixer kept
-  on a thread of its own, and every control put back as it was found.
+  3rd gen's and the Clarett 2Pre's), the interface as its controls describe it (inputs, mixer,
+  outputs, meters), its own switches (48V, AIR, INST, the clock, DIM and MUTE, the lines,
+  standalone), a plan of mixes set on it, the mixer kept on a thread of its own, routing and
+  the mixer set by hand with its inputs shared out by need, and every control put back as it
+  was found.
 - `as-rawmidi`: ALSA raw MIDI out: ports found by card under `/dev/snd`, a port opened for
   writing, note on and off, program change, controllers and panic as bytes.
 - `as-pitch`: a tone's pitch by YIN and a staged long-lag refinement, good to a few cents from
