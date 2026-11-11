@@ -137,6 +137,9 @@ pub struct Focusrite {
     /// What the digital ports carry (`Digital I/O Mode`: `S/PDIF RCA`, `S/PDIF Optical`, `Dual
     /// ADAT` on the 18i20), its enum and items; one or the other, the interface blocking the rest.
     pub digital_mode: Option<(u32, Vec<String>)>,
+    /// Which S/PDIF input a Clarett takes (`S/PDIF Source Capture Enum`: `None`, `Optical`,
+    /// `RCA`, on the 8Pre), its enum and items.
+    pub spdif_source: Option<(u32, Vec<String>)>,
     /// The inputs' switches, by input.
     pub inputs: Vec<InputControls>,
     /// 48V, by the inputs each switch powers (`1-4`), and whether it's kept through a power cycle.
@@ -217,7 +220,7 @@ impl Focusrite {
         let (mut talkback, mut talkback_mixes) = (None, Vec::new());
         let mut knob = None;
         let (mut clock, mut sync, mut phantom_persists, mut dim, mut mute) = (None, None, None, None, None);
-        let mut digital_mode = None;
+        let (mut digital_mode, mut spdif_source) = (None, None);
         let (mut meter, mut standalone, mut firmware) = (None, None, None);
         let mut validity: Vec<(String, u32)> = Vec::new();
         // The outputs in the driver's order (analogue, S/PDIF, ADAT), for the meters.
@@ -278,6 +281,12 @@ impl Focusrite {
             if n == "Digital I/O Mode Capture Enum" {
                 if let Kind::Enum(items) = &k.kind {
                     digital_mode = Some((k.numid, items.clone()));
+                }
+                continue;
+            }
+            if n == "S/PDIF Source Capture Enum" {
+                if let Kind::Enum(items) = &k.kind {
+                    spdif_source = Some((k.numid, items.clone()));
                 }
                 continue;
             }
@@ -406,6 +415,7 @@ impl Focusrite {
             clock,
             sync,
             digital_mode,
+            spdif_source,
             inputs,
             phantom,
             phantom_persists,

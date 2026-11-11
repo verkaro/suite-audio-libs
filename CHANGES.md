@@ -6,6 +6,10 @@ the git log.
 
 ## 2026-11-10
 
+- `as-focusrite`: `Focusrite::spdif_source` (a Clarett's `S/PDIF Source Capture Enum`, the
+  8Pre's, from the driver), `Now::digital_mode` and `spdif_source`, and `Change::Clock`,
+  `DigitalMode` and `SpdifSource`, each by its item's name. *Breaks* a `match` on `Change`
+  with no `_` arm, and a `Now { … }` written in full.
 - `as-meter`: `Ladder::level_db` and `peak_db`, the bar's level and the held peak in dBFS, for
   focusrite-ctrl's ring after a knob's gain. Nothing to do.
 - `as-serve`: `Joining::from`, the address a client connected from, for a tool that lets

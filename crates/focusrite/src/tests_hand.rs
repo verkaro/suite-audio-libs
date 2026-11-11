@@ -241,3 +241,29 @@ fn writes_only_what_changes_and_all_of_it_again() {
     assert_eq!(c.get("Mix A Input 01 Playback Volume"), Some(&[unity][..]));
     assert_eq!(Mixing::read(&mut c, &f).unwrap(), m);
 }
+
+#[test]
+fn the_clock_and_the_digital_ports_set_by_name() {
+    let (c, f) = card(SCARLETT_18I20_GEN3);
+    let mut p = Panel::new(Box::new(c), f);
+    let now = p.now().unwrap();
+    assert_eq!(now.clock.as_deref(), Some("Internal"));
+    assert!(now.digital_mode.is_some() && now.spdif_source.is_none());
+    p.set(&Change::Clock("adat".into())).unwrap();
+    assert_eq!(p.now().unwrap().clock.as_deref(), Some("ADAT"));
+    p.set(&Change::DigitalMode("Dual ADAT".into())).unwrap();
+    assert_eq!(p.now().unwrap().digital_mode.as_deref(), Some("Dual ADAT"));
+    assert!(p.set(&Change::Clock("Word Clock".into())).is_err(), "no such clock");
+    assert!(p.set(&Change::SpdifSource("RCA".into())).is_err(), "the 18i20 hasn't one");
+    // The 8Pre's S/PDIF source, as the driver names it (the box isn't here yet: a line added to
+    // the 2Pre's for the test).
+    let text = format!(
+        "{CLARETT_2PRE}999\tMIXER\t0\tS/PDIF Source Capture Enum\trw\tenum\t1\tNone|Optical|RCA\t1\n"
+    );
+    let (c, f) = card(&text);
+    assert_eq!(f.spdif_source.as_ref().map(|s| s.1.len()), Some(3));
+    let mut p = Panel::new(Box::new(c), f);
+    assert_eq!(p.now().unwrap().spdif_source.as_deref(), Some("Optical"));
+    p.set(&Change::SpdifSource("RCA".into())).unwrap();
+    assert_eq!(p.now().unwrap().spdif_source.as_deref(), Some("RCA"));
+}

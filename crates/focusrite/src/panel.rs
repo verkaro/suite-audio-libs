@@ -65,6 +65,12 @@ pub enum Change {
     LineMute(usize, bool),
     /// The interface keeps its routing and mixes with no computer.
     Standalone(bool),
+    /// The clock, by its item's name: `Internal`, `ADAT`.
+    Clock(String),
+    /// What the digital ports carry (the 18i20's `Digital I/O Mode`), by name.
+    DigitalMode(String),
+    /// Which S/PDIF input a Clarett takes, by name: `Optical`, `RCA`.
+    SpdifSource(String),
 }
 
 /// A line output as it is; each absent where the interface hasn't it.
@@ -116,6 +122,9 @@ pub struct Now {
     pub firmware: Option<i64>,
     /// Each clock source, and whether it has a signal to lock to.
     pub validity: Vec<(String, bool)>,
+    /// What the digital ports carry, and which S/PDIF input is taken, by name.
+    pub digital_mode: Option<String>,
+    pub spdif_source: Option<String>,
 }
 
 /// The interface's own controls.
@@ -180,7 +189,17 @@ impl Panel {
         for (clock, numid) in self.f.validity.clone() {
             validity.push((clock, on(self.get(Some(numid))?).unwrap_or(false)));
         }
+        let (dm, ss) = (self.f.digital_mode.clone(), self.f.spdif_source.clone());
+        let mut item = |e: Option<(u32, Vec<String>)>| -> io::Result<Option<String>> {
+            let Some((numid, items)) = e else { return Ok(None) };
+            let v = self.get(Some(numid))?.unwrap_or(0) as usize;
+            Ok(items.get(v).cloned())
+        };
+        let digital_mode = item(dm)?;
+        let spdif_source = item(ss)?;
         Ok(Now {
+            digital_mode,
+            spdif_source,
             lines,
             standalone: on(self.get(self.f.standalone)?),
             firmware: self.get(self.f.firmware)?,
@@ -207,6 +226,25 @@ impl Panel {
             };
             return self.c.write(numid, &[if *on { TALK_ON } else { TALK_OFF }]);
         }
+        // An enum by its item's name.
+        let named = match ch {
+            Change::Clock(s) => Some((self.f.clock.clone(), s, "a clock")),
+            Change::DigitalMode(s) => Some((self.f.digital_mode.clone(), s, "a digital mode")),
+            Change::SpdifSource(s) => Some((self.f.spdif_source.clone(), s, "an S/PDIF source")),
+            _ => None,
+        };
+        if let Some((e, want, what)) = named {
+            let Some((numid, items)) = e else {
+                return Err(io::Error::new(
+                    io::ErrorKind::NotFound,
+                    format!("the interface hasn't {what} to set"),
+                ));
+            };
+            let Some(i) = items.iter().position(|x| x.eq_ignore_ascii_case(want.trim())) else {
+                return Err(io::Error::new(io::ErrorKind::InvalidInput, format!("no such item: {want}")));
+            };
+            return self.c.write(numid, &[i as i64]);
+        }
         let line = |n: usize| self.f.lines.iter().find(|l| l.n == n);
         if let Change::LineVolume(n, raw) = ch {
             let Some(v) = line(*n).and_then(|l| l.volume) else {
@@ -230,13 +268,16 @@ impl Panel {
             Change::LineMute(n, _) => line(*n).and_then(|l| l.mute),
             Change::Standalone(_) => self.f.standalone,
             Change::Talk(_) | Change::LineVolume(..) => unreachable!("set above"),
+            Change::Clock(_) | Change::DigitalMode(_) | Change::SpdifSource(_) => unreachable!("set above"),
         };
         let on = match ch {
             Change::Inst(_, b) | Change::Pad(_, b) | Change::Air(_, b) | Change::Phantom(_, b) => *b,
             Change::LineHw(_, b) | Change::LineMute(_, b) => *b,
             Change::Persists(b) | Change::Dim(b) | Change::Mute(b) | Change::Talk(b) => *b,
             Change::Standalone(b) => *b,
-            Change::LineVolume(..) => unreachable!("set above"),
+            Change::LineVolume(..) | Change::Clock(_) | Change::DigitalMode(_) | Change::SpdifSource(_) => {
+                unreachable!("set above")
+            }
         };
         let Some(numid) = numid else {
             return Err(io::Error::new(io::ErrorKind::NotFound, "the interface hasn't that switch"));
