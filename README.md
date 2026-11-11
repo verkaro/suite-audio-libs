@@ -84,6 +84,15 @@ tool's.
   standalone), a plan of mixes set on it, the mixer kept on a thread of its own, routing and
   the mixer set by hand with its inputs shared out by need, and every control put back as it
   was found.
+- `as-interfaces`: the audio interfaces by what they are (a USB box by its `/dev/snd/by-id`
+  name, with its serial), their rates and channels at each, found again at their `hw:N`;
+  whether JACK may run realtime. Only reads, under a root tests fake. No JACK.
+- `as-jackd`: the JACK server itself: jackd started from settings (the interface found, setup
+  commands run, its own session, a dated marker in the family's jackd log), found by
+  `JACK_DEFAULT_SERVER`, watched (xruns, the graph, its going away), stopped by its pid unless a
+  named client holds it, and `Dummy`, the tests' server of their own.
+- `as-localtime`: local wall-clock time through the C library, in the formats Dexter's files
+  use.
 - `as-rawmidi`: ALSA raw MIDI out: ports found by card under `/dev/snd`, a port opened for
   writing, note on and off, program change, controllers and panic as bytes.
 - `as-pitch`: a tone's pitch by YIN and a staged long-lag refinement, good to a few cents from

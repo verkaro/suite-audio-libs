@@ -18,10 +18,13 @@ as-envelope = { path = "crates/envelope" }
 as-flac = { path = "crates/flac" }
 as-focusrite = { path = "crates/focusrite" }
 as-http = { path = "crates/http" }
+as-interfaces = { path = "crates/interfaces" }
 as-ir = { path = "crates/ir" }
+as-jackd = { path = "crates/jackd" }
 as-jack-keeper = { path = "crates/jack-keeper" }
 as-jack-capture = { path = "crates/jack-capture" }
 as-keep = { path = "crates/keep" }
+as-localtime = { path = "crates/localtime" }
 as-loudness = { path = "crates/loudness" }
 as-meter = { path = "crates/meter" }
 as-opening = { path = "crates/opening" }

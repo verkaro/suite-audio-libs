@@ -1,0 +1,10 @@
+[package]
+name = "as-interfaces"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "The audio interfaces by what they are (/dev/snd/by-id), their rates and channels, and a rig's interface found at hw:N"
+
+[dependencies]
+serde.workspace = true

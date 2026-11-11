@@ -1,0 +1,10 @@
+[package]
+name = "as-localtime"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Local wall-clock time through the C library, in the formats Dexter's files use"
+
+[dependencies]
+libc.workspace = true

@@ -1,0 +1,17 @@
+[package]
+name = "as-jackd"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "The JACK server itself: jackd started from settings, found, watched and stopped, and a dummy server for tests"
+
+[dependencies]
+as-interfaces.workspace = true
+as-localtime.workspace = true
+jack.workspace = true
+libc.workspace = true
+
+[dev-dependencies]
+libc.workspace = true
+jack.workspace = true

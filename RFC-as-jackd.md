@@ -2,7 +2,10 @@
 
 From the family's session, 2026-11-11, for jackbay (`../Jackbay.md`, step a) and Dexter's step 8
 (`Dexter.md`). Read from Dexter's `main` at `e98d44f`, with nothing run and nothing moved. Dexter
-isn't touched: its copy stays its own until its step 8, and this waits for Warren's go-ahead.
+isn't touched: its copy stays its own until its step 8.
+
+**Settled and moved, 2026-11-11.** Warren took every recommendation below, and the three crates
+are in (see "Settled" and "Found in the move", at the end).
 
 ## What's there
 
@@ -95,3 +98,22 @@ Each has a recommendation, which the work goes on by once he gives the go-ahead.
    graph? Recommended: yes. A deck server with no engine (`--attach`) holds no audio, so jackbay
    may start and stop JACK then, asked as always. Dexter's own stop refuses on the same name, so
    the two agree.
+
+## Settled (Warren, 2026-11-11)
+
+All four as recommended: `as-interfaces` a crate of its own, with no JACK; `Settings` in the suite,
+Dexter re-exporting it as `JackConfig` at its step 8; one jackd log, `$XDG_STATE_HOME/jack/jackd.log`;
+and "the deck has JACK" when the engine's client, `dexter`, is attached (`as_jackd::holder`).
+
+## Found in the move
+
+- **The server's name can't be passed to a client.** libjack takes it as a variadic argument
+  to `jack_client_open`, and the `jack` crate never passes one, so `ClientOptions::SERVER_NAME`
+  can't be used safely. A client finds its server by `JACK_DEFAULT_SERVER` alone. So
+  `as-jackd` reads the name from there, as Dexter did (`server_name`), and passes it only to
+  `Settings::args`. The safety the proposal wanted comes from `Dummy` instead: it refuses to
+  start unless `JACK_DEFAULT_SERVER` already names it, so a test's clients can't reach
+  another server.
+- **What proves it** ran: the moved unit tests, and `SUITE_JACK_TEST=1` on `asjackdtest-<pid>`,
+  beside Warren's running jackd, which it never touched. `as-interfaces`' look at this machine
+  (`show_interfaces`, read only) finds the Clarett 2Pre by its serial.

@@ -66,6 +66,13 @@ name = "as-http"
 version = "0.1.0"
 
 [[package]]
+name = "as-interfaces"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "as-ir"
 version = "0.1.0"
 dependencies = [
@@ -91,7 +98,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-jackd"
+version = "0.1.0"
+dependencies = [
+ "as-interfaces",
+ "as-localtime",
+ "jack",
+ "libc",
+]
+
+[[package]]
 name = "as-keep"
+version = "0.1.0"
+dependencies = [
+ "libc",
+]
+
+[[package]]
+name = "as-localtime"
 version = "0.1.0"
 dependencies = [
  "libc",

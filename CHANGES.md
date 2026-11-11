@@ -4,6 +4,26 @@ What changed in an interface or a behaviour, newest first: a line for each, nami
 what a tool has to do about it. Read it before moving a pin. Begun 2026-11-07; for before that,
 the git log.
 
+## 2026-11-11
+
+- `as-jackd`, `as-interfaces` and `as-localtime`, new crates, moved in from Dexter at `e98d44f`
+  for jackbay (`RFC-as-jackd.md`). Nothing to do for a tool until it takes them. Dexter keeps
+  its own copies until its step 8, which has these to follow:
+  - **`Settings`** is `JackConfig`; `args(server)` is `jackd_args()`, with the server's name
+    passed; `on_dummy(captures, playbacks)` takes the counts a project's tracks make.
+  - **`start(&Start, probe, log, out)`** for `start_server(&Config, log, out)`. `Start` holds the
+    settings, the interface's id and the setup commands. `Start::interface_missing` is the test
+    in `without_interface`.
+  - **`stop(probe, refuse, force)`** for `stop_server(force)`: Dexter passes its engine's name.
+  - **The log** is `$XDG_STATE_HOME/jack/jackd.log`, shared by whoever starts JACK (Warren,
+    2026-11-11). `run_start`, `tail` and `noise` as before; `Follow` reads new lines.
+  - **`Monitor`** has `graph()` beside `xruns`, `shut_down`, `dsp_load` and `clients`; Dexter's
+    `watch` text is built on it and `Follow`.
+  - `find`, `running_io`, `running_driver`, `running_alsa_device` and `started` as before.
+- `as-jackd`: `Dummy`, the tests' JACK server (`<tool>test-<pid>`, dummy driver, stopped by its
+  own pid), and `eventually`. Every tool, and `as-jack-keeper`, `as-transport` and
+  `as-jack-capture` here, writes its own today: each can move onto it when it wants.
+
 ## 2026-11-10
 
 - `as-focusrite`: `Focusrite::spdif_source` (a Clarett's `S/PDIF Source Capture Enum`, the

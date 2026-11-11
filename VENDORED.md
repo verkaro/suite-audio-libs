@@ -143,6 +143,25 @@ for focusrite-ctrl (Warren, 2026-11-10: contributed now, Dexter moving onto it l
   `DEXTER_…`; the tests' scratch names. As it was otherwise: its comments still name Dexter's
   docs, its deck and its mixes. Dexter keeps its own copy until its step 7.
 
+From Dexter at `e98d44f77be270380e4d086240506777ac3c62f6` (2026-11-11), read with `git show`,
+for jackbay (Warren, 2026-11-11: the suite's half of Dexter's step 8 first, `RFC-as-jackd.md`):
+
+- `crates/localtime` (`dexter-localtime`), now `as-localtime`, with its tests: renamed, its
+  first comment. As it was otherwise.
+- `crates/system/src/interfaces.rs`, now `as-interfaces` (`crates/interfaces`), with `cards` and
+  `limit` from `crates/system/src/lib.rs` and its tests from `src/tests.rs` (the two Claretts
+  faked under a scratch root): renamed, its first comment, `rates` tested directly. As it was
+  otherwise.
+- `crates/jack/src/jackd.rs`, now `as-jackd` (`crates/jackd`), and `JackConfig` and
+  `jackd_args` from `crates/project/src/config.rs`, now `Settings` and `Settings::args`. Changed:
+  the settings, interface and setup commands come in a `Start`, not a project's `Config`; the
+  server's name is an argument of `args`; the probe's client name, and the clients that refuse
+  a stop, are the caller's; the log is `$XDG_STATE_HOME/jack/jackd.log` (Warren, 2026-11-11);
+  `Settings::on_dummy` takes the counts, which Dexter makes from its tracks; `watch`'s text stays
+  Dexter's. Written here: `Monitor`'s notification handler (Dexter's is its engine's), `Follow`,
+  `holder`, `clients`, `Dummy` and `eventually`. Its tests are Dexter's, and
+  `tests/dummy.rs`, new. Dexter keeps its own copy until its step 8.
+
 Written here, not moved:
 
 - `crates/serve` (`as-serve`, 2026-11-09, for dexter-irma): a tool's server over `as-http` and
