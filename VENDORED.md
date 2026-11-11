@@ -133,6 +133,16 @@ show`, for dexter-irma's step 1:
   channels, `&[Vec<f32>]`, where place had its `Sound`, and its gain is `as_ir::unit_energy`; as
   it was otherwise. Its tests, from place's `crates/library/src/tests.rs`.
 
+From Dexter at `e98d44f77be270380e4d086240506777ac3c62f6` (2026-11-10), with `git archive`,
+for focusrite-ctrl (Warren, 2026-11-10: contributed now, Dexter moving onto it later):
+
+- `crates/focusrite` (`dexter-focusrite`), now `as-focusrite`, with its tests and `testdata/`
+  (the 18i20 3rd gen's controls, read from Warren's, a list of controls and not a recording).
+  Changed: renamed; its first comment; the tests' variables `SUITE_FOCUSRITE_TEST`,
+  `SUITE_FOCUSRITE_JACK` and `SUITE_FOCUSRITE_PUT_BACK`, and `BLESS`, where Dexter's are
+  `DEXTER_…`; the tests' scratch names. As it was otherwise: its comments still name Dexter's
+  docs, its deck and its mixes. Dexter keeps its own copy until its step 7.
+
 Written here, not moved:
 
 - `crates/serve` (`as-serve`, 2026-11-09, for dexter-irma): a tool's server over `as-http` and

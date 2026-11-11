@@ -4,6 +4,13 @@ What changed in an interface or a behaviour, newest first: a line for each, nami
 what a tool has to do about it. Read it before moving a pin. Begun 2026-11-07; for before that,
 the git log.
 
+## 2026-11-10
+
+- `as-focusrite`, a new crate: Dexter's `dexter-focusrite`, moved in for focusrite-ctrl. The
+  same interface as Dexter's at `e98d44f`. Its tests on the interface itself are
+  `SUITE_FOCUSRITE_TEST=1` (and `SUITE_FOCUSRITE_JACK=1` for `landing`); the fake's file is
+  rewritten with `BLESS=1` on an 18i20 3rd gen. Nothing to do for a tool until it takes it.
+
 ## 2026-11-09
 
 - `as-serve`, a new crate: a tool's server over `as-http` and `as-ws`. `Server::serve` runs the

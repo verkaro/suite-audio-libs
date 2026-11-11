@@ -16,6 +16,7 @@ as-defects = { path = "crates/defects" }
 as-draw = { path = "crates/draw" }
 as-envelope = { path = "crates/envelope" }
 as-flac = { path = "crates/flac" }
+as-focusrite = { path = "crates/focusrite" }
 as-http = { path = "crates/http" }
 as-ir = { path = "crates/ir" }
 as-jack-keeper = { path = "crates/jack-keeper" }

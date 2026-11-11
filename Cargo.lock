@@ -53,6 +53,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-focusrite"
+version = "0.1.0"
+dependencies = [
+ "jack",
+ "libc",
+ "rtrb",
+]
+
+[[package]]
 name = "as-http"
 version = "0.1.0"
 

@@ -192,8 +192,14 @@ Found when this was written (Dexter's `main` at `26be596`):
 Self-contained, so anything that goes wrong is the move itself. Its tests take a fake card read
 from Warren's 18i20 (`testdata/18i20-gen3.txt`), which is a list of controls, not a recording.
 
-> Read ../suite-audio-libs/Dexter.md, steps 7 to 10, then do step 7: move crates/focusrite into
-> the suite as as-focusrite, and Dexter onto it, as a PR.
+**The suite's half is done** (Warren, 2026-11-10, for focusrite-ctrl): `as-focusrite` is
+Dexter's `crates/focusrite` at `e98d44f`, as `VENDORED.md` says. What's left is Dexter's half.
+Anything changed in Dexter's copy since `e98d44f` (the Clarett 2Pre's work, say) goes into the
+suite first, then Dexter moves onto it.
+
+> Read ../suite-audio-libs/Dexter.md, steps 7 to 10, then do step 7: as-focusrite is in the
+> suite already; bring in anything Dexter's crates/focusrite has changed since e98d44f, then
+> move Dexter onto it, as a PR.
 
 **Yours:** the page's INTERFACE tab and the monitor mixes on the 18i20 and the Clarett 2Pre, as
 before.

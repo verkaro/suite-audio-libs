@@ -89,6 +89,10 @@ Since then, from Tape and ducky: `loudness`, `biquad`, `snapshot`, `envelope`, `
    (`Dexter.md`, steps 7 to 10: `focusrite`, `jackd.rs`, the bay, the rig's JACK half), so
    there's never a second copy; jackbay starts once they're done. A Focusrite app of its own
    may follow on `as-focusrite`. No other tool controls JACK.
+   - **`as-focusrite` came first** (Warren, 2026-11-10): moved in from Dexter for
+     focusrite-ctrl, the Focusrite app, without Dexter moving onto it yet. Until Dexter's step
+     7, Dexter's `crates/focusrite` is a second copy: a fix either needs goes here, and Dexter's
+     copy follows at its step 7.
    - jackbay has a panel, and it's the one muntin sends you to when JACK is down, so it runs
      without JACK: it's what starts it.
 6. **KMS panels** (Warren, 2026-11-07): place and scape stay on their pages, with no KMS panel.
