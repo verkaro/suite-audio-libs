@@ -60,6 +60,9 @@ automation, any routing. A tool may offer a side-chain high-pass if the spec kee
 
 ## `as-eq`
 
+**Replaced by `RFC-eq.md` (Warren, 2026-11-12):** four fixed bands in an SSL 4000 style, not six
+slots. What follows is kept as the record.
+
 **Slots.** Six, in a fixed order, each with a kind and the controls its kind has. Any slot may be
 any kind; the spec may fix the ends (slot 1 a high-pass, slot 6 a low-pass) if that reads better
 on a panel. Processed in slot order. A slot off is passed over, not run at unity.
