@@ -196,9 +196,15 @@ impl Session {
     /// The snapshot's bundles with the session's declarations, and the declarations that
     /// didn't apply.
     pub fn bundles(&self, snap: &Snapshot) -> (Bundles, Vec<String>) {
+        self.bundles_with(snap, self.grouping)
+    }
+
+    /// As [`bundles`](Self::bundles), with the ports nobody declared grouped as `grouping`
+    /// says rather than as the session does: for a screen of its own (`as_bay::sheet`).
+    pub fn bundles_with(&self, snap: &Snapshot, grouping: Grouping) -> (Bundles, Vec<String>) {
         let (decls, problems) = Resolver::new(snap, vec![&self.scope]).bundle_decls();
         let mut problems: Vec<String> = problems.into_iter().map(|p| p.msg).collect();
-        let (bundles, more) = Bundles::derive_with(snap, &decls, self.grouping);
+        let (bundles, more) = Bundles::derive_with(snap, &decls, grouping);
         problems.extend(more.iter().map(ToString::to_string));
         (bundles, problems)
     }
@@ -340,6 +346,10 @@ mod tests {
         let (mono, _) = s.bundles(&snap);
         assert!(mono.iter().count() > guessed, "{guessed} bundles guessed");
         assert!(mono.iter().all(|(_, b)| b.ports.len() == 1));
+        // A grouping passed wins over the session's, both ways.
+        assert_eq!(s.bundles_with(&snap, Grouping::Guess).0.iter().count(), guessed);
+        s.set_grouping(Grouping::Guess);
+        assert_eq!(s.bundles_with(&snap, Grouping::Mono).0.iter().count(), mono.iter().count());
     }
 
     /// `snap` with `plan` applied, as a backend would.

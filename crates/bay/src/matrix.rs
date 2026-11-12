@@ -6,7 +6,7 @@
 //! It's plain owned data, worked out when it's built: a screen rebuilds it when the
 //! snapshot, the session or the view changes.
 
-use crate::bundle::{Bundle, Cell};
+use crate::bundle::{Bundle, Cell, Grouping};
 use crate::compile::Plan;
 use crate::error::{ErrorKind, Problem};
 use crate::model::{ClientId, Direction, PortId, PortType, Snapshot};
@@ -105,6 +105,9 @@ pub struct View {
     pub hide: Vec<Pattern>,
     /// Bundles with a port matching one of these come first, in their order otherwise.
     pub favourites: Vec<Pattern>,
+    /// How ports nobody declared are grouped on this screen. None: as the session groups
+    /// them. A staged line names ports, not rows, so it means the same in either.
+    pub grouping: Option<Grouping>,
 }
 
 /// A row or column.
@@ -211,7 +214,8 @@ pub struct Matrix {
 
 impl Matrix {
     pub fn build(snap: &Snapshot, session: &Session, stage: &Stage, view: &View) -> Matrix {
-        let (bundles, mut problems) = session.bundles(snap);
+        let grouping = view.grouping.unwrap_or(session.grouping());
+        let (bundles, mut problems) = session.bundles_with(snap, grouping);
         let names = session.names(snap);
         let axis = |b: &Bundle| {
             let client = snap.client(b.client).name();
@@ -590,6 +594,25 @@ mod tests {
         let sys =
             fixture::parse("out system:capture_1\nout system:capture_2\nin system:playback_1\n").unwrap();
         assert_eq!(Matrix::build(&sys, &Session::new(), &Stage::new(), &view).hidden, 0);
+    }
+
+    /// A view's own grouping wins over the session's, both ways; None is the session's.
+    #[test]
+    fn a_views_grouping() {
+        let s =
+            fixture::parse("out a:out_L\nout a:out_R\nin system:playback_1\nin system:playback_2\n").unwrap();
+        let stage = Stage::new();
+        let labels = |m: &Matrix| m.rows.iter().map(|a| a.bundle.label.clone()).collect::<Vec<_>>();
+        let mut session = Session::new();
+        let at = |session: &Session, g| {
+            Matrix::build(&s, session, &stage, &View { grouping: g, ..View::default() })
+        };
+        assert_eq!(labels(&at(&session, None)), ["out_L/R"]);
+        assert_eq!(labels(&at(&session, Some(Grouping::Mono))), ["out_L", "out_R"]);
+        assert_eq!(at(&session, Some(Grouping::Mono)).cols.len(), 2);
+        session.set_grouping(Grouping::Mono);
+        assert_eq!(labels(&at(&session, None)), ["out_L", "out_R"]);
+        assert_eq!(labels(&at(&session, Some(Grouping::Guess))), ["out_L/R"]);
     }
 
     #[test]

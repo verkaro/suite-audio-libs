@@ -6,6 +6,24 @@ the git log.
 
 ## 2026-11-11
 
+- `as-bay`: **`as_bay::sheet`**, new (`RFC-as-bay.md`, b2): `Sheet::new(backend, grouping)` or
+  `with_rules(…, rules)`, `op(screen, Op) -> Result<Matrix, Refused>`, `forget`, `define`,
+  `undefine`, `set_names`, `snapshot`, `count`. Nothing to do for a tool until it takes it.
+  - **`Rules`**: `check`, `warnings(now, after)`, `shown`, `reserved`, `favourites`, `log`, each
+    letting everything by unless a tool says otherwise. A warning that `ask`s refuses APPLY
+    with `Refused::Ask(lines)` until `anyway`; one that doesn't is only said. So `Refused` has
+    `Ask` beside the RFC's `Patch`, `Rule` and `Other`, and Dexter's loops and prints are one
+    `warnings` list.
+  - **The speaker mark is the tool's** (jackbay's ask 2): each staged line carries its `links`
+    by full port name, and the tool marks it over the `Matrix`. The sheet marks nothing.
+  - **`Matrix`** has `PatchMatrix`'s fields, with `warnings` for `loops` and `prints`, rows'
+    and columns' `declared` for `track`, and `grouping`. A line's `words` are as said when it
+    was staged.
+  - **A screen's own grouping** (jackbay's `SPEC.md` 8.3): `Op::View` carries `grouping`, None
+    being the sheet's own. Under it, `View::grouping` and `Session::bundles_with(snap,
+    grouping)`; None as before. Nothing to do for a tool that writes `View`s with
+    `..View::default()`; one written field by field adds `grouping: None`.
+  - On the fake backend it needs no JACK: a tool's `--sim` runs it as it is.
 - `as-bay` and `as-bay-jack`, new crates, moved in from Dexter at `e98d44f` for jackbay
   (`RFC-as-bay.md`, b1; the sheet, b2, is still to come). Nothing to do for a tool until it takes
   them. Dexter keeps its own copies until its step 9, which has these to follow:

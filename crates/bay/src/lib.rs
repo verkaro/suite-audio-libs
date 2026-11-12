@@ -19,6 +19,7 @@ pub mod model;
 pub mod render;
 pub mod resolve;
 pub mod session;
+pub mod sheet;
 pub mod stage;
 pub mod syntax;
 pub mod undolog;

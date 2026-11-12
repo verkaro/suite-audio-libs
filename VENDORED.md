@@ -181,6 +181,12 @@ now on the bay is changed here. Dexter keeps its own copies until its step 9.
 
 Written here, not moved:
 
+- `crates/bay/src/sheet.rs` (`as_bay::sheet`, 2026-11-11, `RFC-as-bay.md` b2, for jackbay):
+  written from Dexter's `crates/patch` at `e98d44f`, its sheet without Dexter's rules, which
+  stay Dexter's (its tracks and mixes, the guard, the loops, `studio`). A screen's own grouping
+  (`View::grouping`, `Session::bundles_with`) is jackbay's, its `docs/dev/SPEC.md` 8.3. Its tests
+  are the sheet's of Dexter's, on a graph written out here, and new ones. Dexter keeps its own
+  until its step 9.
 - `crates/serve` (`as-serve`, 2026-11-09, for dexter-irma): a tool's server over `as-http` and
   `as-ws`. Written fresh, after the shape BRR's, Tape's and ducky's servers share, each of which
   holds its own until it moves. Two things differ from theirs: a client that can't take what

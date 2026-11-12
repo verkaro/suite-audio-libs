@@ -94,6 +94,9 @@ tool's.
 - `as-bay`: the patch bay's core, Warren's bay: the graph as a snapshot, bundles and their
   names, the patch syntax parsed, compiled to a plan and printed back, the matrix and its views,
   staged lines, the session and its undo, and a fake backend with its fixture format. No I/O.
+  `as_bay::sheet` is a tool's patch bay over it: one bay shared by several screens, each with
+  its view, its grouping and its staged lines, TO, CUT and ONLY, APPLY and UNDO, and the tool's
+  own rules through a trait. It runs on the fake backend for a tool's `--sim`.
 - `as-bay-jack`: the bay's JACK backend: the graph read from any `jack::Client`, a plan run
   through one, a counter of graph notices, and a backend on a client of its own (`bay`, or the
   tool's name).
