@@ -419,3 +419,233 @@ fn the_new_designs_in_pieces_are_the_whole() {
         assert_eq!(parts, whole);
     }
 }
+
+// The matched designs (`specs/eq.md`, "`as-biquad`: what's added").
+
+const RATES: [f64; 3] = [44_100.0, 48_000.0, 96_000.0];
+
+/// The gains on the grid, either way.
+const GAINS: [f64; 14] = [0.5, 1.0, 3.0, 6.0, 9.0, 12.0, 15.0, -0.5, -1.0, -3.0, -6.0, -9.0, -12.0, -15.0];
+
+/// By thirds of an octave from `lo` to `hi`.
+fn thirds(lo: f64, hi: f64) -> Vec<f64> {
+    let n = (3.0 * libm::log2(hi / lo)).floor() as i32;
+    (0..=n).map(|k| lo * libm::pow(2.0, k as f64 / 3.0)).collect()
+}
+
+/// A matched design's analog prototype, `(b, a)` with `s` normalised to its frequency: the
+/// boost's, for a cut the two swapped.
+fn prototype(kind: &str, q: f64, gain: f64) -> ([f64; 3], [f64; 3]) {
+    let a = libm::pow(10.0, gain.abs() / 40.0);
+    let r = a.sqrt() / q;
+    let (b, d) = match kind {
+        "peak" => ([1.0, a / q, 1.0], [1.0, 1.0 / (a * q), 1.0]),
+        "low" => ([a * a, a * r, a], [1.0, r, a]),
+        "high" => ([a, a * r, a * a], [a, r, 1.0]),
+        _ => unreachable!(),
+    };
+    if gain < 0.0 { (d, b) } else { (b, d) }
+}
+
+fn design(kind: &str, hz: f64, q: f64, gain: f64, rate: f64) -> Biquad {
+    match kind {
+        "peak" => Biquad::peak_matched(hz, q, gain, rate),
+        "low" => Biquad::low_shelf_matched(hz, q, gain, rate),
+        "high" => Biquad::high_shelf_matched(hz, q, gain, rate),
+        _ => unreachable!(),
+    }
+}
+
+/// Where each kind is matched.
+fn match_at(kind: &str, hz: f64, rate: f64) -> f64 {
+    if kind == "high" { (0.75 * hz).min(rate / 6.0) } else { hz }
+}
+
+/// The analog prototype's gain in dB at `f`.
+fn analog_db(kind: &str, hz: f64, q: f64, gain: f64, f: f64) -> f64 {
+    let (b, a) = prototype(kind, q, gain);
+    db(analog(b, a, f / hz))
+}
+
+/// The worst difference from the analog curve, 20 Hz to 20 kHz (or 0.45 of the rate if lower).
+fn worst(kind: &str, hz: f64, q: f64, gain: f64, rate: f64) -> f64 {
+    let f = design(kind, hz, q, gain, rate);
+    freqs(160, 20.0, 20_000.0f64.min(0.45 * rate))
+        .into_iter()
+        .map(|x| (db(f.gain(x, rate)) - analog_db(kind, hz, q, gain, x)).abs())
+        .fold(0.0, f64::max)
+}
+
+/// Stable and minimum phase: `1 + c1 z⁻¹ + c2 z⁻²` has both roots inside the unit circle.
+fn inside(c1: f64, c2: f64) -> bool {
+    c2.abs() < 1.0 && c1.abs() < 1.0 + c2
+}
+
+/// The grid of `specs/eq.md`: bells at 20 Hz to 16 kHz by thirds, Q 0.15 to 4; shelves at Q 1.0
+/// over their bands' ranges (LF 30 to 450 Hz, HF 1.5 to 16 kHz); every gain on `GAINS`.
+fn grid() -> Vec<(&'static str, f64, f64, f64)> {
+    let mut g = Vec::new();
+    for hz in thirds(20.0, 16_000.0) {
+        for q in [0.15, 0.25, 0.4, 0.7, 1.0, 1.4, 2.0, 2.8, 4.0] {
+            g.extend(GAINS.iter().map(|&gain| ("peak", hz, q, gain)));
+        }
+    }
+    for hz in thirds(30.0, 450.0) {
+        g.extend(GAINS.iter().map(|&gain| ("low", hz, 1.0, gain)));
+    }
+    for hz in thirds(1500.0, 16_000.0) {
+        g.extend(GAINS.iter().map(|&gain| ("high", hz, 1.0, gain)));
+    }
+    g
+}
+
+#[test]
+fn matched_reads_the_analog_at_dc_nyquist_and_its_match() {
+    // 1e-8 dB, not the spec's first 1e-9: a section at 20 Hz at 96 kHz sums coefficients near 1
+    // to about 1.7e-6 at DC, so its own rounding allows about 2e-9 dB there (measured 1.1e-9).
+    for rate in RATES {
+        for (kind, hz, q, gain) in [
+            ("peak", 1000.0, 1.0, 9.0),
+            ("peak", 16_000.0, 0.4, -15.0),
+            ("peak", 40.0, 4.0, 3.0),
+            ("peak", 20.0, 4.0, 15.0),
+            ("peak", 20.0, 0.15, -0.5),
+            ("low", 30.0, 1.0, -15.0),
+            ("low", 100.0, 1.0, 15.0),
+            ("low", 400.0, 1.0, -6.0),
+            ("high", 10_000.0, 1.0, 12.0),
+            ("high", 16_000.0, 1.0, -15.0),
+        ] {
+            let f = design(kind, hz, q, gain, rate);
+            for x in [0.0, 0.5 * rate, match_at(kind, hz, rate)] {
+                let want = analog_db(kind, hz, q, gain, x);
+                let got = db(f.gain(x, rate));
+                assert!(
+                    (got - want).abs() < 1e-8,
+                    "{kind} {hz} {q} {gain} at {rate}, {x} Hz: {got} for {want}"
+                );
+            }
+        }
+        // And the general form, on a section none of the designs is: a resonant low-pass with a
+        // notch above it.
+        let (b, a) = ([1.0, 0.0, 0.25], [1.0, 0.3, 1.0]);
+        let f = Biquad::matched(b, a, 3000.0, rate, 5000.0);
+        for x in [0.0, 0.5 * rate, 5000.0] {
+            assert!((db(f.gain(x, rate)) - db(analog(b, a, x / 3000.0))).abs() < 1e-8, "{rate} {x}");
+        }
+    }
+}
+
+#[test]
+fn a_section_and_its_inverse_null_an_impulse() {
+    for rate in RATES {
+        for (kind, hz, q, gain) in [
+            ("peak", 1000.0, 0.4, 15.0),
+            ("peak", 12_000.0, 4.0, -9.0),
+            ("low", 60.0, 1.0, 12.0),
+            ("high", 8000.0, 1.0, -15.0),
+        ] {
+            let f = design(kind, hz, q, gain, rate);
+            let mut x = vec![0.0; 4096];
+            x[0] = 1.0;
+            f.run(&mut x);
+            f.inverse().run(&mut x);
+            for (k, v) in x.iter().enumerate() {
+                let want = if k == 0 { 1.0 } else { 0.0 };
+                assert!((v - want).abs() < 1e-12, "{kind} {hz} {gain} at {rate}: {k} is {v}");
+            }
+        }
+    }
+}
+
+#[test]
+fn a_cut_is_the_boosts_exact_inverse() {
+    for (boost, cut) in [
+        (Biquad::peak_matched(2000.0, 0.7, 9.0, 48_000.0), Biquad::peak_matched(2000.0, 0.7, -9.0, 48_000.0)),
+        (
+            Biquad::low_shelf_matched(100.0, 1.0, 6.0, 48_000.0),
+            Biquad::low_shelf_matched(100.0, 1.0, -6.0, 48_000.0),
+        ),
+        (
+            Biquad::high_shelf_matched(9000.0, 1.0, 15.0, 44_100.0),
+            Biquad::high_shelf_matched(9000.0, 1.0, -15.0, 44_100.0),
+        ),
+    ] {
+        assert_eq!(boost.inverse(), cut);
+    }
+    for hz in [100.0, 1000.0, 10_000.0] {
+        assert_eq!(Biquad::peak_matched(hz, 1.0, 0.0, 48_000.0), Biquad::IDENTITY);
+        assert_eq!(Biquad::low_shelf_matched(hz, 1.0, 0.0, 48_000.0), Biquad::IDENTITY);
+        assert_eq!(Biquad::high_shelf_matched(hz, 1.0, 0.0, 48_000.0), Biquad::IDENTITY);
+    }
+}
+
+#[test]
+fn every_design_on_the_grid_is_stable_minimum_phase_and_reached() {
+    for rate in RATES {
+        for (kind, hz, q, gain) in grid() {
+            let (b, a) = prototype(kind, q, gain.abs());
+            let (f, reached) = matched(b, a, hz, rate, match_at(kind, hz, rate));
+            assert!(reached, "{kind} {hz} {q} {gain} at {rate}: can't reach");
+            let f = if gain < 0.0 { f.inverse() } else { f };
+            let all = [f.b0, f.b1, f.b2, f.a1, f.a2];
+            assert!(all.iter().all(|c| c.is_finite()), "{kind} {hz} {q} {gain} at {rate}: {f:?}");
+            assert!(inside(f.a1, f.a2), "{kind} {hz} {q} {gain} at {rate}: unstable, {f:?}");
+            assert!(inside(f.b1 / f.b0, f.b2 / f.b0), "{kind} {hz} {q} {gain} at {rate}: not minimum phase");
+        }
+    }
+}
+
+#[test]
+fn every_design_on_the_grid_follows_its_analog_curve() {
+    // The spec's bounds, and the worst found under each, printed for the record (2026-11-12:
+    // 0.651, 0.803, 0.926, 0.002, 0.301, 1.887).
+    let mut found = [0.0f64; 6];
+    let mut bad = Vec::new();
+    for rate in RATES {
+        for (kind, hz, q, gain) in grid() {
+            let w = worst(kind, hz, q, gain, rate);
+            let (i, bound) = match kind {
+                "peak" if hz <= 7000.0 && q >= 0.7 => (0, 0.7),
+                "peak" if hz <= 10_000.0 => (1, 1.0),
+                "peak" => (2, 1.8),
+                "low" => (3, 0.05),
+                "high" if hz <= 10_000.0 => (4, 0.35),
+                _ => (5, 2.5),
+            };
+            found[i] = found[i].max(w);
+            if w >= bound {
+                bad.push(format!("{kind} {hz:.0} Q {q} {gain:+} at {rate}: {w:.3} dB"));
+            }
+        }
+    }
+    println!("worst: {found:?}");
+    assert!(bad.is_empty(), "off the analog by more than the bound:\n{}", bad.join("\n"));
+}
+
+#[test]
+fn a_bell_at_16_khz_keeps_its_analog_shape() {
+    // The RFC's test: +6 dB, Q 2, at 48 kHz, within 0.5 dB of the analog from 8 to 20 kHz.
+    let f = Biquad::peak_matched(16_000.0, 2.0, 6.0, 48_000.0);
+    for x in freqs(100, 8000.0, 20_000.0) {
+        let d = db(f.gain(x, 48_000.0)) - analog_db("peak", 16_000.0, 2.0, 6.0, x);
+        assert!(d.abs() < 0.5, "{x}: {d}");
+    }
+}
+
+#[test]
+fn the_matched_designs_in_pieces_are_the_whole() {
+    let x: Vec<f64> =
+        (0..10_000).map(|k| libm::sin(k as f64 * 0.37) + 0.1 * libm::cos(k as f64 * 0.011)).collect();
+    for kind in ["peak", "low", "high"] {
+        let f = design(kind, 3000.0, 1.0, -7.0, 48_000.0);
+        let mut whole = x.clone();
+        f.run(&mut whole);
+        let mut parts = x.clone();
+        let mut st = [0.0; 4];
+        for c in parts.chunks_mut(331) {
+            f.process(c, &mut st);
+        }
+        assert_eq!(parts, whole);
+    }
+}

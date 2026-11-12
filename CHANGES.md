@@ -6,6 +6,9 @@ the git log.
 
 ## 2026-11-12
 
+- `as-biquad`: `Biquad::matched`, `peak_matched`, `low_shelf_matched`, `high_shelf_matched` and
+  `inverse`, added (step 2 of `specs/shared.md`, for `as-eq`). `lowpass_matched` unchanged, bit for
+  bit. Nothing for a tool to do.
 - `as-control`, new (step 1 of `specs/shared.md`; its spec is `crates/control/docs/spec.md`):
   `Control`, `Kind`, `Scale`, `Unit`, `Law`, `Shows`, `Size`; `clamp`, `step`, `grid`, `format`,
   `parse`, `find`, `check`. Nothing for a tool to do: `as-eq` and `as-dynamics` take it first.

@@ -70,6 +70,8 @@ tool's.
   dial), and `check`, which a unit's tests run over its list.
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every
   machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass; any analog
+  second-order section matched at DC, Nyquist and a chosen frequency, and from it a bell and
+  shelves that keep their analog shape to Nyquist, each cut the boost's exact inverse; any analog
   second-order section by the bilinear transform, with second-order high- and low-passes,
   cookbook shelves and shelves with their poles at the corner, Butterworth sections, and Q
   from a bandwidth in octaves.

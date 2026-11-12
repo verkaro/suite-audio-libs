@@ -76,6 +76,25 @@ With a `CHANGES.md` line ("added; nothing for the tools to do"), tests in `as-bi
   `peak_matched(16 kHz, Q 2, +6 dB)` at 48 kHz within 0.5 dB of the analog bell from 8 to 20 kHz.
   (The prototype read 0.48.)
 
+**As built (step 2, 2026-11-12).** `Biquad::matched(b, a, f0, rate, match_hz)`, `peak_matched`,
+`low_shelf_matched`, `high_shelf_matched` and `inverse`, as named above. Two figures moved, each
+measured:
+
+- **The match points within 1e-8 dB,** not 1e-9. A section at 20 Hz at 96 kHz has numerator
+  coefficients near 1 that sum to about 1.7e-6 at DC, so f64 rounding in the coefficients alone
+  allows about 2e-9 dB there; a Q 4, +15 dB bell read 1.1e-9. Nothing the design can do about it;
+  far below hearing.
+- **A bell within 0.7 dB** where its centre is at or below 7 kHz and Q_eff at or above 0.7, not
+  0.6. The grid by thirds found 0.651 dB at 6.45 kHz, Q 0.7, ±15 dB, at 44.1 kHz (0.609 at 48),
+  where the prototype's coarser grid had 0.56. The rest held: 0.80 (bound 1.0), 0.93 (1.8), 0.002
+  (low shelf, 0.05), 0.30 (high shelf to 10 kHz, 0.35), 1.89 (above, 2.5).
+
+And one thing the prototype didn't show: Vicanek's formula for the numerator, as written, takes
+`(b0 − b2)²` as the difference of two numbers near 4 when the poles and zeros crowd DC, and lost
+three digits on a 40 Hz bell (2e-9 dB off at 44.1 kHz, 1.2e-8 at 96). It's computed instead from
+the poles one at a time, with `1 − r` kept apart (`expm1`), as `(want − (r0·φ0 − r1·φ1)²)/(4φ0φ1)`.
+`lowpass_matched` shares the pole placement and gives the same bits as before.
+
 ## `as-eq`
 
 ### The layout

@@ -14,6 +14,11 @@
 //!   ([`Biquad::bilinear`]), and from it the second-order high-pass and low-pass, the
 //!   cookbook's low and high shelves, and shelves whose poles sit at the corner and whose
 //!   zeros sit a gain away from it ([`Biquad::low_shelf_poles_at`], [`Biquad::high_shelf_poles_at`]).
+//! - Matched designs (2026-11-12, for `as-eq`; `specs/eq.md`): any analog second-order section
+//!   with its poles exact and its magnitude matched at DC, Nyquist and a chosen frequency
+//!   ([`Biquad::matched`]); from it a bell and the cookbook's shelves that keep their analog
+//!   shape up to Nyquist ([`Biquad::peak_matched`], [`Biquad::low_shelf_matched`],
+//!   [`Biquad::high_shelf_matched`]), each cut the boost's exact inverse ([`Biquad::inverse`]).
 //! - [`q_from_octaves`] turns a bandwidth in octaves into a Q; [`butterworth`] gives the
 //!   sections of an order-`n` Butterworth filter, to be cascaded from [`First::highpass`] and
 //!   [`Biquad::highpass`] (or their low-pass kin).
@@ -135,16 +140,7 @@ impl Biquad {
     /// lie above Nyquist.
     pub fn lowpass_matched(f0: f64, q: f64, match_hz: f64, rate: f64) -> Biquad {
         let w0 = 2.0 * PI * f0 / rate; // the analog corner, radians a sample
-        let zeta = 1.0 / (2.0 * q);
-        let r = libm::exp(-zeta * w0);
-        let a1 = if zeta < 1.0 {
-            -2.0 * r * libm::cos(w0 * (1.0 - zeta * zeta).sqrt())
-        } else if zeta == 1.0 {
-            -2.0 * r
-        } else {
-            -2.0 * r * libm::cosh(w0 * (zeta * zeta - 1.0).sqrt())
-        };
-        let a2 = r * r;
+        let (a1, a2) = poles_invariant(w0, 1.0 / (2.0 * q));
         // |A(e^{jw})|² = A0 φ0 + A1 φ1 + A2 φ2, φ0 = cos²(w/2), φ1 = sin²(w/2), φ2 = 4 φ0 φ1.
         let (big0, big1, big2) =
             ((1.0 + a1 + a2) * (1.0 + a1 + a2), (1.0 - a1 + a2) * (1.0 - a1 + a2), -4.0 * a2);
@@ -159,6 +155,72 @@ impl Biquad {
         let sum = 1.0 + a1 + a2;
         let diff = ((want * den - big0 * p0) / p1).max(0.0).sqrt();
         Biquad { b0: (sum + diff) / 2.0, b1: (sum - diff) / 2.0, b2: 0.0, a1, a2 }
+    }
+
+    /// Any analog second-order section, `(b[2] s² + b[1] s + b[0]) / (a[2] s² + a[1] s + a[0])`
+    /// (coefficients in order of the power of `s`, `s` normalised to `ω0 = 2π f0`), matched at
+    /// `rate` Hz: its poles the analog poles exactly (impulse invariance, as
+    /// [`Biquad::lowpass_matched`] places them), its numerator chosen so its magnitude is the
+    /// analog magnitude at DC, at Nyquist and at `match_hz`, the minimum-phase root taken.
+    /// Vicanek's method (*Matched Second Order Digital Filters*, 2016). `f0` may lie above
+    /// Nyquist; `match_hz` lies between 0 and Nyquist; `a[2]` isn't 0 and `a` is stable. A
+    /// magnitude the section can't reach (a square root's argument below 0) is taken as 0 and the
+    /// design goes on.
+    pub fn matched(b: [f64; 3], a: [f64; 3], f0: f64, rate: f64, match_hz: f64) -> Biquad {
+        matched(b, a, f0, rate, match_hz).0
+    }
+
+    /// The bell `(s² + s·A/q + 1) / (s² + s/(A·q) + 1)`, `A = 10^(|gain_db|/40)`, `s` normalised
+    /// to `2π hz`, by [`Biquad::matched`] at its centre: `gain_db` there exactly, and the analog
+    /// bell's shape up to Nyquist where [`Biquad::peak`] cramps. A cut is the boost's exact
+    /// inverse. 0 dB is the identity.
+    pub fn peak_matched(hz: f64, q: f64, gain_db: f64, rate: f64) -> Biquad {
+        if gain_db == 0.0 {
+            return Biquad::IDENTITY;
+        }
+        let a = libm::pow(10.0, gain_db.abs() / 40.0);
+        let f = Biquad::matched([1.0, a / q, 1.0], [1.0, 1.0 / (a * q), 1.0], hz, rate, hz);
+        if gain_db < 0.0 { f.inverse() } else { f }
+    }
+
+    /// The cookbook's low shelf ([`Biquad::low_shelf`]'s prototype, half the gain in dB at `hz`)
+    /// by [`Biquad::matched`] at its corner. A cut is the boost's exact inverse. 0 dB is the
+    /// identity.
+    pub fn low_shelf_matched(hz: f64, q: f64, gain_db: f64, rate: f64) -> Biquad {
+        if gain_db == 0.0 {
+            return Biquad::IDENTITY;
+        }
+        let a = libm::pow(10.0, gain_db.abs() / 40.0);
+        let r = a.sqrt() / q;
+        let f = Biquad::matched([a * a, a * r, a], [1.0, r, a], hz, rate, hz);
+        if gain_db < 0.0 { f.inverse() } else { f }
+    }
+
+    /// The cookbook's high shelf ([`Biquad::high_shelf`]'s prototype) by [`Biquad::matched`] at
+    /// `min(0.75·hz, rate/6)`, below its corner, which keeps it nearest the analog curve across
+    /// an EQ's high band (`specs/eq.md`). A cut is the boost's exact inverse. 0 dB is the
+    /// identity.
+    pub fn high_shelf_matched(hz: f64, q: f64, gain_db: f64, rate: f64) -> Biquad {
+        if gain_db == 0.0 {
+            return Biquad::IDENTITY;
+        }
+        let a = libm::pow(10.0, gain_db.abs() / 40.0);
+        let r = a.sqrt() / q;
+        let at = (0.75 * hz).min(rate / 6.0);
+        let f = Biquad::matched([a, a * r, a * a], [a, r, 1.0], hz, rate, at);
+        if gain_db < 0.0 { f.inverse() } else { f }
+    }
+
+    /// The exact inverse, `(1/b0) (1 + a1 z⁻¹ + a2 z⁻²) / (1 + (b1/b0) z⁻¹ + (b2/b0) z⁻²)`, as
+    /// [`First::inverse`] is: stable when this one is minimum phase, as the matched designs are.
+    pub fn inverse(&self) -> Biquad {
+        Biquad {
+            b0: 1.0 / self.b0,
+            b1: self.a1 / self.b0,
+            b2: self.a2 / self.b0,
+            a1: self.b1 / self.b0,
+            a2: self.b2 / self.b0,
+        }
     }
 
     /// Any analog second-order section, `(b[2] s² + b[1] s + b[0]) / (a[2] s² + a[1] s + a[0])`
@@ -270,6 +332,86 @@ impl Biquad {
         let d = (1.0 + self.a1 * c1 + self.a2 * c2, -self.a1 * s1 - self.a2 * s2);
         ((n.0 * n.0 + n.1 * n.1) / (d.0 * d.0 + d.1 * d.1)).sqrt()
     }
+}
+
+/// The poles of an analog `s² + 2ζ·w0·s + w0²` by impulse invariance, `w0` in radians a
+/// sample: `(a1, a2)` of `1 + a1 z⁻¹ + a2 z⁻²`.
+fn poles_invariant(w0: f64, zeta: f64) -> (f64, f64) {
+    let r = libm::exp(-zeta * w0);
+    let a1 = if zeta < 1.0 {
+        -2.0 * r * libm::cos(w0 * (1.0 - zeta * zeta).sqrt())
+    } else if zeta == 1.0 {
+        -2.0 * r
+    } else {
+        -2.0 * r * libm::cosh(w0 * (zeta * zeta - 1.0).sqrt())
+    };
+    (a1, r * r)
+}
+
+/// The analog section's magnitude squared at `x` times its `ω0`.
+fn analog_sq(c: [f64; 3], x: f64) -> f64 {
+    let re = c[0] - c[2] * x * x;
+    let im = c[1] * x;
+    re * re + im * im
+}
+
+/// The analog poles, `s² + 2ζ·w0·s + w0²` (`w0` in radians a sample), as impulse invariance puts
+/// them in the z-plane: each with `1 − r` kept apart from `r`, so a pole near 1 loses nothing.
+struct Poles {
+    /// `(r, 1 − r, θ)` of each pole; a conjugate pair has `θ` and `−θ`.
+    each: [(f64, f64, f64); 2],
+}
+
+impl Poles {
+    fn new(w0: f64, zeta: f64) -> Poles {
+        let pole = |x: f64, theta: f64| (libm::exp(-x), -libm::expm1(-x), theta);
+        if zeta < 1.0 {
+            let theta = w0 * (1.0 - zeta * zeta).sqrt();
+            Poles { each: [pole(zeta * w0, theta), pole(zeta * w0, -theta)] }
+        } else {
+            let d = w0 * (zeta * zeta - 1.0).sqrt();
+            Poles { each: [pole(zeta * w0 - d, 0.0), pole(zeta * w0 + d, 0.0)] }
+        }
+    }
+
+    /// `|1 + a1 e^{−jw} + a2 e^{−2jw}|²`, a pole at a time, `|1 − r e^{j(θ − w)}|² = (1 − r)² +
+    /// 4r sin²((θ − w)/2)`: no difference of nearly equal numbers, however near 1 the poles sit.
+    fn mag_sq(&self, w: f64) -> f64 {
+        self.each.iter().fold(1.0, |m, &(r, one_less, theta)| {
+            let s = libm::sin((theta - w) / 2.0);
+            m * (one_less * one_less + 4.0 * r * s * s)
+        })
+    }
+}
+
+/// [`Biquad::matched`], and whether every magnitude asked for was reached (false if a square
+/// root's argument fell below 0 and was taken as 0).
+pub(crate) fn matched(b: [f64; 3], a: [f64; 3], f0: f64, rate: f64, match_hz: f64) -> (Biquad, bool) {
+    // The poles: the denominator as s² + 2ζω s + ω², ω in units of ω0.
+    let (n1, n0) = (a[1] / a[2], a[0] / a[2]);
+    let w = n0.sqrt();
+    let (w0, zeta) = (w * 2.0 * PI * f0 / rate, n1 / (2.0 * w));
+    let (a1, a2) = poles_invariant(w0, zeta);
+    let poles = Poles::new(w0, zeta);
+    // With φ1 = sin²(w/2), φ0 = 1 − φ1, a section's |H|² is B0 φ0 + B1 φ1 + B2 · 4φ0φ1, where
+    // B0 = (b0 + b1 + b2)², B1 = (b0 − b1 + b2)², B2 = −4 b0 b2. DC sets B0, Nyquist B1, the
+    // match B2; the analog |H|² times the poles' |A|² is what the numerator has to make.
+    let h = |hz: f64| analog_sq(b, hz / f0) / analog_sq(a, hz / f0);
+    let s = libm::sin(PI * match_hz / rate);
+    let (p1, p0) = (s * s, 1.0 - s * s);
+    let p2 = 4.0 * p0 * p1;
+    let r0 = (h(0.0) * poles.mag_sq(0.0)).sqrt(); // b0 + b1 + b2
+    let r1 = (h(rate / 2.0) * poles.mag_sq(PI)).sqrt(); // b0 − b1 + b2
+    let want = h(match_hz) * poles.mag_sq(2.0 * PI * match_hz / rate);
+    // (b0 − b2)², written so it isn't a difference of two numbers near 4 when the poles and zeros
+    // crowd DC: from B2 = (want − B0 φ0 − B1 φ1) / (4φ0φ1) and (b0 + b2)² = ((r0 + r1)/2)².
+    let t = r0 * p0 - r1 * p1;
+    let arg = (want - t * t) / p2;
+    let reached = arg >= 0.0;
+    let (half, diff) = (0.5 * (r0 + r1), arg.max(0.0).sqrt());
+    // b0 the larger, for minimum phase.
+    let (b0, b2) = (0.5 * (half + diff), 0.5 * (half - diff));
+    (Biquad { b0, b1: 0.5 * (r0 - r1), b2, a1, a2 }, reached)
 }
 
 /// The Q of a bell or a band `bw` octaves wide (between its −3 dB points, or a bell's

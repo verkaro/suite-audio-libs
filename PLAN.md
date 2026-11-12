@@ -177,7 +177,7 @@ move, never copied from one tool to another.
   steps (0 to 7), one a session, each naming its model. Step 0 waits only on Warren's word. The
   EQ's steps, 1 to 3, go ahead of s1, s2 and the waveform (Warren, 2026-11-12: nothing needs his
   ear until sonorack's panel); 4 to 7 still wait on them. **Steps done:** 0 (`as-bench`,
-  2026-11-12), 1 (`as-control`, 2026-11-12).
+  2026-11-12), 1 (`as-control`, 2026-11-12), 2 (`as-biquad`'s matched designs, 2026-11-12).
 
 Staying in their tools: foley's UCS table, place's positions and its opening played by hand,
 and Tape's and ducky's engines.
