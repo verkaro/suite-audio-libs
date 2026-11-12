@@ -112,6 +112,10 @@ differ in what they detect and how fast.
 
 ### `fet`, the FET style (the 1176's manner)
 
+**Replaced by `RFC-fet.md` (2026-11-12):** Input and Output at 0 dB by default, the dials as the
+unit's 1 to 7, the side-chain high-pass dropped, the stage's colour growing with the reduction.
+What follows is kept as the record.
+
 **Topology: feedback.** The detector listens to the output of the gain cell, one sample late, so
 the ratio and the times depend on the programme as a feedback compressor's do (harder material
 compresses sooner and releases differently). The spec writes the loop: `y[n] = x[n] · g[n]`,
