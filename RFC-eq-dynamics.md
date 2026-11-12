@@ -153,6 +153,10 @@ at each ratio. Gain reduction never exceeds 40 dB.
 
 ### `opto`, the optical style (the LA-4's manner)
 
+**Replaced by `RFC-opto.md` (2026-11-12):** the cell's four behaviours written out, Gain at 0 dB
+by default, a 2A position on the ratio switch, the memory as a readout. What follows is kept as
+the record.
+
 **Topology: feedback,** with the detector's "cell" the thing that makes it: a light driven by the
 output, a photocell that reads it slowly and remembers.
 
