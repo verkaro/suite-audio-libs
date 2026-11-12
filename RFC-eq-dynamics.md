@@ -185,6 +185,9 @@ reduction never exceeds 40 dB.
 
 ### `deess`, the de-esser
 
+**Replaced by `RFC-deess.md` (2026-11-12):** a dynamic bell in split mode, a fixed width, a
+second listen setting. What follows is kept as the record.
+
 **Topology: feed forward,** the detector on the input through a band-pass, so the reduction is
 exact and the test can say so.
 
