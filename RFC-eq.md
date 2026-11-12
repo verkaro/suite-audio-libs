@@ -207,6 +207,17 @@ suite session after s1 and s2, with its `docs/spec.md`, README and `VENDORED.md`
 sonorack takes it at its step 1 (`../Sonorack.md`), and the first gate is Warren's: a voice through
 the EQ, by ear, with the shelf's bump and the proportional Q the things to listen for.
 
+## Later: the Symetrix 551E (Warren, 2026-11-12)
+
+Warren owns a Symetrix 551E, a five-band parametric EQ he rates. Its function, measured from his
+unit and switchable mono to stereo, is wanted **after sonorack works,** as a project of its own:
+a voicing of the rack's EQ or a tool of its own, decided then. Nothing is built for it now.
+
+What it asks of `as-eq` now: **a voicing may bring its own band layout** (how many bands, and each
+band's kind and ranges), not only its own figures, since the 551E's five bands aren't the four here.
+The spec writes the four-band layout as one layout, so a second can be added later without
+reworking the crate. The dbx 286s was weighed and set aside (Warren, 2026-11-12).
+
 ## For the spec session to decide (not Warren)
 
 - The proportional-Q law, and the shelf's Q.
