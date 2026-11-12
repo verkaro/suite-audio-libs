@@ -241,6 +241,9 @@ impl Comp {
 
 #[test]
 fn a_compressor_reads_as_written() {
+    if slow() {
+        return;
+    }
     for rate in RATES {
         let c = Comp { thr: -30.0, ratio: 4.0, knee: 6.0, attack: 0.050, release: 0.200, rate: rate as f64 };
         let m = Maker::new(rate, CEILING_DB);
@@ -262,6 +265,16 @@ fn a_compressor_reads_as_written() {
             assert!((r / c.release - 1.0).abs() < 0.05, "{rate}: release {r}");
         }
     }
+}
+
+/// A slow test runs only with `FAMILY_SLOW` set, as CI and `family.sh check --slow` do (Warren,
+/// 2026-11-12). Skipped, it says so.
+fn slow() -> bool {
+    if std::env::var_os("FAMILY_SLOW").is_some() {
+        return false;
+    }
+    eprintln!("skipped: slow, set FAMILY_SLOW=1 to run it");
+    true
 }
 
 /// The compressor above with a memory: its release slows the longer it's been reducing, from
@@ -393,6 +406,9 @@ mod figures {
 
     #[test]
     fn a_model_reduces_to_figures_that_survive_the_file() {
+        if slow() {
+            return;
+        }
         let rate = 48_000;
         let c = Comp { thr: -30.0, ratio: 4.0, knee: 6.0, attack: 0.050, release: 0.200, rate: rate as f64 };
         let m = Maker::new(rate, CEILING_DB);

@@ -188,6 +188,9 @@ fn every_connection_is_checked_before_the_tool_sees_it() {
 
 #[test]
 fn a_client_that_doesnt_listen_is_closed_and_the_rest_arent_held_up() {
+    if slow() {
+        return;
+    }
     let run = start();
     let (mut a, a_w) = connect(&run.addr);
     text(&mut a);
@@ -206,6 +209,16 @@ fn a_client_that_doesnt_listen_is_closed_and_the_rest_arent_held_up() {
     until("the deaf one to leave", || *run.tool.left.lock().unwrap() == vec![2]);
     a_w.send_text("1").unwrap();
     assert_eq!(text(&mut a), "n 1 by 1");
+}
+
+/// A slow test runs only with `FAMILY_SLOW` set, as CI and `family.sh check --slow` do (Warren,
+/// 2026-11-12). Skipped, it says so.
+fn slow() -> bool {
+    if std::env::var_os("FAMILY_SLOW").is_some() {
+        return false;
+    }
+    eprintln!("skipped: slow, set FAMILY_SLOW=1 to run it");
+    true
 }
 
 #[test]

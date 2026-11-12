@@ -49,6 +49,9 @@ fn band(hz: f64) -> (f64, f64) {
 
 #[test]
 fn sines() {
+    if slow() {
+        return;
+    }
     for k in 21..=108 {
         for off in [-30.0, -15.0, 0.0, 15.0, 30.0] {
             let hz = key_hz(k) * 2f64.powf(off / 1200.0);
@@ -58,6 +61,16 @@ fn sines() {
             assert!(cents(e.hz, hz).abs() < 2.0, "key {k} {off}: {} vs {hz}", e.hz);
         }
     }
+}
+
+/// A slow test runs only with `FAMILY_SLOW` set, as CI and `family.sh check --slow` do (Warren,
+/// 2026-11-12). Skipped, it says so.
+fn slow() -> bool {
+    if std::env::var_os("FAMILY_SLOW").is_some() {
+        return false;
+    }
+    eprintln!("skipped: slow, set FAMILY_SLOW=1 to run it");
+    true
 }
 
 #[test]

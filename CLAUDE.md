@@ -21,6 +21,7 @@ made here therefore shows up at once in every tool beside it that uses the crate
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test
+FAMILY_SLOW=1 cargo test                                  # also the slow tests, as CI does
 cargo test -p as-wav NAME                                 # one test in one crate
 BLESS=1 cargo test -p as-wav reference_files              # rewrites testdata/: on purpose only
 SUITE_JACK_TEST=1 cargo test -p as-jack-keeper --test dummy   # also as-transport, as-jack-capture, as-jackd, as-bench; as-bay-jack's is --test live
