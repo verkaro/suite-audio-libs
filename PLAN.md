@@ -170,6 +170,12 @@ move, never copied from one tool to another.
   (Settled, 5): `Dexter.md`'s steps 7 to 10, after step 5, at Dexter's pace.
 - **`noise`**, a recording's floor matched, from scape's `core/src/noise.rs`, when a second tool
   wants it.
+- **The shaping units,** for sonorack first: `as-bench` (measuring hardware against a model,
+  built first so the rig can start early), `as-control`, `as-biquad`'s matched designs, `as-eq`
+  and `as-dynamics` (`deess`, `opto`, `fet`). Written here, not moved. Shaped by `RFC-shaping.md`
+  and the four unit RFCs; specified in `specs/` (2026-11-12), read from `specs/shared.md`, eight
+  steps (0 to 7), one a session, each naming its model. Step 0 waits only on Warren's word; steps
+  1 to 7 on s1 and s2. **Steps done:** none.
 
 Staying in their tools: foley's UCS table, place's positions and its opening played by hand,
 and Tape's and ducky's engines.
