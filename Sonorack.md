@@ -54,10 +54,9 @@ writes the local patch.
 
 - `CLAUDE.md`, "Project state": "nothing is built", and "waits on `as-eq` … after the suite's s1 and
   s2". The EQ's steps went ahead of s1 and s2 (Warren, 2026-11-12), and `as-eq` exists.
-- `CLAUDE.md`'s order and `docs/dev/TODO.md`: `sonorack measure` comes first, ahead of the EQ
-  (Warren, 2026-11-12, settled with the bench's spec; `../HANDOFFS.md`, "For sonorack"). That isn't
-  written into either file yet. Its suite half, `as-bench`, is built. Nothing in step 1 depends on
-  `measure`, so either can go first. Which one is Warren's call.
+- `CLAUDE.md`'s order and `docs/dev/TODO.md`: `sonorack measure` no longer comes first. It was
+  settled to go ahead of the EQ, with the bench's spec. Now it waits until after the RACK voicings
+  (Warren, 2026-11-12; below). Step 1 is next.
 - CI from `../ci-template.yml`, with the repository's first `Cargo.toml`.
 
 ## Warren's note on the compressors (2026-11-12)
@@ -69,6 +68,6 @@ So the RACK voicings, as `specs/deess.md`, `opto.md` and `fet.md` have them, are
 heard first. The LA-4 and KT76 voicings, fitted to his measured units, come only after all three
 RACK voicings have passed his ears. As `CLAUDE.md` has it now, the LA-4 is measured and voiced
 right after the optical's RACK voicing (step 6), before the FET's (step 7). The note moves both
-hardware voicings after step 7. Write that into the order. Measuring with `sonorack measure`
-itself can still start early, since the rig's readings take time to gather. Ask Warren if the
-note meant measuring to wait too.
+hardware voicings after step 7. **Measuring waits too** (Warren, 2026-11-12): `sonorack measure`,
+the loopback at the rig and both units measured all come after step 7, ahead of the LA-4 and KT76
+voicings. Write that into the order.
