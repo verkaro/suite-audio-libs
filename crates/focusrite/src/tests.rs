@@ -901,8 +901,8 @@ fn prints_are_never_heard_in_what_they_print() {
     let p = Plan::new(&f, &one_spare(r.clone()));
     assert_eq!(p.others, [(15, "S/PDIF 1".to_string())]);
     let mut m = Mixer::setup(Box::new(card.clone()), f.clone(), p, &lv).unwrap();
-    for k in 0..4 {
-        lv.inputs[k][0] = (c, c);
+    for input in lv.inputs.iter_mut().take(4) {
+        input[0] = (c, c);
     }
     m.apply(&lv).unwrap();
     assert_eq!((get("I", 16), get("J", 16)), (0, 0));
