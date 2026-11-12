@@ -14,7 +14,7 @@
 //!   ([`Biquad::bilinear`]), and from it the second-order high-pass and low-pass, the
 //!   cookbook's low and high shelves, and shelves whose poles sit at the corner and whose
 //!   zeros sit a gain away from it ([`Biquad::low_shelf_poles_at`], [`Biquad::high_shelf_poles_at`]).
-//! - Matched designs (2026-11-12, for `as-eq`; `specs/eq.md`): any analog second-order section
+//! - Matched designs (2026-11-12, for `as-eq`; `crates/eq/docs/spec.md`): any analog second-order section
 //!   with its poles exact and its magnitude matched at DC, Nyquist and a chosen frequency
 //!   ([`Biquad::matched`]); from it a bell and the cookbook's shelves that keep their analog
 //!   shape up to Nyquist ([`Biquad::peak_matched`], [`Biquad::low_shelf_matched`],
@@ -198,7 +198,7 @@ impl Biquad {
 
     /// The cookbook's high shelf ([`Biquad::high_shelf`]'s prototype) by [`Biquad::matched`] at
     /// `min(0.75·hz, rate/6)`, below its corner, which keeps it nearest the analog curve across
-    /// an EQ's high band (`specs/eq.md`). A cut is the boost's exact inverse. 0 dB is the
+    /// an EQ's high band (`crates/eq/docs/spec.md`). A cut is the boost's exact inverse. 0 dB is the
     /// identity.
     pub fn high_shelf_matched(hz: f64, q: f64, gain_db: f64, rate: f64) -> Biquad {
         if gain_db == 0.0 {

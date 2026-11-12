@@ -6,6 +6,10 @@ the git log.
 
 ## 2026-11-12
 
+- `as-eq`, new (step 3 of `specs/shared.md`; its spec is `crates/eq/docs/spec.md`): `Eq`
+  (`new`, `set`, `process`, `process2`, `settings`, `settled`, `readouts`), `Settings` (`get`,
+  `set_by_id`, `held`), `Layout::CHANNEL`, `controls`, `response`, `band_response`, `marker`,
+  `q_eff`. Nothing for a tool to do: sonorack takes it first, at its step 1.
 - `as-biquad`: `Biquad::matched`, `peak_matched`, `low_shelf_matched`, `high_shelf_matched` and
   `inverse`, added (step 2 of `specs/shared.md`, for `as-eq`). `lowpass_matched` unchanged, bit for
   bit. Nothing for a tool to do.

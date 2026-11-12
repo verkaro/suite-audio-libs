@@ -420,7 +420,7 @@ fn the_new_designs_in_pieces_are_the_whole() {
     }
 }
 
-// The matched designs (`specs/eq.md`, "`as-biquad`: what's added").
+// The matched designs (`crates/eq/docs/spec.md`, "`as-biquad`: what's added").
 
 const RATES: [f64; 3] = [44_100.0, 48_000.0, 96_000.0];
 
@@ -481,7 +481,7 @@ fn inside(c1: f64, c2: f64) -> bool {
     c2.abs() < 1.0 && c1.abs() < 1.0 + c2
 }
 
-/// The grid of `specs/eq.md`: bells at 20 Hz to 16 kHz by thirds, Q 0.15 to 4; shelves at Q 1.0
+/// The grid of `crates/eq/docs/spec.md`: bells at 20 Hz to 16 kHz by thirds, Q 0.15 to 4; shelves at Q 1.0
 /// over their bands' ranges (LF 30 to 450 Hz, HF 1.5 to 16 kHz); every gain on `GAINS`.
 fn grid() -> Vec<(&'static str, f64, f64, f64)> {
     let mut g = Vec::new();

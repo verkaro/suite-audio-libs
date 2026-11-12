@@ -85,6 +85,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-eq"
+version = "0.1.0"
+dependencies = [
+ "as-biquad",
+ "as-control",
+ "as-envelope",
+ "libm",
+]
+
+[[package]]
 name = "as-flac"
 version = "0.1.0"
 dependencies = [

@@ -1,6 +1,6 @@
 use super::*;
 
-// Controls written as the specs' tables have them (`specs/eq.md`, `opto.md`, `fet.md`), so the
+// Controls written as the specs' tables have them (`crates/eq/docs/spec.md`, `opto.md`, `fet.md`), so the
 // rules are tried on every kind the units will declare. The units' own lists are checked in
 // their own crates.
 

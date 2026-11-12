@@ -19,6 +19,7 @@ as-conv = { path = "crates/conv" }
 as-defects = { path = "crates/defects" }
 as-draw = { path = "crates/draw" }
 as-envelope = { path = "crates/envelope" }
+as-eq = { path = "crates/eq" }
 as-flac = { path = "crates/flac" }
 as-focusrite = { path = "crates/focusrite" }
 as-http = { path = "crates/http" }
@@ -82,4 +83,6 @@ opt-level = 3
 [profile.dev.package.as-bands]
 opt-level = 3
 [profile.dev.package.as-bench]
+opt-level = 3
+[profile.dev.package.as-eq]
 opt-level = 3

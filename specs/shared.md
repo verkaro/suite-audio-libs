@@ -14,7 +14,7 @@ Eight files, read in this order:
 | `shared.md` (this) | the rules every unit keeps, and the test rigs | |
 | `../crates/control/docs/spec.md` | `as-control`, the controls as data | `as-control` (built) |
 | `../crates/bench/docs/spec.md` | measuring hardware against a model: play, record, check, reduce | `as-bench` (built) |
-| `eq.md` | `as-biquad`'s matched designs, and `as-eq` | `as-biquad` additions, `as-eq` |
+| `../crates/eq/docs/spec.md` | `as-biquad`'s matched designs, and `as-eq` | `as-biquad` additions, `as-eq` (built) |
 | `dynamics.md` | `as-dynamics`' core: the gain computer, the feedback loop, levels, rigs | `as-dynamics` core |
 | `deess.md` | `deess` | |
 | `opto.md` | `opto`, its RACK voicing | |
@@ -46,8 +46,8 @@ not on writing code. If that isn't enough, the step is rerun on Fable alone (bel
 |---|---|---|---|---|---|---|
 | 0 | `as-bench` | `../crates/bench/docs/spec.md` | Opus 5.5 | **Fable 5.2** | high | built first, so the rig can start early (Warren, 2026-11-12); known methods (Farina's sweep, alignment), but a duplex JACK client and a reduction whose mistakes would mislead every fit later |
 | 1 | `as-control` | `../crates/control/docs/spec.md` | Opus 5.5 | none | medium | small and fully specified: types, stepping, parsing |
-| 2 | `as-biquad`: `matched`, the matched peak and shelves, `inverse` | `eq.md` | Opus 5.5 | none | high | the method and its figures were prototyped here; the tests say what to hit |
-| 3 | `as-eq` | `eq.md` | Opus 5.5 | none | high | assembly on step 2, and the crossfade written out |
+| 2 | `as-biquad`: `matched`, the matched peak and shelves, `inverse` | `../crates/eq/docs/spec.md` | Opus 5.5 | none | high | the method and its figures were prototyped here; the tests say what to hit |
+| 3 | `as-eq` | `../crates/eq/docs/spec.md` | Opus 5.5 | none | high | assembly on step 2, and the crossfade written out |
 | 4 | `as-dynamics` core: gain computers, the loop, levels, the rigs | `dynamics.md` | Opus 5.5 | none | high | written out to the formula, with an exact test for the loop |
 | 5 | `deess` | `deess.md` | Opus 5.5 | none | high | its detector was prototyped here |
 | 6 | `opto`, RACK | `opto.md` | Opus 5.5 | **Fable 5.2** | high | untried figures; two envelopes, a memory and a loop that interact |

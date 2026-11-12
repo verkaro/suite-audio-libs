@@ -1,9 +1,10 @@
 # Spec: `as-eq`, and `as-biquad`'s matched designs
 
-From the suite's session, 2026-11-12. Read `shared.md` first: its rules hold here and aren't
-repeated. The shape is `../RFC-eq.md` (settled 2026-11-12); this chooses what it left to the spec.
-Moves to `crates/eq/docs/spec.md` when the crate is made (the `as-biquad` part goes with it as the
-record of why those designs were added).
+From the suite's session, 2026-11-12. Read `specs/shared.md` first: its rules hold here and
+aren't repeated. The shape is `RFC-eq.md` (settled 2026-11-12); this chooses what it left to the
+spec. Moved here from `specs/eq.md` when the crate was made (step 3, 2026-11-12); the `as-biquad`
+part came with it as the record of why those designs were added. "As built", at the end, says what
+the builder chose and where it differs.
 
 ## What was decided here, and why
 
@@ -239,3 +240,59 @@ A voice through the EQ, by ear, from his own patching. What to listen for, which
 builds hands him: the shelf's bump on a top lift (sweet, or hissy?), the proportional Q (a big
 mid boost focused, a small one broad and gentle), the HF shelf at 16 kHz at 44.1 kHz, and no click
 or zip from any key held.
+
+## As built (step 3, 2026-11-12)
+
+The names are as above: `Eq` (`new`, `set`, `process`, `process2`, `settings`, `settled`,
+`readouts`), `Settings` (`get`, `set_by_id`, `held`, its fields public and held again by `set`),
+`Layout::CHANNEL`, `controls()`, `response`, `band_response`, `marker`, and `q_eff`, the law.
+`Settings` holds `[Band; 6]`, each band's `on`, `freq`, `gain`, `q`, `bell` and `steep` (the
+high-pass at 18); a field its layout gives no control is ignored. `response` includes the trim,
+so it's the sum of `band_response` plus the trim; both read 0 dB where the EQ is out. `marker`
+gives where a band is set, in or out, without a rate.
+
+**The new set is run over the last 100 ms of input, not given the old set's state** (Warren,
+2026-11-12). **Differs from the spec above** ("Changes: the crossfade, written out"), measured:
+
+- A band at 0 dB isn't run, so on the state-copy test's own step (0 to +6 dB) there was no state
+  to copy; and where there was (+3 to +9 dB), the copied direct-form memory, which fits the old
+  coefficients, thumped more than rest did. A 40 Hz sine at −6 dBFS, the LF shelf at 30 Hz, at
+  48 kHz, the step's peak against the steady peaks after it: copied 1.26 (+3 to +9), 1.67 (0 to
+  +15); from rest 1.19 and 1.28.
+- Neither burst above 4 kHz (−108 to −137 dB): a thump here is low, so the burst check can't tell.
+- So each set keeps the last 100 ms of input, each channel (allocated in `new`), and a new set
+  starts from rest and runs over it before the crossfade: it joins its steady state, as if it had
+  run all along. A 30 Hz shelf at +15 dB settles within 0.2% in that time. The cost is the pre-roll
+  per change, at most one per 10 ms: about 0.1 ms at 48 kHz, two channels, by estimate (not timed).
+- **The test** (`the_new_set_starts_settled`), 0 to +6 and 0 to +15 dB at each rate: the output
+  within 0.005 of the old and new sets' steady outputs crossfaded (found 0.0007 at most), its peak
+  within 0.5% of theirs (found 1.0001), nothing above 4 kHz over −80 dB; and from rest, the same
+  step strays by more than 0.03 and peaks more than 5% over (found 0.047 to 0.39, 1.07 to 1.50),
+  so the test shows the pre-roll matters.
+
+**The HF shelf reads its dial at Nyquist where its corner is at or below rate/20,** not rate/8.
+The analog shelf at Q 1.0 is still over its plateau there: at ±15 dB, 0.47 dB at 4 times its
+corner, 0.13 at 8, 0.08 at 10. So between rate/20 and rate/8 the test reads Nyquist against the
+analog shelf there, within 1e-6 dB (the match point), and the dial only from rate/20 down. Half
+the gain at the corner, within 0.25 dB up to rate/8, holds as written.
+
+**A unit that has run nothing yet takes its first settings at once,** with no crossfade or ramp:
+there's nothing to fade from, and a fresh unit set to a setting is the reference the rigs compare
+against.
+
+**Readings found:** every reading within 0.13 dB of its target where 0.25 is allowed (the HF
+shelf's corner), within 0.1 elsewhere; the HF bell at 16 kHz, ±15 dB, 44.1 kHz, within 1.59 dB of
+the analog bell; the shelf's bump 0.904 dB at ±15 and 0.229 at ±3; held keys at 0.91 of the
+step bound (a step no larger than at either end) and −94 dB or below above 4 kHz.
+
+**The ranges** are the E-series channel EQ's as commonly published; no manual was at hand to check
+them against, and the crate's README says so.
+
+**The denormal test** times blocks of a second of noise against the last of ten seconds of
+silence after it, with bands whose memory falls past the denormals within that time. Unflushed,
+the end is 25 times slower; flushed, no slower.
+
+**For Warren's gate** (sonorack's step 2), what to listen for: the shelf's bump on a top lift
+(sweet, or hissy?), the proportional Q (a big mid boost focused, a small one broad and gentle),
+the HF shelf at 16 kHz at 44.1 kHz, no click or zip from any key held, and no thump when a low
+shelf is stepped on a bass note.
