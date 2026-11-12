@@ -7,11 +7,12 @@ written from the settled RFCs (`../RFC-shaping.md`, `../RFC-eq-dynamics.md`, `..
 why. These say what has to be true when it's built, with every figure the RFCs left to "the spec"
 chosen.
 
-Seven files, read in this order:
+Eight files, read in this order:
 
 | File | What it covers | Builds |
 |---|---|---|
-| `shared.md` (this) | the rules every unit keeps, the test rigs, and `as-control` | `as-control` |
+| `shared.md` (this) | the rules every unit keeps, and the test rigs | |
+| `../crates/control/docs/spec.md` | `as-control`, the controls as data | `as-control` (built) |
 | `../crates/bench/docs/spec.md` | measuring hardware against a model: play, record, check, reduce | `as-bench` (built) |
 | `eq.md` | `as-biquad`'s matched designs, and `as-eq` | `as-biquad` additions, `as-eq` |
 | `dynamics.md` | `as-dynamics`' core: the gain computer, the feedback loop, levels, rigs | `as-dynamics` core |
@@ -29,7 +30,7 @@ RFC". The RFCs stay as the record; they aren't edited.
 
 ## The steps, and which model builds each
 
-Steps 1 to 7 wait on the suite's s1 and s2 (`../../NOTES.md`, the bookmark), as the RFCs say. Step
+Steps 1 to 7 waited on the suite's s1 and s2 (`../../NOTES.md`, the bookmark), as the RFCs say; the EQ's, 1 to 3, now go ahead of them (Warren, 2026-11-12; `../PLAN.md`). Step
 0, the bench, needs nothing of theirs and none of the units, so it can go first, once Warren says
 so; sonorack's `measure` then runs it, built first in sonorack (`as-bench`'s spec, settled 2026-11-12).
 
@@ -44,7 +45,7 @@ not on writing code. If that isn't enough, the step is rerun on Fable alone (bel
 | Step | What | Spec | Model | Advisor | Effort | Why |
 |---|---|---|---|---|---|---|
 | 0 | `as-bench` | `../crates/bench/docs/spec.md` | Opus 5.5 | **Fable 5.2** | high | built first, so the rig can start early (Warren, 2026-11-12); known methods (Farina's sweep, alignment), but a duplex JACK client and a reduction whose mistakes would mislead every fit later |
-| 1 | `as-control` | this file | Opus 5.5 | none | medium | small and fully specified: types, stepping, parsing |
+| 1 | `as-control` | `../crates/control/docs/spec.md` | Opus 5.5 | none | medium | small and fully specified: types, stepping, parsing |
 | 2 | `as-biquad`: `matched`, the matched peak and shelves, `inverse` | `eq.md` | Opus 5.5 | none | high | the method and its figures were prototyped here; the tests say what to hit |
 | 3 | `as-eq` | `eq.md` | Opus 5.5 | none | high | assembly on step 2, and the crossfade written out |
 | 4 | `as-dynamics` core: gain computers, the loop, levels, the rigs | `dynamics.md` | Opus 5.5 | none | high | written out to the formula, with an exact test for the loop |
@@ -168,90 +169,8 @@ a crate, automation, routing.
 
 ## `as-control`: the controls as data
 
-`RFC-eq.md` asked for every control to be described as data, so a panel's keys, a typed value, a
-page and later a FaderPort encoder all step alike, and left open where the description lives. **A
-crate of its own, `as-control`,** because `as-eq` and `as-dynamics` both need it and the suite keeps
-one of each thing; a module in one of them would make the other depend on it for no audio reason.
-sonofader2's desks will read the same descriptions, so it has a third user coming.
-
-It holds no audio and no unit's controls: each unit crate declares its own with it.
-
-### A control
-
-```rust
-pub struct Control {
-    pub id: &'static str,       // never changes: settings files and protocols use it
-    pub short: &'static str,    // a panel's label: "FREQ", "GAIN", "Q", "BELL", "IN"
-    pub long: &'static str,     // for `?` and a page's title text
-    pub kind: Kind,
-    pub default: f64,
-    pub detent: f64,            // where "back to the middle" goes
-}
-
-pub enum Kind {
-    /// A value on a line or a log scale.
-    Value { lo: f64, hi: f64, scale: Scale, fine: f64, coarse: f64, unit: Unit },
-    /// Named positions; the value is the position's index.
-    Switch { positions: &'static [&'static str] },
-}
-
-pub enum Scale { Linear, Log }   // Log steps in octaves of the value
-pub enum Unit { Hz, Db, Q, Ratio, Plain, Dial(DialLaw), /* … as a unit needs */ }
-```
-
-The shape is a sketch: the names and fields are the builder's, in the suite's plain voice. What it
-must do is below.
-
-**Values are `f64` everywhere,** a switch's being its position index. A unit's `Settings` gives
-`get(id) -> Option<f64>` and `set_by_id(id, v)` (held to range), so a panel, a snapshot file and a
-protocol work from ids alone. A unit lists its controls as `pub fn controls() -> &'static [Control]`
-(per voicing, later). Ids are local to the unit (`lf.freq`, `thr`); a tool puts its unit's name in
-front (`eq.lf.freq`) in its own files.
-
-### Stepping
-
-- **The grid is anchored at the detent.** A linear value's grid is `detent + k·fine`; a log value's
-  is `detent · 2^(k·fine)` (fine in octaves). `k` is an integer, and a stepped value is always
-  computed from `k`, never by adding a step to the last value, so up n and down n land exactly back.
-- **Coarse is a whole number of fine steps,** on the same grid. Every control below keeps this.
-- **From a value off the grid** (typed, or clamped), a step up goes to the next grid point above,
-  a step down to the next below.
-- **At the ends,** a step that would pass the range lands on the end itself. A step back from the
-  end goes to the grid point below it.
-- **To the detent:** one call.
-- **Switches** step one position, and stop at the ends (no wrap).
-
-`RFC-eq.md` anchored a frequency's grid at the range's low end. **Differs from the RFC:** anchored at
-the detent instead, so a band's default (100 Hz, 400 Hz, 3 kHz, 10 kHz) is on its own grid, and the
-first step from a fresh rack lands on a clean value. The low end isn't on any grid of round values
-anyway.
-
-### Format and parse
-
-One pair of functions both ways, per unit kind:
-
-| Unit | Shows | Reads |
-|---|---|---|
-| Hz | `80 Hz`, `450 Hz`, `1.20 kHz`, `16.0 kHz` (three figures) | `1200`, `1.2k`, `1k2`, `1.2 kHz`, `1200hz`, case and spaces ignored |
-| dB | `+3.0 dB`, `−4.5 dB`, `0.0 dB` | `3`, `+3`, `3dB`, `-4.5`, `−4.5` (the real minus too) |
-| Q | `Q 1.40` | `1.4`, `Q1.4`, `q 1.4` |
-| Ratio | `4:1`, and a switch's own names (`ALL`, `2A`) | `4`, `4:1`, the names |
-| Dial | `3 (234 µs)` | `3` sets the dial; `330us`, `0.33ms`, `330 µs` set the time and land on the nearest fine step of the dial |
-| Switch | the position's name | the name, case ignored, or a unique prefix |
-
-A value typed out of range is held to it and shown held, never refused. Text that can't be read
-is the one refusal: `parse` returns `None` and the panel says so.
-
-### Tests
-
-- For every control of every unit (each unit's test runs this over its own list): from the detent,
-  n steps up then n down returns exactly, for every n that stays inside the range; coarse the same.
-- `format` then `parse` returns the value, for every grid point of every value control and every
-  switch position.
-- The forgiving inputs above each parse as said.
-- Out of range is held; nonsense is `None`.
-- Each coarse step is a whole number of fine steps (a test over every control's description, so a
-  new control can't break it).
+Built (step 1, 2026-11-12). Its spec is `../crates/control/docs/spec.md`, with what was chosen
+as it was built.
 
 ## The test rigs every unit uses
 

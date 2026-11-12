@@ -14,6 +14,7 @@ as-bay = { path = "crates/bay" }
 as-bay-jack = { path = "crates/bay-jack" }
 as-bench = { path = "crates/bench" }
 as-biquad = { path = "crates/biquad" }
+as-control = { path = "crates/control" }
 as-conv = { path = "crates/conv" }
 as-defects = { path = "crates/defects" }
 as-draw = { path = "crates/draw" }

@@ -65,6 +65,9 @@ tool's.
   recorded sample-locked over JACK (never connecting a port), each capture checked at once,
   and the unit's captures and a model's reduced the same way to figures, pictures as data,
   and a sitting kept to resume.
+- `as-control`: a unit's controls as data: ranges, detents, fine and coarse steps on a grid
+  anchored at the detent, values shown and read as text (`1.2k`, `1k2`, `+3 dB`, `330us` on a
+  dial), and `check`, which a unit's tests run over its list.
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every
   machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass; any analog
   second-order section by the bilinear transform, with second-order high- and low-passes,

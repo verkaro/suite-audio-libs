@@ -1,0 +1,10 @@
+[package]
+name = "as-control"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "A unit's controls as data: ranges, detents, fine and coarse steps on a grid, and values shown and read as text, so keys, a typed value, a page and a surface all step alike"
+
+[dependencies]
+libm.workspace = true

@@ -123,6 +123,8 @@ named in its header:
   signals, alignment, the check, the reduction, figures, pictures as data, the sitting, and a
   JACK client of two outs and two ins. Written here, not moved. dexter-place's `place-measure`
   is the same idea; nothing was read from it or copied.
+- `crates/control` (`as-control`, 2026-11-12, step 1 of `specs/shared.md`, for `as-eq` and
+  `as-dynamics`, and sonofader2's desks later): the controls as data. Written here, not moved.
 
 From `dexter-foley` at `9e1ea2226362e43f786c1d781d510e536fccb0a2` (2026-11-09), with `git
 archive`, for dexter-irma's step 1:

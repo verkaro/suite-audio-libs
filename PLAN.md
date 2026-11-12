@@ -174,8 +174,10 @@ move, never copied from one tool to another.
   built first so the rig can start early), `as-control`, `as-biquad`'s matched designs, `as-eq`
   and `as-dynamics` (`deess`, `opto`, `fet`). Written here, not moved. Shaped by `RFC-shaping.md`
   and the four unit RFCs; specified in `specs/` (2026-11-12), read from `specs/shared.md`, eight
-  steps (0 to 7), one a session, each naming its model. Step 0 waits only on Warren's word; steps
-  1 to 7 on s1 and s2. **Steps done:** 0 (`as-bench`, 2026-11-12).
+  steps (0 to 7), one a session, each naming its model. Step 0 waits only on Warren's word. The
+  EQ's steps, 1 to 3, go ahead of s1, s2 and the waveform (Warren, 2026-11-12: nothing needs his
+  ear until sonorack's panel); 4 to 7 still wait on them. **Steps done:** 0 (`as-bench`,
+  2026-11-12), 1 (`as-control`, 2026-11-12).
 
 Staying in their tools: foley's UCS table, place's positions and its opening played by hand,
 and Tape's and ducky's engines.

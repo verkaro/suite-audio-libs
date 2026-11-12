@@ -6,6 +6,9 @@ the git log.
 
 ## 2026-11-12
 
+- `as-control`, new (step 1 of `specs/shared.md`; its spec is `crates/control/docs/spec.md`):
+  `Control`, `Kind`, `Scale`, `Unit`, `Law`, `Shows`, `Size`; `clamp`, `step`, `grid`, `format`,
+  `parse`, `find`, `check`. Nothing for a tool to do: `as-eq` and `as-dynamics` take it first.
 - `as-bench`, new (step 0 of `specs/shared.md`; its spec is `crates/bench/docs/spec.md`):
   signals under a ceiling with a sync mark, `align::find`, `check::{calibrate, check}`,
   `figures` (TOML), `picture` (as data), `sitting` (the measuring list, resume, redo),
