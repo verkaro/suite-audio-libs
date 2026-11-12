@@ -162,6 +162,23 @@ for jackbay (Warren, 2026-11-11: the suite's half of Dexter's step 8 first, `RFC
   `holder`, `clients`, `Dummy` and `eventually`. Its tests are Dexter's, and
   `tests/dummy.rs`, new. Dexter keeps its own copy until its step 8.
 
+From Dexter at `e98d44f77be270380e4d086240506777ac3c62f6` (2026-11-11), with `git archive`,
+for jackbay (Warren, 2026-11-11: the suite's half of Dexter's step 9 first, `RFC-as-bay.md`, b1):
+
+- `crates/bay-core`, now `as-bay` (`crates/bay`), with its tests and `testdata/studio.fake`:
+  renamed, its first comment. As it was otherwise.
+- `crates/bay-jack`, now `as-bay-jack` (`crates/bay-jack`), with its live test. Changed:
+  renamed; its first comment; `Jack::open_as(name)` added, `Jack::open()` still naming it `bay`;
+  the live test on `as_jackd::Dummy` (`asbaytest-<pid>`) with `SUITE_JACK_TEST=1`, where it made
+  a dummy of its own with `BAY_JACK_TEST=1`. As it was otherwise.
+
+Both are Warren's bay, bay-rs's `crates/core` and `crates/jack` at
+`af5c0c7bc5a332b06898c09cae700c0e45bd1e93`, which Dexter took with `git archive` on 2026-09-29
+(its `crates/bay-core/VENDORED.md`: `studio.fake` moved beside the crate, then rustfmt). bay-rs
+has no licence file; here, as in Dexter, they're MIT (Warren, 2026-10-03). bay-rs's `PLAN.md`
+and `SYNTAX.md`, which the comments name, aren't here yet (`RFC-as-bay.md`, Settled 4). From
+now on the bay is changed here. Dexter keeps its own copies until its step 9.
+
 Written here, not moved:
 
 - `crates/serve` (`as-serve`, 2026-11-09, for dexter-irma): a tool's server over `as-http` and

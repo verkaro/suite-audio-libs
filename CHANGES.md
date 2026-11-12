@@ -6,6 +6,14 @@ the git log.
 
 ## 2026-11-11
 
+- `as-bay` and `as-bay-jack`, new crates, moved in from Dexter at `e98d44f` for jackbay
+  (`RFC-as-bay.md`, b1; the sheet, b2, is still to come). Nothing to do for a tool until it takes
+  them. Dexter keeps its own copies until its step 9, which has these to follow:
+  - **`as_bay`** is `bay_core`, and **`as_bay_jack`** is `bay_jack`, as they were.
+  - **`Jack::open_as(name)`**, new: the backend's client under a tool's own name. `Jack::open()`
+    is `bay`, as before.
+  - **The live test** runs with `SUITE_JACK_TEST=1` on `as_jackd::Dummy`, where Dexter's is
+    `BAY_JACK_TEST=1`.
 - `as-page-kit`: the common keys gain tier 3's letters (Warren, 2026-11-11, `../STYLE.md`, "Keys"):
   `m` "mark here", `-` "mute", `=` "solo", `o` "the loop on or off", as `lp-keys` has them. **What
   a tool has to do** when its pin moves here: a `keys.json` that uses one of the four for

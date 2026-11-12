@@ -1,0 +1,9 @@
+[package]
+name = "as-bay"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "The patch bay: its model, patch syntax, bundles, compile, render, matrix and session, with no I/O and no audio dependencies"
+
+[dependencies]

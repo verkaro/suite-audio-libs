@@ -12,6 +12,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-bay"
+version = "0.1.0"
+
+[[package]]
+name = "as-bay-jack"
+version = "0.1.0"
+dependencies = [
+ "as-bay",
+ "as-jackd",
+ "jack",
+]
+
+[[package]]
 name = "as-biquad"
 version = "0.1.0"
 dependencies = [

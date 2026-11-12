@@ -1,0 +1,33 @@
+out alsa_input.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:capture_FL
+out alsa_input.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:capture_FR
+in alsa_output.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:playback_FL
+in alsa_output.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:playback_FR
+out alsa_output.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:monitor_FL
+out alsa_output.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:monitor_FR
+out REAPER:out1
+out REAPER:out2
+out REAPER:out3
+out REAPER:out4
+out REAPER:out5
+out REAPER:out6
+in REAPER:in1
+in REAPER:in2
+in REAPER:in3
+in REAPER:in4
+out Carla:audio-out1
+out Carla:audio-out2
+in Carla:audio-in1
+in Carla:audio-in2
+out Firefox:output_FL
+out Firefox:output_FR
+in OBS:input_FL
+in OBS:input_FR
+link REAPER:out1 > alsa_output.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:playback_FL
+link REAPER:out2 > alsa_output.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:playback_FR
+link REAPER:out3 > Carla:audio-in1
+link REAPER:out4 > Carla:audio-in2
+link Carla:audio-out1 > REAPER:in3
+link Carla:audio-out2 > REAPER:in4
+link alsa_input.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:capture_FL > REAPER:in1
+link alsa_input.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo:capture_FL > REAPER:in2
+link Firefox:output_FL > OBS:input_FL

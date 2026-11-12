@@ -10,6 +10,8 @@ repository = "https://github.com/verkaro/suite-audio-libs"
 
 [workspace.dependencies]
 as-bands = { path = "crates/bands" }
+as-bay = { path = "crates/bay" }
+as-bay-jack = { path = "crates/bay-jack" }
 as-biquad = { path = "crates/biquad" }
 as-conv = { path = "crates/conv" }
 as-defects = { path = "crates/defects" }

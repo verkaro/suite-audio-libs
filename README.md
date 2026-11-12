@@ -91,6 +91,12 @@ tool's.
   commands run, its own session, a dated marker in the family's jackd log), found by
   `JACK_DEFAULT_SERVER`, watched (xruns, the graph, its going away), stopped by its pid unless a
   named client holds it, and `Dummy`, the tests' server of their own.
+- `as-bay`: the patch bay's core, Warren's bay: the graph as a snapshot, bundles and their
+  names, the patch syntax parsed, compiled to a plan and printed back, the matrix and its views,
+  staged lines, the session and its undo, and a fake backend with its fixture format. No I/O.
+- `as-bay-jack`: the bay's JACK backend: the graph read from any `jack::Client`, a plan run
+  through one, a counter of graph notices, and a backend on a client of its own (`bay`, or the
+  tool's name).
 - `as-localtime`: local wall-clock time through the C library, in the formats Dexter's files
   use.
 - `as-rawmidi`: ALSA raw MIDI out: ports found by card under `/dev/snd`, a port opened for
