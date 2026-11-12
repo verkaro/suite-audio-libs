@@ -16,10 +16,17 @@ struct Counter {
     n: Mutex<i64>,
     ticks: AtomicUsize,
     notes: Mutex<Vec<String>>,
+    left: Mutex<Vec<Id>>,
+    turn_away: AtomicBool,
+    /// When set, `left` takes the state and sends to the rest.
+    left_sends: AtomicBool,
 }
 
 impl Tool for Counter {
     fn hello(&self, joining: &mut Joining) {
+        if self.turn_away.load(Ordering::Relaxed) {
+            return;
+        }
         let n = self.n.lock().unwrap();
         joining.admit(vec!["hello".into(), format!("n {n}")]);
     }
@@ -36,6 +43,14 @@ impl Tool for Counter {
 
     fn refusal(&self, why: &str) -> String {
         format!("refused: {why}")
+    }
+
+    fn left(&self, id: Id) {
+        if self.left_sends.load(Ordering::Relaxed) {
+            let n = self.n.lock().unwrap();
+            self.clients.send(&format!("n {n}, {id} left"));
+        }
+        self.left.lock().unwrap().push(id);
     }
 
     fn tick(&self) {
@@ -69,6 +84,9 @@ fn start() -> Running {
         n: Mutex::new(0),
         ticks: AtomicUsize::new(0),
         notes: Mutex::new(vec![]),
+        left: Mutex::new(vec![]),
+        turn_away: AtomicBool::new(false),
+        left_sends: AtomicBool::new(false),
     });
     let server = Server::new(tool.clone(), clients);
     let l = TcpListener::bind("127.0.0.1:0").unwrap();
@@ -139,8 +157,10 @@ fn a_client_is_told_everything_then_hears_each_change() {
     // One leaves and is forgotten; the other carries on.
     b_w.close();
     until("the client to be forgotten", || run.server.clients.count() == 1);
+    until("the tool to hear it left", || !run.tool.left.lock().unwrap().is_empty());
     a_w.send_text("1").unwrap();
     assert_eq!(text(&mut a), "n 5 by 1");
+    assert_eq!(*run.tool.left.lock().unwrap(), vec![2], "b left once, and a didn't");
     until("the notes", || run.tool.notes.lock().unwrap().iter().any(|n| n.contains("left (1 now)")));
     assert!(run.tool.ticks.load(Ordering::Relaxed) > 0, "it ticks");
 }
@@ -183,6 +203,7 @@ fn a_client_that_doesnt_listen_is_closed_and_the_rest_arent_held_up() {
         assert_eq!(text(&mut a).len(), 60_000);
     }
     until("the deaf one to be closed", || run.server.clients.count() == 1);
+    until("the deaf one to leave", || *run.tool.left.lock().unwrap() == vec![2]);
     a_w.send_text("1").unwrap();
     assert_eq!(text(&mut a), "n 1 by 1");
 }
@@ -198,4 +219,30 @@ fn stopping_ends_the_serving_and_closes_the_clients() {
     assert!(run.server.stopping());
     assert!(a.read().is_err(), "the client is told it's over");
     assert_eq!(run.server.clients.count(), 0);
+    until("the client to leave", || *run.tool.left.lock().unwrap() == vec![1]);
+}
+
+#[test]
+fn a_client_turned_away_never_leaves() {
+    let run = start();
+    run.tool.turn_away.store(true, Ordering::Relaxed);
+    let (mut a, _a_w) = connect(&run.addr);
+    assert!(a.read().is_err(), "it's closed");
+    until("the left note", || run.tool.notes.lock().unwrap().iter().any(|n| n.contains("left (0 now)")));
+    assert!(run.tool.left.lock().unwrap().is_empty());
+}
+
+#[test]
+fn leaving_can_take_the_state_and_send() {
+    let run = start();
+    run.tool.left_sends.store(true, Ordering::Relaxed);
+    let (mut a, _a_w) = connect(&run.addr);
+    text(&mut a);
+    text(&mut a);
+    let (mut b, b_w) = connect(&run.addr);
+    text(&mut b);
+    text(&mut b);
+    b_w.close();
+    assert_eq!(text(&mut a), "n 0, 2 left");
+    until("b to leave", || *run.tool.left.lock().unwrap() == vec![2]);
 }

@@ -4,6 +4,12 @@ What changed in an interface or a behaviour, newest first: a line for each, nami
 what a tool has to do about it. Read it before moving a pin. Begun 2026-11-07; for before that,
 the git log.
 
+## 2026-11-12
+
+- `as-serve`: `Tool::left(id)`, called when an admitted client has gone (it left, was closed for
+  falling behind, or the server is ending), once, after its last command, with nothing locked.
+  A default that does nothing: nothing for a tool to do (jackbay's `SPEC.md` 8.1).
+
 ## 2026-11-11
 
 - `as-bay`: **`as_bay::sheet`**, new (`RFC-as-bay.md`, b2): `Sheet::new(backend, grouping)` or

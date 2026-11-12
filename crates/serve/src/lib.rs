@@ -11,6 +11,8 @@
 //! while it still holds its state: nothing sent to everyone can then fall between what the
 //! client was told on connecting and its place among the clients. [`Clients::send`] is safe to
 //! call with the state held, and the crate never calls into the tool with the clients held.
+//! [`Tool::left`] says an admitted client has gone, once, after its last command: so a tool
+//! that keeps something for each client can let it go.
 //!
 //! A client that doesn't take what it's sent is closed, never left with part of the state: its
 //! queue holds [`QUEUE`] messages, and one more ends it. It connects again and is told
@@ -106,6 +108,7 @@ pub struct Joining<'a> {
     id: Id,
     from: &'a str,
     client: Option<Client>,
+    admitted: bool,
 }
 
 impl Joining<'_> {
@@ -125,6 +128,8 @@ impl Joining<'_> {
     /// change.
     pub fn admit(&mut self, hello: Vec<String>) {
         let Some(c) = self.client.take() else { return };
+        // Counted before the hello is queued: the tool may already have made something for it.
+        self.admitted = true;
         for m in hello {
             if !Clients::queue(&c, m.into_bytes().into()) {
                 return;
@@ -146,6 +151,13 @@ pub trait Tool: Send + Sync + 'static {
     /// The message that tells a client its command was refused, and why. Each tool's protocol
     /// has its own.
     fn refusal(&self, why: &str) -> String;
+
+    /// A client that was admitted has gone: it left, it was closed for falling behind, or the
+    /// server is ending. Called once for each client [`Joining::admit`] was called for, after its
+    /// last [`Tool::command`], with the client already out of the clients and nothing of this
+    /// crate's locked: so it may take the tool's state and send to the rest. Never called for a
+    /// client `hello` turned away. Not promised when the process itself ends.
+    fn left(&self, _id: Id) {}
 
     /// Called [`Server::serve`]'s `ticks` a second, on a thread of its own.
     fn tick(&self) {}
@@ -252,9 +264,15 @@ impl<T: Tool> Server<T> {
         let Ok((mut reader, writer)) = as_ws::upgrade(key, r) else { return };
         let (tx, rx) = sync_channel::<Arc<[u8]>>(QUEUE);
         let id = self.next.fetch_add(1, Ordering::Relaxed);
-        let mut joining =
-            Joining { clients: &self.clients, id, from, client: Some(Client { tx, writer: writer.clone() }) };
+        let mut joining = Joining {
+            clients: &self.clients,
+            id,
+            from,
+            client: Some(Client { tx, writer: writer.clone() }),
+            admitted: false,
+        };
         self.tool.hello(&mut joining);
+        let admitted = joining.admitted;
         // A tool that didn't admit it has turned it away: with nothing holding the queue's
         // sending end, the writer below ends at once.
         drop(joining);
@@ -281,6 +299,9 @@ impl<T: Tool> Server<T> {
         self.clients.lock().remove(&id);
         writer.close();
         let _ = writing.join();
+        if admitted {
+            self.tool.left(id);
+        }
         self.tool.note(&format!("the client from {from} left ({} now)", self.clients.count()));
     }
 }
