@@ -3,73 +3,18 @@
 //! under it, which reattaches and stays silent until asked. Only with `SUITE_JACK_TEST=1`.
 //! place's (`VENDORED.md`), with a player of its own.
 //!
-//! The server is `suitetest-<pid>` (`jackd -n suitetest-<pid> -r -d dummy -r 48000 -p 512 -C 16
-//! -P 2`), stopped by its own pid.
+//! The server is `as_jackd::Dummy`'s, `keepertest-<pid>`, stopped by its own pid.
 
-use std::process::{Child, Command, Stdio};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, Ordering};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use as_jack_keeper::{Audio, Player, links};
+use as_jackd::{Dummy, eventually};
 use jack::{AudioIn, ClientOptions};
 
-/// A dummy jackd, stopped by its pid when dropped.
-struct Jackd {
-    child: Option<Child>,
-}
-
-impl Jackd {
-    fn start(name: &str) -> Jackd {
-        let child = Command::new("jackd")
-            .args(["-n", name, "-r", "-d", "dummy", "-r", "48000", "-p", "512", "-C", "16", "-P", "2"])
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn()
-            .expect("jackd (jackd2) is installed");
-        let j = Jackd { child: Some(child) };
-        assert!(
-            eventually(Duration::from_secs(10), || jack::Client::new("up", ClientOptions::NO_START_SERVER)
-                .is_ok()),
-            "the dummy server started"
-        );
-        j
-    }
-
-    fn stop(&mut self) {
-        if let Some(mut c) = self.child.take() {
-            // SAFETY: a signal to our own child, by its pid.
-            unsafe { libc::kill(c.id() as i32, libc::SIGTERM) };
-            let start = Instant::now();
-            while start.elapsed() < Duration::from_secs(10) {
-                if c.try_wait().ok().flatten().is_some() {
-                    return;
-                }
-                std::thread::sleep(Duration::from_millis(50));
-            }
-            let _ = c.kill();
-            let _ = c.wait();
-        }
-    }
-}
-
-impl Drop for Jackd {
-    fn drop(&mut self) {
-        self.stop();
-    }
-}
-
-fn eventually(within: Duration, mut f: impl FnMut() -> bool) -> bool {
-    let start = Instant::now();
-    while start.elapsed() < within {
-        if f() {
-            return true;
-        }
-        std::thread::sleep(Duration::from_millis(20));
-    }
-    false
-}
+/// The dummy server is `keepertest-<pid>` (`as_jackd::Dummy`).
+const TOOL: &str = "keeper";
 
 /// An input's last sample, as f32 bits.
 type Cell = Arc<AtomicU32>;
@@ -137,10 +82,10 @@ fn on_a_dummy_server() {
         eprintln!("skipped: set SUITE_JACK_TEST=1 to run it on a dummy JACK server");
         return;
     }
-    let name = format!("suitetest-{}", std::process::id());
+    let name = Dummy::name(TOOL);
     // SAFETY: the only test in this binary, before any thread of ours starts.
     unsafe { std::env::set_var("JACK_DEFAULT_SERVER", &name) };
-    let mut jackd = Jackd::start(&name);
+    let mut jackd = Dummy::start(TOOL);
     let (pr, cells) = probe();
     let mut pr = Some(pr);
     let [l, r] = &cells;
@@ -176,7 +121,7 @@ fn on_a_dummy_server() {
     assert!(eventually(secs(5), || !audio.attached()), "noticed JACK going away");
     // The probe went with it: closing it would wait on a server that's gone.
     std::mem::forget(pr.take());
-    let mut jackd = Jackd::start(&name);
+    let mut jackd = Dummy::start(TOOL);
     let (pr2, cells) = probe();
     assert!(eventually(secs(5), || audio.attached()), "reattached");
     assert!(eventually(secs(3), || connected("keeper:out_L", "probe:in_L")), "connected again");

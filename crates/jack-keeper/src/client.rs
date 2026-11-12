@@ -2,11 +2,12 @@
 //! sees it, and noticing JACK going away. place's (`VENDORED.md`), its player generic.
 
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::Ordering;
 
-use jack::{AudioOut, ClientOptions, Control, Port, PortFlags, ProcessScope};
+use as_jack_client::{JackGraph, Notices, Notify, lock_memory, reconcile};
+use jack::{AudioOut, Control, Port, PortFlags, ProcessScope};
 
-use crate::{Graph, Handle, Keeper, OUT, Player, PortInfo, RETRY, Rt, TICK, pair, reconcile};
+use crate::{Handle, Keeper, OUT, Player, PortInfo, RETRY, Rt, Status, TICK, pair};
 
 const AUDIO_TYPE: &str = "32 bit float mono audio";
 
@@ -31,28 +32,24 @@ pub(crate) fn keep<P: Player>(mut k: Keeper<P>) {
     }
 }
 
-type Active<P> = jack::AsyncClient<Notify, Handler<P>>;
+type Active<P> = jack::AsyncClient<Notify<Status>, Handler<P>>;
 
 struct Session<P: Player> {
     active: Active<P>,
-    notices: Arc<Notices>,
+    notices: Arc<Notices<Status>>,
     handle: Handle<P>,
 }
 
 impl<P: Player> Session<P> {
     fn open(k: &mut Keeper<P>) -> Result<Session<P>, String> {
-        let opts = ClientOptions::NO_START_SERVER | ClientOptions::USE_EXACT_NAME;
-        let client = match jack::Client::new(&k.name, opts) {
-            Ok((c, _)) => c,
-            Err(e) => return Err(why_not(&k.name, &e.to_string())),
-        };
+        let client = as_jack_client::open(&k.name)?;
         let reg =
             |name: &str| client.register_port(name, AudioOut::default()).map_err(|e| format!("{name}: {e}"));
         let out = [reg(OUT[0])?, reg(OUT[1])?];
         let (rt, handle) = pair((k.make)(client.sample_rate()));
         let handler = Handler { out, rt };
-        lock_memory(k);
-        let notices = Arc::new(Notices { status: k.status.clone(), ..Notices::default() });
+        lock_memory(|m| k.note(m));
+        let notices = Notices::new(k.status.clone());
         let (rate, period) = (client.sample_rate(), client.buffer_size());
         let active = client
             .activate_async(Notify(notices.clone()), handler)
@@ -114,30 +111,6 @@ fn latency(c: &jack::Client, me: &str) -> u32 {
         .unwrap_or(0)
 }
 
-/// Why the client couldn't be opened, in words.
-fn why_not(name: &str, e: &str) -> String {
-    // jack2 doesn't say a taken exact name was the reason, so ask who's there.
-    let probe = jack::Client::new(&format!("{name}-probe"), ClientOptions::NO_START_SERVER);
-    if let Ok((p, _)) = probe {
-        let mine = format!("^{name}:");
-        if !p.ports(Some(&mine), None, PortFlags::empty()).is_empty() {
-            return format!("another {name} is running on this JACK server");
-        }
-        return format!("can't open the JACK client ({e})");
-    }
-    "is jackd running?".into()
-}
-
-/// Locks the process's memory so far, the callback's included, where the limit allows.
-fn lock_memory<P: Player>(k: &Keeper<P>) {
-    static SAID: AtomicBool = AtomicBool::new(false);
-    // SAFETY: mlockall only changes how the process's pages are kept.
-    let locked = unsafe { libc::mlockall(libc::MCL_CURRENT) } == 0;
-    if !locked && !SAID.swap(true, Ordering::Relaxed) {
-        k.note("couldn't lock memory (ulimit -l); an xrun is likelier under memory pressure");
-    }
-}
-
 /// Every audio port of the graph that takes audio in, but the client's own.
 fn graph_ports(c: &jack::Client) -> Vec<PortInfo> {
     let physical = c.ports(None, Some(AUDIO_TYPE), PortFlags::IS_PHYSICAL);
@@ -147,76 +120,6 @@ fn graph_ports(c: &jack::Client) -> Vec<PortInfo> {
         .filter(|n| !n.starts_with(&mine))
         .map(|n| PortInfo { physical: physical.contains(&n), name: n })
         .collect()
-}
-
-struct JackGraph<'a>(&'a jack::Client);
-
-impl Graph for JackGraph<'_> {
-    fn exists(&self, port: &str) -> bool {
-        self.0.port_by_name(port).is_some()
-    }
-
-    fn connected(&self, from: &str, to: &str) -> bool {
-        self.0.port_by_name(from).is_some_and(|p| p.is_connected_to(to).unwrap_or(false))
-    }
-
-    fn connect(&mut self, from: &str, to: &str) -> Result<(), String> {
-        self.0.connect_ports_by_name(from, to).map_err(|e| e.to_string())
-    }
-
-    fn disconnect(&mut self, from: &str, to: &str) {
-        let _ = self.0.disconnect_ports_by_name(from, to);
-    }
-}
-
-/// What JACK's notices leave for the keeper: counted or flagged only, since calling JACK from
-/// a notification can deadlock.
-#[derive(Default)]
-struct Notices {
-    status: Arc<crate::Status>,
-    graph: AtomicU64,
-    shut: AtomicBool,
-}
-
-struct Notify(Arc<Notices>);
-
-impl Notify {
-    fn bump(&self) {
-        self.0.graph.fetch_add(1, Ordering::Release);
-    }
-}
-
-impl jack::NotificationHandler for Notify {
-    fn xrun(&mut self, _: &jack::Client) -> Control {
-        self.0.status.xruns.fetch_add(1, Ordering::Relaxed);
-        Control::Continue
-    }
-
-    unsafe fn shutdown(&mut self, _: jack::ClientStatus, _: &str) {
-        self.0.shut.store(true, Ordering::Release);
-    }
-
-    fn client_registration(&mut self, _: &jack::Client, _: &str, _: bool) {
-        self.bump();
-    }
-
-    fn port_registration(&mut self, _: &jack::Client, _: jack::PortId, _: bool) {
-        self.bump();
-    }
-
-    fn port_rename(&mut self, _: &jack::Client, _: jack::PortId, _: &str, _: &str) -> Control {
-        self.bump();
-        Control::Continue
-    }
-
-    fn ports_connected(&mut self, _: &jack::Client, _: jack::PortId, _: jack::PortId, _: bool) {
-        self.bump();
-    }
-
-    fn sample_rate(&mut self, _: &jack::Client, rate: jack::Frames) -> Control {
-        self.0.status.rate.store(rate, Ordering::Relaxed);
-        Control::Continue
-    }
 }
 
 /// The process callback: the two outputs' buffers, handed to the player.

@@ -10,4 +10,4 @@ description = "A read-only JACK transport clock: where the transport is, never m
 jack.workspace = true
 
 [dev-dependencies]
-libc.workspace = true
+as-jackd.workspace = true

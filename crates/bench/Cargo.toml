@@ -1,0 +1,24 @@
+[package]
+name = "as-bench"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Measuring hardware against a model: known signals played and recorded sample-locked over JACK, each capture checked at once, and captures reduced to figures and pictures the same way for the unit and for a model"
+
+[dependencies]
+as-conv.workspace = true
+as-envelope.workspace = true
+as-jack-client.workspace = true
+as-keep.workspace = true
+as-wav.workspace = true
+jack.workspace = true
+libm.workspace = true
+realfft.workspace = true
+rtrb.workspace = true
+serde.workspace = true
+toml.workspace = true
+
+[dev-dependencies]
+as-biquad.workspace = true
+as-jackd.workspace = true

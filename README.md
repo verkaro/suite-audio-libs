@@ -46,6 +46,8 @@ tool's.
   connections kept, reattaching to jackd; and `--sim`.
 - `as-jack-capture`: a JACK client of two inputs read into a ring off JACK's thread, its
   connections kept, reattaching to jackd; it says when frames were lost or a new ring began.
+- `as-jack-client`: what the suite's JACK clients do alike: opening on the server named,
+  never starting one; locking memory; JACK's notices counted; the wanted connections kept.
 - `as-transport`: where JACK's transport is, read and never moved: a client of no ports and no
   sync callback, polled from a thread of its own, `None` while the server is away and
   reattaching when it returns; and a simulated clock of the same shape.
@@ -59,6 +61,10 @@ tool's.
   tool's server: the handshake checked, fragments joined, pings answered, frames out masked.
 - `as-loudness`: integrated loudness (BS.1770-4, gated) at any rate, its per-channel mean
   beside the standard's sum, a linked group's, true peak, and the trim to a reference.
+- `as-bench`: measuring hardware against a model: known signals under a ceiling, played and
+  recorded sample-locked over JACK (never connecting a port), each capture checked at once,
+  and the unit's captures and a model's reduced the same way to figures, pictures as data,
+  and a sitting kept to resume.
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every
   machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass; any analog
   second-order section by the bilinear transform, with second-order high- and low-passes,
@@ -123,6 +129,7 @@ BLESS=1 cargo test -p as-wav reference_files   # rewrites wav's testdata/, on pu
 SUITE_JACK_TEST=1 cargo test -p as-jack-keeper --test dummy   # on a dummy JACK of its own
 SUITE_JACK_TEST=1 cargo test -p as-transport --test dummy     # likewise
 SUITE_JACK_TEST=1 cargo test -p as-jack-capture --test dummy    # likewise
+SUITE_JACK_TEST=1 cargo test -p as-bench --test dummy           # likewise
 ```
 
 Building needs JACK2's dev package, `libjack-jackd2-dev`.

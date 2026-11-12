@@ -17,6 +17,7 @@ use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
+use as_jack_client::{JackGraph, Notices, Notify, lock_memory, reconcile};
 use jack::{AudioIn, ClientOptions, Control, Port, ProcessScope};
 
 #[cfg(test)]
@@ -197,6 +198,15 @@ struct Keeper {
     rings: Sender<rtrb::Consumer<f32>>,
 }
 
+impl as_jack_client::Counts for Status {
+    fn xrun(&self) {
+        self.xruns.fetch_add(1, Ordering::Relaxed);
+    }
+    fn rate(&self, rate: u32) {
+        self.rate.store(rate, Ordering::Relaxed);
+    }
+}
+
 impl Keeper {
     fn stopping(&self) -> bool {
         self.stop.load(Ordering::Acquire)
@@ -255,25 +265,24 @@ fn keep(mut k: Keeper) {
     }
 }
 
-type Active = jack::AsyncClient<Notify, Handler>;
+type Active = jack::AsyncClient<Notify<Status>, Handler>;
 
 struct Session {
     active: Active,
-    notices: Arc<Notices>,
+    notices: Arc<Notices<Status>>,
 }
 
 impl Session {
     fn open(k: &mut Keeper) -> Result<Session, String> {
-        let opts = ClientOptions::NO_START_SERVER | ClientOptions::USE_EXACT_NAME;
-        let client = jack::Client::new(&k.name, opts).map(|(c, _)| c).map_err(|e| e.to_string())?;
+        let client = as_jack_client::open(&k.name)?;
         let reg =
             |name: &str| client.register_port(name, AudioIn::default()).map_err(|e| format!("{name}: {e}"));
         let ins = [reg(IN[0])?, reg(IN[1])?];
         let rate = client.sample_rate();
         let slots = 2 * (k.seconds * rate as f64).ceil() as usize;
         let (prod, cons) = rtrb::RingBuffer::new(slots);
-        lock_memory();
-        let notices = Arc::new(Notices { status: k.status.clone(), ..Notices::default() });
+        lock_memory(|m| k.note(m));
+        let notices = Notices::new(k.status.clone());
         let handler = Handler { ins, prod, status: k.status.clone() };
         let period = client.buffer_size();
         let active = client
@@ -312,8 +321,8 @@ impl Session {
             if g != seen || dirty {
                 seen = g;
                 dirty = false;
-                let c = self.active.as_client();
-                for line in reconcile(c, &k.links, &cuts) {
+                let mut graph = JackGraph(self.active.as_client());
+                for line in reconcile(&mut graph, &k.links, &cuts) {
                     k.note(&line);
                 }
                 cuts.clear();
@@ -323,86 +332,6 @@ impl Session {
                 dirty = true;
             }
         }
-    }
-}
-
-/// Makes every wanted connection whose ports both exist and isn't made, and cuts those in
-/// `cuts`. Returns what it did, for the log.
-fn reconcile(c: &jack::Client, links: &BTreeSet<(String, String)>, cuts: &[(String, String)]) -> Vec<String> {
-    let mut said = Vec::new();
-    let connected =
-        |a: &str, b: &str| c.port_by_name(a).is_some_and(|p| p.is_connected_to(b).unwrap_or(false));
-    for (a, b) in cuts {
-        if connected(a, b) {
-            let _ = c.disconnect_ports_by_name(a, b);
-            said.push(format!("cut {a} > {b}"));
-        }
-    }
-    for (a, b) in links {
-        if c.port_by_name(a).is_some() && c.port_by_name(b).is_some() && !connected(a, b) {
-            match c.connect_ports_by_name(a, b) {
-                Ok(()) => said.push(format!("connected {a} > {b}")),
-                Err(e) => said.push(format!("can't connect {a} > {b}: {e}")),
-            }
-        }
-    }
-    said
-}
-
-/// Locks the process's memory so far, the callback's included, where the limit allows. A
-/// failure is quiet: the keeper's own client says so once.
-fn lock_memory() {
-    // SAFETY: mlockall only changes how the process's pages are kept.
-    let _ = unsafe { libc::mlockall(libc::MCL_CURRENT) };
-}
-
-/// What JACK's notices leave for the keeper: counted or flagged only, since calling JACK from a
-/// notification can deadlock.
-#[derive(Default)]
-struct Notices {
-    status: Arc<Status>,
-    graph: AtomicU64,
-    shut: AtomicBool,
-}
-
-struct Notify(Arc<Notices>);
-
-impl Notify {
-    fn bump(&self) {
-        self.0.graph.fetch_add(1, Ordering::Release);
-    }
-}
-
-impl jack::NotificationHandler for Notify {
-    fn xrun(&mut self, _: &jack::Client) -> Control {
-        self.0.status.xruns.fetch_add(1, Ordering::Relaxed);
-        Control::Continue
-    }
-
-    unsafe fn shutdown(&mut self, _: jack::ClientStatus, _: &str) {
-        self.0.shut.store(true, Ordering::Release);
-    }
-
-    fn client_registration(&mut self, _: &jack::Client, _: &str, _: bool) {
-        self.bump();
-    }
-
-    fn port_registration(&mut self, _: &jack::Client, _: jack::PortId, _: bool) {
-        self.bump();
-    }
-
-    fn port_rename(&mut self, _: &jack::Client, _: jack::PortId, _: &str, _: &str) -> Control {
-        self.bump();
-        Control::Continue
-    }
-
-    fn ports_connected(&mut self, _: &jack::Client, _: jack::PortId, _: jack::PortId, _: bool) {
-        self.bump();
-    }
-
-    fn sample_rate(&mut self, _: &jack::Client, rate: jack::Frames) -> Control {
-        self.0.status.rate.store(rate, Ordering::Relaxed);
-        Control::Continue
     }
 }
 

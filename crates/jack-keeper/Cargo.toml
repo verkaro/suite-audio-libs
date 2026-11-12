@@ -7,10 +7,10 @@ rust-version.workspace = true
 description = "A JACK client of two outputs: a player on JACK's thread, its connections kept, reattaching to jackd, and --sim"
 
 [dependencies]
+as-jack-client.workspace = true
 jack.workspace = true
-libc.workspace = true
 rtrb.workspace = true
 
 [dev-dependencies]
+as-jackd.workspace = true
 jack.workspace = true
-libc.workspace = true

@@ -25,6 +25,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-bench"
+version = "0.1.0"
+dependencies = [
+ "as-biquad",
+ "as-conv",
+ "as-envelope",
+ "as-jack-client",
+ "as-jackd",
+ "as-keep",
+ "as-wav",
+ "jack",
+ "libm",
+ "realfft",
+ "rtrb",
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "as-biquad"
 version = "0.1.0"
 dependencies = [
@@ -96,17 +115,27 @@ dependencies = [
 name = "as-jack-capture"
 version = "0.1.0"
 dependencies = [
+ "as-jack-client",
+ "as-jackd",
+ "jack",
+ "rtrb",
+]
+
+[[package]]
+name = "as-jack-client"
+version = "0.1.0"
+dependencies = [
  "jack",
  "libc",
- "rtrb",
 ]
 
 [[package]]
 name = "as-jack-keeper"
 version = "0.1.0"
 dependencies = [
+ "as-jack-client",
+ "as-jackd",
  "jack",
- "libc",
  "rtrb",
 ]
 
@@ -226,8 +255,8 @@ version = "0.1.0"
 name = "as-transport"
 version = "0.1.0"
 dependencies = [
+ "as-jackd",
  "jack",
- "libc",
 ]
 
 [[package]]

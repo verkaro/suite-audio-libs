@@ -1,10 +1,10 @@
 # Spec: `as-bench`, measuring hardware against a model
 
 From the suite's session, 2026-11-12, at Warren's asking: the measuring the LA-4 and KT76 voicings
-need (`../RFC-opto.md`, "Measuring Warren's LA-4"; `../RFC-fet.md`, "The KT76 voicing"), made a suite
+need (`../../../RFC-opto.md`, "Measuring Warren's LA-4"; `../../../RFC-fet.md`, "The KT76 voicing"), made a suite
 crate and built first, so it's ready before the first sitting at the rig and useful sooner than the
-voicings are. Read `shared.md` first: its rules for numbers and tests hold here. Moves to
-`crates/bench/docs/spec.md` when the crate is made.
+voicings are. Read `../../../specs/shared.md` first: its rules for numbers and tests hold here.
+Built in step 0 (2026-11-12) and moved here; "As built" at the end says what the build settled.
 
 ## What it's for
 
@@ -25,7 +25,7 @@ shared part. The front that runs it is a tool's (below, "The front").
 **Why a suite crate:** sonorack measures the LA-4 and KT76 with it, and it's the shape of every
 "play something known through it and see what comes back" in the family. dexter-place's
 `place-measure` (a sweep, and an IR made from its recording) is the same idea. Place is held as it is
-(`../CLAUDE.md`, 2026-11-11), so nothing is moved from it and nothing is copied: this is written
+(`../../../../CLAUDE.md`, 2026-11-11), so nothing is moved from it and nothing is copied: this is written
 fresh, and if place stays, its measuring can come onto this crate later.
 
 ## What's in it
@@ -41,15 +41,23 @@ Built from `as-envelope`'s signals, at the session's rate, each with a short **s
 | `sweep` | an exponential sine sweep, 20 Hz to 20 kHz, 10 s, faded in and out (Farina's) | the response at rest, and harmonics |
 | `steps` | 1 kHz stepped from −60 to 0 dBFS in 1 dB steps, each held a time the measuring list says | the static curve; distortion against level |
 | `bursts` | 1 kHz bursts between two levels, each held a time the list says, repeated three times | attack and release |
-| `hold` | a tone at one level held a stated time, then silence | the optical's memory (0.1 s and 2 s) |
+| `hold` | a tone at one level held a stated time, then a quiet tone (or silence, if the list says) | the optical's memory (0.1 s and 2 s) |
 | `steady_sweep` | a sweep over a steady tone that holds the unit at a set reduction | the response while compressing |
 
 **The sync mark:** a short linear chirp, 2 kHz to 8 kHz over 20 ms, at −20 dBFS, then 200 ms of
 silence. Every capture is aligned by it (below). A sweep's or step's level is never set by it.
+Its ends are tapered over 2 ms by a raised cosine, so its correlation's sidelobes are low; it's
+played at −20 dBFS or the ceiling, the lower (2026-11-12, as built).
 
 **The ceiling:** every signal is scaled so its peak is at most the session's ceiling, **−6 dBFS by
 default**, which Warren raises by typing it. Out of a +4 interface, 0 dBFS can be +18 to +24 dBu,
 more than some inputs want. The ceiling is written into every capture's notes.
+
+**Levels are dB under the ceiling** (2026-11-12, as built): 0 is the ceiling, and nothing a
+signal is given can pass it. So `steps` runs from 60 dB under the ceiling to the ceiling (−66 to
+−6 dBFS by default), not −60 to 0 dBFS, which a −6 ceiling can't play. `sweep` and `steps` peak at
+the ceiling; the others at their loudest level given, and never under the mark. Each part of a
+signal carries the dBFS it was played at, which the static curve and the reduction read.
 
 ### Play and record: one client, sample-locked
 
@@ -70,7 +78,7 @@ nowhere until Warren patches them** (in jackbay or Dexter's bay); the bench neve
 This is a third JACK client in the suite, beside `as-jack-keeper` (outputs) and `as-jack-capture`
 (inputs). What it shares with them (opening on the server named, the reattach, the wanted
 connections) is used from them or moved into one place they all use, **never a third copy**
-(`../CLAUDE.md`, "one of each thing"). The builder decides which, in the step, with a `CHANGES.md`
+(`../../../../CLAUDE.md`, "one of each thing"). The builder decides which, in the step, with a `CHANGES.md`
 line if either crate's interface moves.
 
 ### The loopback, first
@@ -94,10 +102,10 @@ Run at once, said in words, one line each, then **PASS** or **REDO**:
 | Check | Passes if |
 |---|---|
 | clipped | no input sample at or above −0.1 dBFS |
-| level | the return's peak between −40 and −1 dBFS |
+| level | the return's peak between −40 and −1 dBFS (a peak at −0.1 or over is said by "clipped" alone) |
 | aligned | the sync mark found, its correlation peak at least 10× the next, the latency within 2 samples of the calibration's |
 | polarity | the same as the calibration's (the mark's correlation positive) |
-| signal over noise | at least 40 dB over the calibration's floor, over the part measured |
+| signal over noise | at least 40 dB over the floor, over the part measured: the calibration's floor or the capture's own (the last 100 ms before the signal proper), the higher |
 | xruns | none |
 | length | the whole signal came back |
 
@@ -106,8 +114,8 @@ the unit's in patched?"). A capture that fails is kept, marked failed, never use
 
 ### Reduction: captures to figures
 
-Offline, deterministic (`shared.md`'s rules), each from aligned captures with the calibration
-divided out. Here rather than in `as-envelope` or `as-dynamics`' test support, where `RFC-opto.md`
+Offline, deterministic (`../../../specs/shared.md`'s rules), each from aligned captures with the calibration
+divided out. Here rather than in `as-envelope` or `as-dynamics`' test support, where `../../../RFC-opto.md`
 put it: the unit's side and the model's must go through the same code, and a tool runs it.
 **Differs from the RFC.**
 
@@ -160,7 +168,7 @@ suite). The front draws them with `lp-paint`, on the panel and **into PNG files*
 A sitting is a **measuring list**: an ordered list of captures, each naming its signal, its levels
 and times, and what Warren sets on the unit by hand ("ratio 4, input 3"). The list is a text file
 the voicing's step writes (the RFCs ask for one sitting of about an hour per unit, said up front).
-The bench keeps a sitting in a folder (`as_keep::Folder`, numbered), with a manifest of what was
+The bench keeps a sitting in a folder (`sitting-NNN/`, made through `as_keep::Folder`), with a manifest of what was
 captured, what passed, and the knob positions typed. A sitting stopped halfway **resumes** where it
 stopped, and any capture can be redone, the redo kept beside the first.
 
@@ -225,3 +233,55 @@ a quick look at either unit's static curve and times, long before a voicing is f
 
 **Settled (Warren, 2026-11-12):** both as recommended. sonorack's `measure` comes first, ahead of its
 EQ (for sonorack's own session to write into its order); the ceiling is −6 dBFS by default.
+
+## As built (step 0, 2026-11-12)
+
+What the build settled that the text above left open, or changed, and why. Each was put to the
+advisor (Fable 5.2) or to Warren as the step went.
+
+- **Levels under the ceiling,** and `hold`'s quiet tone after (above). A release can't be read on
+  silence: there's nothing to read the gain from. The list gives its level (−40 under by default).
+- **The mark's search:** every lag up to the 200 ms after it, so the signal proper never falls
+  under the template, for a latency up to 200 ms. "The next" peak is the largest more than 1 ms
+  from the first, outside the lobe of the mark's own carrier. A capture where nothing correlates
+  has no mark (found at once on a silent capture).
+- **The check's lines are each alone:** a clipped capture fails "clipped", not "level" too, and a
+  noisy capture is caught by its own floor even when the calibration's was quiet.
+- **Inputs:** the same signal goes to both outputs, and each list entry names the inputs it keeps
+  (`inputs = ["L"]`, both by default), so a one-channel unit isn't failed on its dead side.
+- **The response** divides the capture's deconvolution by the played sweep's own, worked out the
+  same way, then the calibration's third-octave points: the fades and the band's edges fall out.
+  The linear part is cut from a quarter of the way back to the second harmonic to 0.5 s on, each
+  harmonic a quarter of the way to its neighbours. `realfft` picks a SIMD path when it runs: the
+  same build gives the same bits, not promised between machines, as `as-bands` says.
+- **The reduction over time** reads the largest sample in each half cycle of the tone; attack and
+  release are the time to move 63% of the way from where the reduction was to where it settled
+  (the mean of its last 10 ms), between half cycles on a line.
+- **The JACK client** stays open for a sitting, so Warren's patches last between captures. A
+  capture goes to JACK's thread in a box through a ring of one and comes back through another;
+  it isn't reattached mid-capture (it says JACK went away, and the front opens the bench again).
+  What it shares with `as-jack-keeper` and `as-jack-capture` is `as-jack-client` (Warren,
+  2026-11-12: a crate of its own, the one copy of opening, locking memory, the notices and
+  `reconcile`).
+- **A sitting's folder** is numbered when it's begun (`Folder` finished at once, so a sitting
+  stopped halfway is still there to resume). Takes are 32-bit float WAVs (`as-wav`), exactly
+  what JACK gave; the manifest is replaced whole by `as_keep::save`.
+- **Harmonics from the sweep** (`figures::sweep_harmonics`): each at its own frequency, against
+  the sweep's level, leaving out inputs whose sixth of an octave reaches into the sweep's 100 ms
+  fade-in (a harmonic grows faster than the level, so they read low). The interface's own aren't
+  taken off; its calibration's THD says how far down they're believed.
+- **Under `steady_sweep`,** the response leaves out the point whose sixth of an octave holds the
+  steady tone: the tone isn't the sweep's and reads there as a bump (+13 dB in a test).
+- **On JACK's thread:** the signal and record buffers are written through before a capture goes
+  (`as_conv::touched`), so no page is first touched there; and each capture carries a number, so
+  one that ran out of time and came back late is dropped, never taken for the next.
+- **The calibration is a file** (`Calibration::write`, `stem-NNN.toml`, named by date by its
+  caller), read back by `from_toml`.
+- **Left as they are, said here:** a take is written by the caller's thread (the front's), not a
+  writer thread of the bench's own; a round trip of 200 ms or more isn't found and reads "not
+  aligned", whose REDO blames the patching; the memory test runs at 48 kHz only, and its unit
+  counts how long it held while reducing, which is the test's model, not a figure of the LA-4's.
+- **The dummy servers:** `as-jack-keeper`'s, `as-jack-capture`'s and `as-transport`'s tests had
+  each its own; all are on `as_jackd::Dummy` now (Warren, 2026-11-12).
+- **Not in the crate:** the comparison against a voicing's tolerances (the voicing's step) and
+  drawing (the front, with `lp-paint`).

@@ -12,7 +12,7 @@ Seven files, read in this order:
 | File | What it covers | Builds |
 |---|---|---|
 | `shared.md` (this) | the rules every unit keeps, the test rigs, and `as-control` | `as-control` |
-| `bench.md` | measuring hardware against a model: play, record, check, reduce | `as-bench` |
+| `../crates/bench/docs/spec.md` | measuring hardware against a model: play, record, check, reduce | `as-bench` (built) |
 | `eq.md` | `as-biquad`'s matched designs, and `as-eq` | `as-biquad` additions, `as-eq` |
 | `dynamics.md` | `as-dynamics`' core: the gain computer, the feedback loop, levels, rigs | `as-dynamics` core |
 | `deess.md` | `deess` | |
@@ -31,7 +31,7 @@ RFC". The RFCs stay as the record; they aren't edited.
 
 Steps 1 to 7 wait on the suite's s1 and s2 (`../../NOTES.md`, the bookmark), as the RFCs say. Step
 0, the bench, needs nothing of theirs and none of the units, so it can go first, once Warren says
-so; sonorack's `measure` then runs it, built first in sonorack (`bench.md`, settled 2026-11-12).
+so; sonorack's `measure` then runs it, built first in sonorack (`as-bench`'s spec, settled 2026-11-12).
 
 **One step per session** (Warren, 2026-11-12: cost matters). Each session builds one step, ends it
 (below), and stops, so Warren can clear the context and choose the model for the next.
@@ -43,7 +43,7 @@ not on writing code. If that isn't enough, the step is rerun on Fable alone (bel
 
 | Step | What | Spec | Model | Advisor | Effort | Why |
 |---|---|---|---|---|---|---|
-| 0 | `as-bench` | `bench.md` | Opus 5.5 | **Fable 5.2** | high | built first, so the rig can start early (Warren, 2026-11-12); known methods (Farina's sweep, alignment), but a duplex JACK client and a reduction whose mistakes would mislead every fit later |
+| 0 | `as-bench` | `../crates/bench/docs/spec.md` | Opus 5.5 | **Fable 5.2** | high | built first, so the rig can start early (Warren, 2026-11-12); known methods (Farina's sweep, alignment), but a duplex JACK client and a reduction whose mistakes would mislead every fit later |
 | 1 | `as-control` | this file | Opus 5.5 | none | medium | small and fully specified: types, stepping, parsing |
 | 2 | `as-biquad`: `matched`, the matched peak and shelves, `inverse` | `eq.md` | Opus 5.5 | none | high | the method and its figures were prototyped here; the tests say what to hit |
 | 3 | `as-eq` | `eq.md` | Opus 5.5 | none | high | assembly on step 2, and the crossfade written out |

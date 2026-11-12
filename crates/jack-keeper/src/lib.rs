@@ -18,6 +18,8 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
+use as_jack_client::{Graph, reconcile};
+
 mod client;
 mod sim;
 
@@ -77,6 +79,15 @@ pub struct Status {
     ports: Mutex<Vec<PortInfo>>,
 }
 
+impl as_jack_client::Counts for Status {
+    fn xrun(&self) {
+        self.xruns.fetch_add(1, Ordering::Relaxed);
+    }
+    fn rate(&self, rate: u32) {
+        self.rate.store(rate, Ordering::Relaxed);
+    }
+}
+
 impl Status {
     fn set_ports(&self, mut p: Vec<PortInfo>) {
         sort_ports(&mut p);
@@ -134,39 +145,6 @@ pub fn links(me: &str, left: &[String], right: &[String]) -> BTreeSet<(String, S
         }
     }
     l
-}
-
-/// What the keeper needs of a graph, JACK's or the simulation's.
-trait Graph {
-    fn exists(&self, port: &str) -> bool;
-    fn connected(&self, from: &str, to: &str) -> bool;
-    fn connect(&mut self, from: &str, to: &str) -> Result<(), String>;
-    fn disconnect(&mut self, from: &str, to: &str);
-}
-
-/// Makes every wanted connection whose ports both exist and isn't made, and cuts those in
-/// cuts. Returns what it did, for the log.
-fn reconcile(
-    g: &mut dyn Graph,
-    links: &BTreeSet<(String, String)>,
-    cuts: &[(String, String)],
-) -> Vec<String> {
-    let mut said = Vec::new();
-    for (a, b) in cuts {
-        if g.connected(a, b) {
-            g.disconnect(a, b);
-            said.push(format!("cut {a} > {b}"));
-        }
-    }
-    for (a, b) in links {
-        if g.exists(a) && g.exists(b) && !g.connected(a, b) {
-            match g.connect(a, b) {
-                Ok(()) => said.push(format!("connected {a} > {b}")),
-                Err(e) => said.push(format!("can't connect {a} > {b}: {e}")),
-            }
-        }
-    }
-    said
 }
 
 /// What the keeper is told.

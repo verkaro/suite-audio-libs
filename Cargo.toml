@@ -12,6 +12,7 @@ repository = "https://github.com/verkaro/suite-audio-libs"
 as-bands = { path = "crates/bands" }
 as-bay = { path = "crates/bay" }
 as-bay-jack = { path = "crates/bay-jack" }
+as-bench = { path = "crates/bench" }
 as-biquad = { path = "crates/biquad" }
 as-conv = { path = "crates/conv" }
 as-defects = { path = "crates/defects" }
@@ -25,6 +26,7 @@ as-ir = { path = "crates/ir" }
 as-jackd = { path = "crates/jackd" }
 as-jack-keeper = { path = "crates/jack-keeper" }
 as-jack-capture = { path = "crates/jack-capture" }
+as-jack-client = { path = "crates/jack-client" }
 as-keep = { path = "crates/keep" }
 as-localtime = { path = "crates/localtime" }
 as-loudness = { path = "crates/loudness" }
@@ -77,4 +79,6 @@ opt-level = 3
 [profile.dev.package.as-envelope]
 opt-level = 3
 [profile.dev.package.as-bands]
+opt-level = 3
+[profile.dev.package.as-bench]
 opt-level = 3

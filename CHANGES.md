@@ -6,6 +6,19 @@ the git log.
 
 ## 2026-11-12
 
+- `as-bench`, new (step 0 of `specs/shared.md`; its spec is `crates/bench/docs/spec.md`):
+  signals under a ceiling with a sync mark, `align::find`, `check::{calibrate, check}`,
+  `figures` (TOML), `picture` (as data), `sitting` (the measuring list, resume, redo),
+  `jack::Bench` (two outs, two ins, never connecting a port), and `run_model`. Nothing for a tool
+  to do until it takes it: sonorack's `measure` first.
+- `as-jack-keeper`, `as-jack-capture`, `as-transport`: their dummy tests run on
+  `as_jackd::Dummy`, the servers now `keepertest-<pid>`, `capturetest-<pid>` and
+  `transporttest-<pid>`; keeper and capture no longer depend on `libc`. Nothing for a tool to do.
+- `as-jack-client`, new: `open(name)`, `lock_memory(note)`, `Notices`/`Notify` over a `Counts`,
+  `Graph`, `JackGraph`, `reconcile`, the one copy of what `as-jack-keeper` and
+  `as-jack-capture` each had (Warren, 2026-11-12). Their interfaces don't move: nothing for a
+  tool to do. `as-jack-capture` now says why a client couldn't open in `as-jack-keeper`'s words
+  ("another … is running", "is jackd running?"), and notes once if memory can't be locked.
 - `as-serve`: `Tool::left(id)`, called when an admitted client has gone (it left, was closed for
   falling behind, or the server is ending), once, after its last command, with nothing locked.
   A default that does nothing: nothing for a tool to do (jackbay's `SPEC.md` 8.1).

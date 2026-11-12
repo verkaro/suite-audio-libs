@@ -1,73 +1,20 @@
 //! The capture on a dummy JACK server of its own (never Warren's), with a client playing a
-//! counter into it. Only with `SUITE_JACK_TEST=1`. The server is `suitetest-<pid>` (`jackd -n
-//! suitetest-<pid> -r -d dummy -r 48000 -p 512 -C 2 -P 2`), stopped by its own pid.
+//! counter into it. Only with `SUITE_JACK_TEST=1`. The server is
+//! `as_jackd::Dummy`'s, `capturetest-<pid>`, stopped by its own pid.
 
-use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use as_jack_capture::{Capture, Chunk, links};
+use as_jackd::{Dummy, eventually};
 use jack::{AudioOut, ClientOptions};
+
+/// The dummy server is `capturetest-<pid>` (`as_jackd::Dummy`).
+const TOOL: &str = "capture";
 
 /// The tests set one process-wide environment variable: one at a time.
 static ONE: Mutex<()> = Mutex::new(());
-
-struct Jackd {
-    child: Option<Child>,
-}
-
-impl Jackd {
-    fn start(name: &str) -> Jackd {
-        let child = Command::new("jackd")
-            .args(["-n", name, "-r", "-d", "dummy", "-r", "48000", "-p", "512", "-C", "2", "-P", "2"])
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn()
-            .expect("jackd (jackd2) is installed");
-        let j = Jackd { child: Some(child) };
-        assert!(
-            eventually(Duration::from_secs(10), || jack::Client::new("up", ClientOptions::NO_START_SERVER)
-                .is_ok()),
-            "the dummy server started"
-        );
-        j
-    }
-
-    fn stop(&mut self) {
-        if let Some(mut c) = self.child.take() {
-            // SAFETY: a signal to our own child, by its pid.
-            unsafe { libc::kill(c.id() as i32, libc::SIGTERM) };
-            let start = Instant::now();
-            while start.elapsed() < Duration::from_secs(10) {
-                if c.try_wait().ok().flatten().is_some() {
-                    return;
-                }
-                std::thread::sleep(Duration::from_millis(50));
-            }
-            let _ = c.kill();
-            let _ = c.wait();
-        }
-    }
-}
-
-impl Drop for Jackd {
-    fn drop(&mut self) {
-        self.stop();
-    }
-}
-
-fn eventually(within: Duration, mut f: impl FnMut() -> bool) -> bool {
-    let start = Instant::now();
-    while start.elapsed() < within {
-        if f() {
-            return true;
-        }
-        std::thread::sleep(Duration::from_millis(20));
-    }
-    false
-}
 
 type Process = Box<dyn FnMut(&jack::Client, &jack::ProcessScope) -> jack::Control + Send>;
 type Source = jack::AsyncClient<(), jack::contrib::ClosureProcessHandler<(), Process>>;
@@ -102,17 +49,17 @@ fn want() -> std::collections::BTreeSet<(String, String)> {
 }
 
 /// With a dummy server running, `f` on it. Skipped without `SUITE_JACK_TEST`.
-fn with_server(f: impl FnOnce(&mut Option<Jackd>, &str)) {
+fn with_server(f: impl FnOnce(&mut Option<Dummy>)) {
     if std::env::var_os("SUITE_JACK_TEST").is_none() {
         eprintln!("skipped: set SUITE_JACK_TEST=1 to run it on a dummy JACK server");
         return;
     }
     let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
-    let name = format!("suitetest-{}", std::process::id());
+    let name = Dummy::name(TOOL);
     // SAFETY: serialised by ONE; the harness's other threads are idle.
     unsafe { std::env::set_var("JACK_DEFAULT_SERVER", &name) };
-    let mut jackd = Some(Jackd::start(&name));
-    f(&mut jackd, &name);
+    let mut jackd = Some(Dummy::start(TOOL));
+    f(&mut jackd);
 }
 
 /// Reads for `secs`, returning every frame, and what came that wasn't frames.
@@ -145,7 +92,7 @@ fn assert_consecutive(l: &[f32], r: &[f32]) -> usize {
 
 #[test]
 fn dummy_ramp() {
-    with_server(|_jackd, _| {
+    with_server(|_jackd| {
         let src = source();
         let mut c = Capture::jack("cap", want(), 2.0);
         assert!(eventually(Duration::from_secs(5), || c.status().attached.load(Ordering::Acquire)));
@@ -160,7 +107,7 @@ fn dummy_ramp() {
 
 #[test]
 fn dummy_gap() {
-    with_server(|_jackd, _| {
+    with_server(|_jackd| {
         let src = source();
         let mut c = Capture::jack("cap", want(), 0.5);
         assert!(eventually(Duration::from_secs(5), || c.status().attached.load(Ordering::Acquire)));
@@ -180,7 +127,7 @@ fn dummy_gap() {
 
 #[test]
 fn dummy_reattach() {
-    with_server(|jackd, name| {
+    with_server(|jackd| {
         let src = source();
         let mut c = Capture::jack("cap", want(), 2.0);
         assert!(eventually(Duration::from_secs(5), || c.status().attached.load(Ordering::Acquire)));
@@ -198,7 +145,7 @@ fn dummy_reattach() {
         let (mut l, mut r) = (vec![], vec![]);
         assert!(eventually(Duration::from_secs(3), || c.read(&mut l, &mut r, 4096) == Chunk::Away), "Away");
 
-        *jackd = Some(Jackd::start(name));
+        *jackd = Some(Dummy::start(TOOL));
         let src = source();
         assert!(
             eventually(Duration::from_secs(5), || c.status().attached.load(Ordering::Acquire)),
@@ -226,7 +173,7 @@ fn dummy_reattach() {
 
 #[test]
 fn dummy_sources() {
-    with_server(|_jackd, _| {
+    with_server(|_jackd| {
         let src = source();
         let found = as_jack_capture::sources().unwrap();
         assert!(found.contains(&"system:capture_1".to_string()), "{found:?}");

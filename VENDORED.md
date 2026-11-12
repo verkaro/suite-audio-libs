@@ -116,6 +116,13 @@ named in its header:
 - `crates/jack-capture` (`as-jack-capture`, 2026-11-04, for dexter-like110): a JACK client of two
   inputs, a ring read off JACK's thread, its connections kept, reattaching to jackd with a new
   ring (said as a gap). Written fresh, opening and losing the client after `as-jack-keeper`.
+- `crates/jack-client` (`as-jack-client`, 2026-11-12, when `as-bench` made a third client; Warren
+  chose a crate of its own): opening the client, locking memory, the notices, `reconcile`. Written
+  here, not moved: gathered from the copies `as-jack-keeper` and `as-jack-capture` each had.
+- `crates/bench` (`as-bench`, 2026-11-12, step 0 of `specs/shared.md`, for sonorack's measure):
+  signals, alignment, the check, the reduction, figures, pictures as data, the sitting, and a
+  JACK client of two outs and two ins. Written here, not moved. dexter-place's `place-measure`
+  is the same idea; nothing was read from it or copied.
 
 From `dexter-foley` at `9e1ea2226362e43f786c1d781d510e536fccb0a2` (2026-11-09), with `git
 archive`, for dexter-irma's step 1:
