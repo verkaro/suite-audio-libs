@@ -21,7 +21,7 @@
 //! order: the same input and settings give the same bits at any block size, on any machine.
 
 use as_biquad::{Biquad, First};
-use as_control::{Control, Kind, Scale, Unit};
+use as_control::{Control, Kind, Ramp, Scale, Unit};
 use std::f64::consts::PI;
 
 /// The most bands a layout has (the 551E, later, has five and a high-pass).
@@ -391,35 +391,6 @@ fn run(p: &Path, m: &mut Mem, mut x: f64) -> f64 {
     x
 }
 
-/// A gain moving linearly to a target over [`RAMP_S`].
-#[derive(Clone, Copy, Debug)]
-struct Ramp {
-    g: f64,
-    from: f64,
-    to: f64,
-    k: usize,
-    n: usize,
-}
-
-impl Ramp {
-    fn retarget(&mut self, to: f64) {
-        (self.from, self.to, self.k) = (self.g, to, 0);
-    }
-
-    #[inline]
-    fn next(&mut self) -> f64 {
-        if self.k < self.n {
-            self.k += 1;
-            self.g = if self.k == self.n {
-                self.to
-            } else {
-                self.from + (self.to - self.from) * (self.k as f64 / self.n as f64)
-            };
-        }
-        self.g
-    }
-}
-
 /// The EQ, one or two channels.
 pub struct Eq {
     rate: f64,
@@ -470,7 +441,7 @@ impl Eq {
             chans: 1,
             waiting: None,
             sent: s,
-            trim: Ramp { g: 1.0, from: 1.0, to: 1.0, k: 0, n: libm::round(RAMP_S * rate) as usize },
+            trim: Ramp::new(1.0, libm::round(RAMP_S * rate) as usize),
             readouts: Readouts { in_peak_db: -300.0, out_peak_db: -300.0, gr_db: 0.0 },
             fresh: true,
             #[cfg(test)]
@@ -487,13 +458,12 @@ impl Eq {
     pub fn set(&mut self, s: &Settings) {
         let s = s.held();
         let trim = if s.on { libm::pow(10.0, s.trim / 20.0) } else { 1.0 };
-        if trim != self.trim.to {
+        if trim != self.trim.target() {
             self.trim.retarget(trim);
         }
         self.sent = s;
         if self.fresh {
-            self.trim.g = trim;
-            self.trim.k = self.trim.n;
+            self.trim.jump(trim);
             self.paths[self.live] = design(&s, self.rate);
             self.built[self.live] = s;
             return;
@@ -553,7 +523,7 @@ impl Eq {
 
     /// Whether every crossfade and ramp has ended and nothing waits.
     pub fn settled(&self) -> bool {
-        self.fading.is_none() && self.waiting.is_none() && self.trim.k == self.trim.n
+        self.fading.is_none() && self.waiting.is_none() && self.trim.done()
     }
 
     /// What the last block read.
@@ -619,7 +589,7 @@ impl Eq {
                 }
             }
         }
-        let g = self.trim.next();
+        let g = self.trim.advance();
         for v in &mut y {
             *v *= g;
         }

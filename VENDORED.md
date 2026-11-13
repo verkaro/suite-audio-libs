@@ -127,6 +127,9 @@ named in its header:
   `as-dynamics`, and sonofader2's desks later): the controls as data. Written here, not moved.
 - `crates/eq` (`as-eq`, 2026-11-12, step 3 of `specs/shared.md`, for sonorack, then BRR, ducky,
   place and irma): the channel EQ. Written here, not moved.
+- `crates/dynamics` (`as-dynamics`, 2026-11-12, step 4 of `specs/shared.md`, for sonorack, then
+  BRR, ducky, place and irma): the core of the de-esser, optical and FET. Written here, not moved.
+  `as-control`'s `Ramp` came out of `as-eq`, where it was private, the same day.
 
 From `dexter-foley` at `9e1ea2226362e43f786c1d781d510e536fccb0a2` (2026-11-09), with `git
 archive`, for dexter-irma's step 1:

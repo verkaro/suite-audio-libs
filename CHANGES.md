@@ -6,6 +6,13 @@ the git log.
 
 ## 2026-11-12
 
+- `as-dynamics`, new (step 4 of `specs/shared.md`; its spec is `crates/dynamics/docs/spec.md`):
+  the core the de-esser, optical and FET share: `Knee` (`ff`, `fb`, their slopes, `curve`,
+  `curve_ff`), `Follower`, `peak_db`, `MeanSquare`, `one_pole`, `gain`, `Fade`, `samples`,
+  `MAX_GR_DB`, `FADE_S`, `RAMP_S`; `Ramp` re-exported. No unit yet. Nothing for a tool to do.
+- `as-control`: `Ramp` (`new`, `retarget`, `jump`, `advance`, `now`, `target`, `done`), moved out
+  of `as-eq`, where it was private; `as-eq`'s output is unchanged, bit for bit. Nothing for a tool
+  to do.
 - `as-eq`, new (step 3 of `specs/shared.md`; its spec is `crates/eq/docs/spec.md`): `Eq`
   (`new`, `set`, `process`, `process2`, `settings`, `settled`, `readouts`), `Settings` (`get`,
   `set_by_id`, `held`), `Layout::CHANNEL`, `controls`, `response`, `band_response`, `marker`,

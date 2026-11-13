@@ -1,6 +1,6 @@
 # Spec: `as-dynamics`' `fet`, the FET compressor (RACK voicing)
 
-From the suite's session, 2026-11-12. Read `shared.md` and `dynamics.md` first. The shape is
+From the suite's session, 2026-11-12. Read `shared.md` and `../crates/dynamics/docs/spec.md` first. The shape is
 `../RFC-fet.md` (settled 2026-11-12); this chooses the RACK voicing's figures. The KT76 voicing's
 come from measuring Warren's unit, later. Built last in `as-dynamics`, its stage last of all.
 
@@ -21,7 +21,7 @@ dated, with why.
 3. **The detector is peak, in dB, of the cell's output before the stage,** with the reduction's own
    attack and release as the only smoothing, as the unit's rectifier into an RC. Before the stage,
    so the colour never changes how hard it compresses, and `curve()` is exact.
-4. **The attack is loop-corrected and the release isn't** (`dynamics.md`): the dial's attack time is
+4. **The attack is loop-corrected and the release isn't** (`../crates/dynamics/docs/spec.md`): the dial's attack time is
    what a step measures, at any ratio, and the loop can't oscillate at 20 µs; the release lets go
    faster while the signal stays hot, which is the unit's programme-dependence, kept.
 5. **The threshold at Input 0 is −18 dBFS** (peak, on the output side), as the RFC asked. Input is a
@@ -32,7 +32,7 @@ dated, with why.
 ## The path, per sample
 
 1. `u = x · input_gain` (ramped);
-2. `v = u · g`, by `dynamics.md`'s loop on `v[n−1]`'s peak level;
+2. `v = u · g`, by `../crates/dynamics/docs/spec.md`'s loop on `v[n−1]`'s peak level;
 3. `w = stage(v, ρ)`;
 4. `w` through a first-order high-pass at 2 Hz (the stage's even order puts a little DC in; 2 Hz
    costs 0.04 dB at 20 Hz);
@@ -82,14 +82,14 @@ the dial and shows it.
 
 ## Readouts
 
-`dynamics.md`'s. `curve(level_db) -> out_db` at the Input and ratio set, Output included, the
+`../crates/dynamics/docs/spec.md`'s. `curve(level_db) -> out_db` at the Input and ratio set, Output included, the
 stage not (it's a colour, not a level).
 
 Status line: `FET  IN +18.0  OUT −6.0  ATK 3 (234 µs)  REL 5 (140 ms)  4:1  GR −6.0 dB`
 
 ## Pinned by tests
 
-- **The static curve:** the stepped sine (`dynamics.md`), steps held 2 s, ATK 4, REL 1, Input +20:
+- **The static curve:** the stepped sine (`../crates/dynamics/docs/spec.md`), steps held 2 s, ATK 4, REL 1, Input +20:
   the fundamental's level against the input matches `curve()` within 0.1 dB at each ratio and ALL.
 - **The attack:** on the DC step from silence to a level whose settled output stays above the knee,
   the core's exact test: the remaining error shrinks by `exp(−1/(τ_a·rate))` each sample within

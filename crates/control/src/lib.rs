@@ -14,8 +14,11 @@
 //!
 //! Written here, not moved.
 
+mod ramp;
 #[cfg(test)]
 mod tests;
+
+pub use ramp::Ramp;
 
 /// One control of a unit.
 #[derive(Clone, Copy, Debug)]

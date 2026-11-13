@@ -67,12 +67,18 @@ tool's.
   and a sitting kept to resume.
 - `as-control`: a unit's controls as data: ranges, detents, fine and coarse steps on a grid
   anchored at the detent, values shown and read as text (`1.2k`, `1k2`, `+3 dB`, `330us` on a
-  dial), and `check`, which a unit's tests run over its list.
+  dial), and `check`, which a unit's tests run over its list; and `Ramp`, a setting's linear ramp
+  over whole samples.
 - `as-eq`: a four-band channel EQ in a console's manner: a Butterworth high-pass, shelves that
   switch to bells, two overlapping mids with proportional Q, a trim; every bell and shelf matched,
   each change crossfaded from a set run over the last 100 ms, the curve drawn from the same
   coefficients. Its ranges are the E-series channel EQ's as commonly published, not checked
   against a manual (LF 30 to 450 Hz, LMF 0.2 to 2.5 kHz, HMF 0.6 to 7 kHz, HF 1.5 to 16 kHz).
+- `as-dynamics`: gain reduction for the shaping units: soft-knee gain computers fed forward and
+  back, the static curve a panel draws, a feedback loop whose attack is corrected for the loop's
+  gain so a step measures the dial's time at any ratio, peak and mean-square detectors, a reduction
+  of none passing to the bit, and the 10 ms crossfade. The de-esser, optical and FET come as its
+  modules, one a step (`specs/shared.md`).
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every
   machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass; any analog
   second-order section matched at DC, Nyquist and a chosen frequency, and from it a bell and

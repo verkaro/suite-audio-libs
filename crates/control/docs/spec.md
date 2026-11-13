@@ -117,3 +117,7 @@ is the one refusal: `parse` returns `None` and the panel says so.
 - **Not a number** given to `clamp` (so to `step` and `format`) is the default. `inf` and `nan`
   typed are refused, as text that can't be read.
 - **A switch's coarse step** is one position, as fine.
+- **`Ramp`,** added at step 4 (2026-11-12): a setting's linear ramp over whole samples
+  (`specs/shared.md`, "Ramps"), out of `as-eq`, where it was private, when `as-dynamics` became its
+  second user. Not a control's description, but how every unit's controls move, so it lives with
+  them.

@@ -15,7 +15,7 @@ Eight files, read in this order:
 | `../crates/control/docs/spec.md` | `as-control`, the controls as data | `as-control` (built) |
 | `../crates/bench/docs/spec.md` | measuring hardware against a model: play, record, check, reduce | `as-bench` (built) |
 | `../crates/eq/docs/spec.md` | `as-biquad`'s matched designs, and `as-eq` | `as-biquad` additions, `as-eq` (built) |
-| `dynamics.md` | `as-dynamics`' core: the gain computer, the feedback loop, levels, rigs | `as-dynamics` core |
+| `../crates/dynamics/docs/spec.md` | `as-dynamics`' core: the gain computer, the feedback loop, levels, rigs | `as-dynamics` core (built) |
 | `deess.md` | `deess` | |
 | `opto.md` | `opto`, its RACK voicing | |
 | `fet.md` | `fet`, its RACK voicing | |
@@ -30,7 +30,7 @@ RFC". The RFCs stay as the record; they aren't edited.
 
 ## The steps, and which model builds each
 
-Steps 1 to 7 waited on the suite's s1 and s2 (`../../NOTES.md`, the bookmark), as the RFCs say; the EQ's, 1 to 3, now go ahead of them (Warren, 2026-11-12; `../PLAN.md`). Step
+Steps 1 to 7 waited on the suite's s1 and s2 (`../../NOTES.md`, the bookmark), as the RFCs say; the EQ's, 1 to 3, now go ahead of them (Warren, 2026-11-12; `../PLAN.md`), and so do 4 to 7: the RACK voicings are built and heard as the specs have them first (Warren, 2026-11-12). Step
 0, the bench, needs nothing of theirs and none of the units, so it can go first, once Warren says
 so; sonorack's `measure` then runs it, built first in sonorack (`as-bench`'s spec, settled 2026-11-12).
 
@@ -48,7 +48,7 @@ not on writing code. If that isn't enough, the step is rerun on Fable alone (bel
 | 1 | `as-control` | `../crates/control/docs/spec.md` | Opus 5.5 | none | medium | small and fully specified: types, stepping, parsing |
 | 2 | `as-biquad`: `matched`, the matched peak and shelves, `inverse` | `../crates/eq/docs/spec.md` | Opus 5.5 | none | high | the method and its figures were prototyped here; the tests say what to hit |
 | 3 | `as-eq` | `../crates/eq/docs/spec.md` | Opus 5.5 | none | high | assembly on step 2, and the crossfade written out |
-| 4 | `as-dynamics` core: gain computers, the loop, levels, the rigs | `dynamics.md` | Opus 5.5 | none | high | written out to the formula, with an exact test for the loop |
+| 4 | `as-dynamics` core: gain computers, the loop, levels, the rigs | `../crates/dynamics/docs/spec.md` | Opus 5.5 | none | high | written out to the formula, with an exact test for the loop |
 | 5 | `deess` | `deess.md` | Opus 5.5 | none | high | its detector was prototyped here |
 | 6 | `opto`, RACK | `opto.md` | Opus 5.5 | **Fable 5.2** | high | untried figures; two envelopes, a memory and a loop that interact |
 | 7 | `fet`, RACK, its stage last | `fet.md` | Opus 5.5 | **Fable 5.2** | high | untried figures, the aliasing test that may call for an internal double rate |
@@ -66,7 +66,7 @@ Not for routine code, a compile error, or a test that a plain fix makes pass.
 
 sonorack takes each unit as it lands: its step 1 after step 3 here, its step 5 after step 5 here,
 and so on. The LA-4 and KT76 voicings and `sonorack measure` come after Warren has measured his
-units; these specs only keep room for them (`dynamics.md`, "Voicings").
+units; these specs only keep room for them (`../crates/dynamics/docs/spec.md`, "Voicings").
 
 **When a step is stuck,** a test still failing after a real try at both the code and the figure
 (and the advisor's advice, where there is one): don't keep going round. Commit what passes, write
@@ -159,7 +159,7 @@ nothing here knows of it.
 
 **Readouts.** A plain `Copy` struct each unit fills as it runs, read by the tool after a block:
 `in_peak_db`, `out_peak_db` (the block's largest, both channels), `gr_db` (the reduction at the
-block's last sample, 0 for the EQ), and what a unit adds (`dynamics.md`). Nothing in a unit draws,
+block's last sample, 0 for the EQ), and what a unit adds (`../crates/dynamics/docs/spec.md`). Nothing in a unit draws,
 logs or allocates.
 
 **No shared trait** across the crates. sonorack wires the chain.

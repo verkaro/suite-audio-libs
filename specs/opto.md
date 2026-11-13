@@ -1,6 +1,6 @@
 # Spec: `as-dynamics`' `opto`, the optical compressor (RACK voicing)
 
-From the suite's session, 2026-11-12. Read `shared.md` and `dynamics.md` first. The shape is
+From the suite's session, 2026-11-12. Read `shared.md` and `../crates/dynamics/docs/spec.md` first. The shape is
 `../RFC-opto.md` (settled 2026-11-12); this chooses the RACK voicing's figures, which it left to the
 spec. The LA-4 voicing's figures come from measuring Warren's unit, later; nothing here is fitted
 to it. Built after `deess`, before `fet`.
@@ -12,7 +12,7 @@ builds"). Its character is Warren's ear's.
 
 ## The cell, written out
 
-Feedback, by `dynamics.md`'s loop. Per sample:
+Feedback, by `../crates/dynamics/docs/spec.md`'s loop. Per sample:
 
 1. **Level:** mean square of the cell's output `y[n−1]` (both channels, the larger square), a
    symmetric one-pole of **1 ms**, sine-referenced dB. Fast enough not to blur the attack, slow
@@ -26,7 +26,7 @@ Feedback, by `dynamics.md`'s loop. Per sample:
      the gain computer's); on a release, the fast part lets half go quickly and the slow part holds
      the rest.
 4. **Attack** (either envelope, when its target is above it): the loop-corrected attack of
-   `dynamics.md`, with `τ_a` depending on how brightly the light is driven, `o = L − T`, the
+   `../crates/dynamics/docs/spec.md`, with `τ_a` depending on how brightly the light is driven, `o = L − T`, the
    output's level over the threshold in dB: `τ_a = 10 ms · sqrt(6 / max(o, 0.1))`, held between
    3 and 30 ms. 10 ms at 6 dB over, 7.1 ms at 12, 14 ms at 3: **faster the harder it's pushed.**
    As the cell closes, the output falls toward the threshold and the attack slows, which is the
@@ -42,7 +42,7 @@ Feedback, by `dynamics.md`'s loop. Per sample:
    `M = 10 dB` (6 in the 2A position). `τ_s = 0.5 s · 10^held`: 0.5 s with no memory, 5 s at its most.
 
 When the level stays under the knee, `r_t` is exactly 0, the envelopes and the memory decay to
-exactly 0 (by the `1e-12` rule of `dynamics.md`), and the gain is exactly 1.
+exactly 0 (by the `1e-12` rule of `../crates/dynamics/docs/spec.md`), and the gain is exactly 1.
 
 ## The controls
 
@@ -78,12 +78,12 @@ panel to settle (`RFC-opto.md`, "Asked of Warren"). RACK keeps Reduce, as settle
 
 ## Readouts
 
-`dynamics.md`'s, and `held`, 0 to 1, as above. With `curve(level_db) -> out_db` for the ratio and
+`../crates/dynamics/docs/spec.md`'s, and `held`, 0 to 1, as above. With `curve(level_db) -> out_db` for the ratio and
 Reduce set.
 
 ## Pinned by tests
 
-- **The static curve:** the stepped sine (`dynamics.md`), each step held 5 s, at Reduce 60 and Gain
+- **The static curve:** the stepped sine (`../crates/dynamics/docs/spec.md`), each step held 5 s, at Reduce 60 and Gain
   0: the output against the input matches `curve()` within 0.3 dB at every position.
 - **The attack,** on the DC step from silence to 6 dB over the threshold, at 4:1: the 63% time of
   the reduction is between 9 and 15 ms. (Not "10 ms within 10%" as the RFC has it: the attack slows

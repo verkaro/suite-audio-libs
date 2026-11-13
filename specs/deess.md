@@ -1,6 +1,6 @@
 # Spec: `as-dynamics`' `deess`, the de-esser
 
-From the suite's session, 2026-11-12. Read `shared.md` and `dynamics.md` first. The shape is
+From the suite's session, 2026-11-12. Read `shared.md` and `../crates/dynamics/docs/spec.md` first. The shape is
 `../RFC-deess.md` (settled 2026-11-12); this chooses what it left to the spec. Built first of the
 three, after the core.
 
@@ -63,7 +63,7 @@ Listen is a setting like the rest; the crate doesn't know it's never saved on. T
 
 ## Readouts
 
-`dynamics.md`'s, and:
+`../crates/dynamics/docs/spec.md`'s, and:
 
 - `acting`: true if the reduction at any sample of the block was above 0.1 dB;
 - `ess_db`: the band over the whole now, `band_dB − whole_dB`, the number the threshold is compared

@@ -76,6 +76,15 @@ name = "as-draw"
 version = "0.1.0"
 
 [[package]]
+name = "as-dynamics"
+version = "0.1.0"
+dependencies = [
+ "as-control",
+ "as-envelope",
+ "libm",
+]
+
+[[package]]
 name = "as-envelope"
 version = "0.1.0"
 dependencies = [
