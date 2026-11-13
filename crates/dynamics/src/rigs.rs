@@ -1,6 +1,7 @@
 //! The test rigs, written once for the three units (`docs/spec.md`, "The rigs, written once", and
 //! `specs/shared.md`, "The test rigs every unit uses").
 
+use as_control::{Control, Kind, Size};
 use as_envelope::measure::{spectrum, tone};
 use as_envelope::signal::{faded, noise, sine, torture};
 
@@ -31,20 +32,32 @@ pub struct Step {
 /// 1 kHz from −60 to 0 dBFS in 1 dB steps, each held `hold` seconds (at least 0.1), one
 /// continuous sine; each read over its last 100 ms.
 pub fn stepped_sine(rate: u32, hold: f64) -> (Vec<f64>, Vec<Step>) {
-    let (h, len) = ((hold * rate as f64) as usize, rate as usize / 10);
-    assert!(h >= len);
+    let len = rate as usize / 10;
+    let (mut x, mut steps) = (Vec::new(), Vec::new());
+    each_step(rate, hold, |d, step| {
+        steps.push(Step { db: d, from: x.len() + step.len() - len, len });
+        x.extend_from_slice(&step);
+    });
+    (x, steps)
+}
+
+/// The stepped sine a step at a time, for a long hold that needn't be held in memory: `f` is
+/// handed each step's level and its samples, in order, the sine continuous across them.
+pub fn each_step(rate: u32, hold: f64, mut f: impl FnMut(f64, Vec<f64>)) {
+    let h = (hold * rate as f64) as usize;
+    assert!(h >= rate as usize / 10);
     let w = core::f64::consts::TAU * 1000.0 / rate as f64;
-    let mut x = Vec::with_capacity(61 * h);
-    let mut steps = Vec::new();
     for i in 0..=60 {
         let d = -60.0 + i as f64;
         let a = level(d);
-        steps.push(Step { db: d, from: x.len() + h - len, len });
-        for _ in 0..h {
-            x.push(a * libm::sin(w * x.len() as f64));
-        }
+        f(d, (0..h).map(|k| a * libm::sin(w * (i * h + k) as f64)).collect());
     }
-    (x, steps)
+}
+
+/// A step's output level in dBFS by its fundamental, over its last 100 ms.
+pub fn read_tail(y: &[f64], rate: u32) -> f64 {
+    let len = rate as usize / 10;
+    db(tone(&y[y.len() - len..], 1000.0, rate, 0, len).0)
 }
 
 /// Each step's output level in dBFS, sine-referenced, by its fundamental.
@@ -79,7 +92,8 @@ fn run<U: Unit>(u: &mut U, l: &mut [f64], r: Option<&mut [f64]>, block: usize) {
     }
 }
 
-fn same(a: &[f64], b: &[f64]) -> bool {
+/// Equal to the bit.
+pub fn same(a: &[f64], b: &[f64]) -> bool {
     a.len() == b.len() && a.iter().zip(b).all(|(x, y)| x.to_bits() == y.to_bits())
 }
 
@@ -193,8 +207,10 @@ pub fn held_key_len(rate: u32) -> usize {
 /// `specs/shared.md`'s held key: a 1 kHz sine at −12 dBFS, faded in, `set` with each value of
 /// `path` in turn every 2 ms for a second, after a quarter second at its start. No step larger
 /// than 1.1× the largest through the unit held at either end of the path, and nothing above 4 kHz
-/// louder than −80 dBFS. `after` is handed the unit 50 ms after the last setting, for the unit's
-/// own check that the last setting holds.
+/// louder than −80 dBFS, or 3 dB over the louder end held still where that's over −80 (Warren,
+/// 2026-11-12: the FET's stage reads −60 at Input +40 with nothing moving; the line is for clicks,
+/// not colour). `after` is handed the unit 50 ms after the last setting, for the unit's own check
+/// that the last setting holds.
 pub fn held_key<U: Unit>(
     make: impl Fn() -> U,
     set: impl Fn(&mut U, f64),
@@ -257,9 +273,56 @@ pub fn held_key_on<U: Unit>(
     distinct.sort_by(f64::total_cmp);
     distinct.dedup();
     let ends = if distinct.len() <= 8 { distinct } else { vec![lo, hi] };
-    let bound = 1.1 * ends.iter().map(|&v| largest_step(&held(v), from)).fold(0.0, f64::max);
+    let (mut bound, mut base) = (0.0f64, -300.0f64);
+    for &v in &ends {
+        let h = held(v);
+        bound = bound.max(1.1 * largest_step(&h, from));
+        base = base.max(loudest_above(&h, from, rate, above));
+    }
     let step = largest_step(&y, from);
     assert!(step <= bound, "{what} at {rate}: a step of {step:e} against {bound:e}");
     let burst = loudest_above(&y, from, rate, above);
-    assert!(burst < -80.0, "{what} at {rate}: {burst:.1} dB above {above} Hz");
+    let line = if base < -80.0 { -80.0 } else { base + 3.0 };
+    eprintln!("held key {what} at {rate}: the ends {base:.1} dB above {above} Hz, the line {line:.1}");
+    assert!(burst < line, "{what} at {rate}: {burst:.1} dB above {above} Hz, the line {line:.1}");
+}
+
+/// A control's grid by fine steps, its low end to its high end and back: a held key's path.
+pub fn grid(list: &[Control], id: &str) -> Vec<f64> {
+    let c = as_control::find(list, id).unwrap();
+    let Kind::Value { lo, hi, .. } = c.kind else { panic!("{id} is a switch") };
+    let mut up = vec![lo];
+    while *up.last().unwrap() < hi {
+        up.push(c.step(*up.last().unwrap(), 1, Size::Fine));
+    }
+    let down: Vec<f64> = up.iter().rev().skip(1).cloned().collect();
+    up.extend(down);
+    up
+}
+
+/// `specs/shared.md`, "Denormals": `lead` (a second of signal), then ten seconds of silence, two
+/// channels, timed a block of 1,024 at a time: a block at the end takes no longer than one at the
+/// start (within 2×, by medians).
+pub fn tail<U: Unit>(u: &mut U, lead: &[f64], rate: u32) {
+    use std::time::Instant;
+    let blocks = (lead.len() + 10 * rate as usize) / 1024;
+    let mut times = vec![];
+    for k in 0..blocks {
+        let mut l = [0.0; 1024];
+        if let Some(b) = lead.get(k * 1024..(k + 1) * 1024) {
+            l.copy_from_slice(b);
+        }
+        let mut r = l;
+        let t = Instant::now();
+        u.process2(&mut l, &mut r);
+        times.push(t.elapsed().as_nanos());
+    }
+    let median = |t: &[u128]| {
+        let mut t = t.to_vec();
+        t.sort();
+        t[t.len() / 2]
+    };
+    let (start, end) = (median(&times[..40]), median(&times[times.len() - 90..]));
+    eprintln!("a block: {start} ns at the start, {end} ns at the end");
+    assert!(end < 2 * start.max(1), "{end} ns against {start}");
 }

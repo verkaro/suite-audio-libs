@@ -1,9 +1,8 @@
 //! `docs/spec-opto.md`, "Pinned by tests".
 
 use super::*;
-use crate::rigs::{self, level};
+use crate::rigs::{self, level, same};
 use as_envelope::corpus::{phrases, speech};
-use as_envelope::measure::tone;
 use as_envelope::signal::sine;
 
 const RATES: [u32; 3] = [44_100, 48_000, 96_000];
@@ -79,10 +78,6 @@ fn attack_on_dc(rate: u32, s: &Settings, over: f64) -> f64 {
     t63(&rhos(rate, s, &x).0, at, n, rate)
 }
 
-fn same(a: &[f64], b: &[f64]) -> bool {
-    a.iter().zip(b).all(|(x, y)| x.to_bits() == y.to_bits())
-}
-
 #[test]
 fn the_controls_pass_the_check() {
     as_control::check(controls()).unwrap();
@@ -113,22 +108,14 @@ fn static_curve(position: f64) {
     let rate = 48_000;
     let s = with(&[("reduce", 60.0), ("ratio", position)]);
     let mut u = unit(rate, &s);
-    let (hold, len) = (5 * rate as usize, rate as usize / 10);
-    let w = std::f64::consts::TAU * 1000.0 / rate as f64;
-    let mut at = 0usize;
     let mut worst = 0.0f64;
-    for i in 0..=60 {
-        let d = -60.0 + i as f64;
-        let a = level(d);
-        let mut x: Vec<f64> = (0..hold).map(|k| a * libm::sin(w * (at + k) as f64)).collect();
+    rigs::each_step(rate, 5.0, |d, mut x| {
         x.chunks_mut(1024).for_each(|b| u.process(b));
-        // `tone` reads phase from the index: give it the whole step's indices.
-        let out = 20.0 * libm::log10(tone(&x[hold - len..], 1000.0, rate, 0, len).0);
+        let out = rigs::read_tail(&x, rate);
         let want = curve(&s, d);
         worst = worst.max((out - want).abs());
         assert!((out - want).abs() < 0.3, "{position} at {d} dBFS: {out:.3} against {want:.3}");
-        at += hold;
-    }
+    });
     eprintln!("the curve at position {position}: within {worst:.3} dB");
 }
 
@@ -302,17 +289,7 @@ use crate::MAX_GR_DB;
 #[test]
 fn a_held_key_glides() {
     for rate in RATES {
-        let grid = |id: &str| {
-            let c = as_control::find(controls(), id).unwrap();
-            let Kind::Value { lo, hi, .. } = c.kind else { unreachable!() };
-            let mut up = vec![lo];
-            while *up.last().unwrap() < hi {
-                up.push(c.step(*up.last().unwrap(), 1, as_control::Size::Fine));
-            }
-            let down: Vec<f64> = up.iter().rev().skip(1).cloned().collect();
-            up.extend(down);
-            up
-        };
+        let grid = |id: &str| rigs::grid(controls(), id);
         let base = with(&[]);
         for (id, path) in [
             ("reduce", grid("reduce")),
@@ -374,34 +351,11 @@ fn one_light_for_both_channels() {
     rigs::linked(|| unit(48_000, &with(&[("reduce", 60.0)])), &x);
 }
 
-/// `specs/shared.md`, "Denormals": a second of speech, then ten of silence, a block at the end no
-/// slower than one at the start (within 2×, by medians).
 #[test]
 fn a_tail_to_silence_takes_no_longer() {
-    use std::time::Instant;
     let rate = 48_000;
     let mut u = unit(rate, &with(&[("reduce", 60.0)]));
-    let x = speech(110.0, 0.7, 1.0, 0.2, rate, 9);
-    let blocks = 11 * rate as usize / 1024;
-    let mut times = vec![];
-    for k in 0..blocks {
-        let mut l = [0.0; 1024];
-        if let Some(b) = x.get(k * 1024..(k + 1) * 1024) {
-            l.copy_from_slice(b);
-        }
-        let mut r = l;
-        let t = Instant::now();
-        u.process2(&mut l, &mut r);
-        times.push(t.elapsed().as_nanos());
-    }
-    let median = |t: &[u128]| {
-        let mut t = t.to_vec();
-        t.sort();
-        t[t.len() / 2]
-    };
-    let (start, end) = (median(&times[..40]), median(&times[times.len() - 90..]));
-    eprintln!("a block: {start} ns at the start, {end} ns at the end");
-    assert!(end < 2 * start.max(1), "{end} ns against {start}");
+    rigs::tail(&mut u, &speech(110.0, 0.7, 1.0, 0.2, rate, 9), rate);
 }
 
 /// The slow envelope's charge. Corrected by the loop's slope as the spec writes, though outside the

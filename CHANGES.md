@@ -6,6 +6,11 @@ the git log.
 
 ## 2026-11-12
 
+- `as-dynamics`: **`fet`**, the FET, its RACK voicing (step 7 of `specs/shared.md`; its spec is
+  `crates/dynamics/docs/spec-fet.md`): `Fet` (`new`, `set`, `process`, `process2`, `settings`,
+  `settled`, `readouts`), `Settings` (`on`, `voicing`, `rack`), `Rack`, `Voicing`, `Figures`,
+  `RACK`, `Button`, `Readouts`, `controls`, `curve`, `stage`, `attack_time`, `attack_dial`,
+  `release_time`, `release_dial`. Nothing for a tool to do: sonorack takes it at its step 7.
 - `as-dynamics`: **`opto`**, the optical, its RACK voicing (step 6 of `specs/shared.md`; its spec
   is `crates/dynamics/docs/spec-opto.md`): `Opto` (`new`, `set`, `process`, `process2`,
   `settings`, `settled`, `readouts`), `Settings` (`on`, `voicing`, `rack`), `Rack`, `Voicing`,

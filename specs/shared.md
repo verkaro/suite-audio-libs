@@ -18,7 +18,7 @@ Eight files, read in this order:
 | `../crates/dynamics/docs/spec.md` | `as-dynamics`' core: the gain computer, the feedback loop, levels, rigs | `as-dynamics` core (built) |
 | `../crates/dynamics/docs/spec-deess.md` | `deess` | `as-dynamics`' `deess` (built) |
 | `../crates/dynamics/docs/spec-opto.md` | `opto`, its RACK voicing | `as-dynamics`' `opto` (built) |
-| `fet.md` | `fet`, its RACK voicing | |
+| `../crates/dynamics/docs/spec-fet.md` | `fet`, its RACK voicing | `as-dynamics`' `fet` (built) |
 
 **Where they live.** Here, in `specs/`, until each crate exists; the workspace takes every folder
 under `crates/` as a member, so a spec can't sit in a crate's folder before its `Cargo.toml`.
@@ -51,7 +51,7 @@ not on writing code. If that isn't enough, the step is rerun on Fable alone (bel
 | 4 | `as-dynamics` core: gain computers, the loop, levels, the rigs | `../crates/dynamics/docs/spec.md` | Opus 5.5 | none | high | written out to the formula, with an exact test for the loop |
 | 5 | `deess` | `../crates/dynamics/docs/spec-deess.md` | Opus 5.5 | none | high | its detector was prototyped here |
 | 6 | `opto`, RACK | `../crates/dynamics/docs/spec-opto.md` | Opus 5.5 | **Fable 5.2** | high | untried figures; two envelopes, a memory and a loop that interact |
-| 7 | `fet`, RACK, its stage last | `fet.md` | Opus 5.5 | **Fable 5.2** | high | untried figures, the aliasing test that may call for an internal double rate |
+| 7 | `fet`, RACK, its stage last | `../crates/dynamics/docs/spec-fet.md` | Opus 5.5 | **Fable 5.2** | high | untried figures, the aliasing test that may call for an internal double rate |
 
 **When to consult the advisor** (steps 0, 6 and 7). An advisor helps only if it's asked at the right
 moments, and the builder can't be counted on to spot them alone, so they're named:

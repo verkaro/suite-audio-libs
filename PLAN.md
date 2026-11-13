@@ -179,7 +179,7 @@ move, never copied from one tool to another.
   ear until sonorack's panel), and so do 4 to 7: the RACK voicings are built and heard as the
   specs have them, before anything is modelled on Warren's units (Warren, 2026-11-12). **Steps
   done:** 0 (`as-bench`, 2026-11-12), 1 (`as-control`, 2026-11-12), 2 (`as-biquad`'s matched
-  designs, 2026-11-12), 3 (`as-eq`, 2026-11-12), 4 (`as-dynamics`' core, 2026-11-12), 5 (`deess`, 2026-11-12), 6 (`opto`, RACK, 2026-11-12).
+  designs, 2026-11-12), 3 (`as-eq`, 2026-11-12), 4 (`as-dynamics`' core, 2026-11-12), 5 (`deess`, 2026-11-12), 6 (`opto`, RACK, 2026-11-12), 7 (`fet`, RACK, 2026-11-12): all eight built.
 
 Staying in their tools: foley's UCS table, place's positions and its opening played by hand,
 and Tape's and ducky's engines.

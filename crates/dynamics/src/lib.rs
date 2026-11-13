@@ -3,7 +3,7 @@
 //! place and irma. Written here, not moved.
 //!
 //! The units are its modules, one a step: [`deess`], the de-esser (step 5); [`opto`], the optical
-//! (step 6); `fet` to come. The core they share:
+//! (step 6); [`fet`], the FET (step 7). The core they share:
 //!
 //! - [`Knee`]: the gain computer, in dB, with a quadratic soft knee, fed forward ([`Knee::ff`]) or
 //!   back ([`Knee::fb`]), and the static curve a panel draws ([`Knee::curve`]).
@@ -20,6 +20,7 @@
 pub use as_control::Ramp;
 
 pub mod deess;
+pub mod fet;
 pub mod opto;
 
 #[cfg(test)]

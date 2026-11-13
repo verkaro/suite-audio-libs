@@ -64,7 +64,7 @@ writes the local patch.
 > With the compressors and de-esser, I'd like to hear an AI interpretation of the specs before I
 > add in hardware-informed compression models.
 
-So the RACK voicings, as `crates/dynamics/docs/spec-deess.md`, `spec-opto.md` and `specs/fet.md` have them, are each built and
+So the RACK voicings, as `crates/dynamics/docs/spec-deess.md`, `spec-opto.md` and `spec-fet.md` have them, are each built and
 heard first. The LA-4 and KT76 voicings, fitted to his measured units, come only after all three
 RACK voicings have passed his ears. As `CLAUDE.md` has it now, the LA-4 is measured and voiced
 right after the optical's RACK voicing (step 6), before the FET's (step 7). The note moves both
@@ -107,3 +107,16 @@ Written by the suite's session after step 6 here (`as_dynamics::opto`; its spec 
   0.5 s, or its share, a half).
 - **Build `libm` optimised in sonorack's dev profile** (`[profile.dev.package.libm] opt-level = 3`),
   as the suite now does: unoptimised, the suite's optical tests ran three times slower.
+
+## Step 7: the FET (2026-11-12)
+
+Written by the suite's session after step 7 here (`as_dynamics::fet`; its spec is
+`crates/dynamics/docs/spec-fet.md`, "As built" at its end).
+
+- `Fet` as `Opto`; `Settings` by id (`in`, `input`, `output`, `attack`, `release`, `ratio`), the
+  knobs in `Settings::rack`. Out by default. `ratio` is 0 to 4: 4, 8, 12, 20, ALL. The dials show
+  `3 (234 µs)` and read `330us`.
+- `curve(&s, level_db)` draws the transfer with Input and Output, the stage not.
+- **For Warren's gate,** beside the spec's three faults: at the top of the range the stage takes up
+  to 0.6 dB off the fundamental beyond what `curve()` draws (4:1, Input +20, 0 dBFS in); at
+  Input +40 its harmonics read −60 dBFS above 4 kHz with nothing moving, the colour asked for.

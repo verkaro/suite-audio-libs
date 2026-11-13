@@ -1,8 +1,10 @@
 # Spec: `as-dynamics`' `fet`, the FET compressor (RACK voicing)
 
-From the suite's session, 2026-11-12. Read `shared.md` and `../crates/dynamics/docs/spec.md` first. The shape is
-`../RFC-fet.md` (settled 2026-11-12); this chooses the RACK voicing's figures. The KT76 voicing's
-come from measuring Warren's unit, later. Built last in `as-dynamics`, its stage last of all.
+From the suite's session, 2026-11-12. Read `../../../specs/shared.md` and `spec.md` (beside this)
+first. The shape is `../../../RFC-fet.md` (settled 2026-11-12); this chooses the RACK voicing's
+figures. The KT76 voicing's come from measuring Warren's unit, later. Built last in `as-dynamics`,
+its stage last of all. Moved here from `specs/fet.md` when it was built (step 7, 2026-11-12); "As
+built", at the end, has what was measured and where it differs.
 
 As the optical's, these figures weren't prototyped in the session. They're starting points that
 meet the RFC's shape; the tests pin the shape, and a figure that has to move to pass one moves here,
@@ -126,3 +128,69 @@ likely to move by ear: ALL's, the stage's `k` and `b`, and the knees.
 
 Then, later: Warren's KT76 measured at the rig, and the KT76 voicing, by `RFC-fet.md`. A spec of its
 own when that comes.
+
+## As built (step 7, 2026-11-12)
+
+`as_dynamics::fet`: `Fet` (`new`, `set`, `process`, `process2`, `settings`, `settled`,
+`readouts`), `Settings` (`on`, `voicing`, `rack`; `get`, `set_by_id`, `held`, `button`,
+`threshold`, `times`), `Rack`, `Voicing` (RACK alone), `Figures` and `RACK`, `Button`, `Readouts`,
+`controls`, `curve`, `stage`, and the dials' laws (`attack_time`, `attack_dial`, `release_time`,
+`release_dial`). The tests are `src/fet/tests.rs`. No manual was at hand: the 1176's figures are
+as commonly published, not checked (decision 1). The `in` switch's short label is `ON`.
+
+**Measured, and kept at the spec's figures:**
+
+- **The stage, `k` and `b` unmoved:** THD 0.12% at −18 dBFS with no reduction, rising every dB to
+  2.86% at 0 dBFS; more with 10 dB of reduction than with none at every level tried; the second
+  harmonic 10.9 dB under the third at 0 dBFS. **Aliasing** through the whole unit, a 1 kHz sine at
+  −18 dBFS at 44.1 kHz (where folded harmonics don't land on harmonics): the worst product −106.8
+  dBFS. **The stage runs at the rate;** no double rate. Recorded: 5 kHz at 0 dBFS, −86.2 dBFS at
+  9.1 kHz.
+- **The attack:** the core's exact test passes (within 1e-9) at dials 1, 4 and 7, at every button,
+  at 44.1, 48 and 96 kHz, with one exception: **ALL at ATK 7 (10 µs) at 44.1 and 48 kHz.** ALL
+  settles above its knee only past 40 dB of reduction, so the test drives it 55 dB over and checks
+  on the way to 40; at 10 µs the first sample's step, `(1 − p)` of 52 dB, already passes 40. The
+  reduction is checked held at 40 there, and the pole is read at 96 kHz.
+- **The release:** within 1e-9 of the dial's pole once under the knee, dials 1, 4 and 7, every
+  button, every rate.
+- **ALL is its own:** its attack and release poles are half of 20:1's within 0.5%; read off
+  `curve()`, its threshold is −15 dBFS and its knee 10 dB, within 1% (the knee's foot and one point
+  in it, since fed back, ALL's straight part starts 85 dB over its threshold, past the 40 dB hold).
+- **The dials:** 1, 4 and 7 read 800, 126 and 20 µs and 1.1 s, 235 and 50 ms within 1%; the
+  defaults show `3 (234 µs)` and `5 (140 ms)`; `330us` typed lands on 2.4 and shows `2.4 (338 µs)`.
+- **Switched in, never louder:** on `speech` and `impacts` from −40 to 0 dBFS, every 50 ms window's
+  peak and RMS at most **+0.0023 dB** over the input's.
+
+**Where it differs:**
+
+- **The high-pass filters only what the stage adds** (differs from "The path", item 4):
+  `w = v + highpass(stage(v, ρ) − v)`, not `highpass(stage(v, ρ))`. On the whole signal, the 2 Hz
+  filter's settling after a low onset (a decaying 60 Hz impact) lifted a quiet tail's peak by
+  0.27 dB at −40 dBFS, failing "never louder"; a lower corner only fits the figure to the signal,
+  since a lower hit would bring it back. The filter is there for the stage's DC, and now takes
+  only that: unfiltered, a 0 dBFS sine with the stage working hard puts DC 25 dB under its peak;
+  filtered, nothing (a pin). The input's own DC passes, as through the optical. Above 2 Hz the
+  output is as before.
+- **The burst is pinned as found, not within 25% of the dial.** On the RFC's burst (−30 to −6
+  dBFS at Input +20, REL 1, 4:1, the burst starting at a zero crossing going up), the 63% time is
+  **1.59 times** the dial at ATK 1 and **1.81** at ATK 4. The peak detector pulls only near the
+  crests (the duty cycle, `spec.md`'s "As built"); at ATK 4, 126 µs, it's mostly the sine's quarter
+  period to its first crest, the reason the spec already gives for leaving out ATK 7. Decision 3
+  keeps the detector a bare peak, so the figure moves: pinned at 1.4 to 1.8 at ATK 1, recorded at
+  ATK 4. The DC test is the exact pin.
+- **The static curve is pinned in two parts, nothing loosened.** The fundamental measures out the
+  stage's harmonics but not its compression of the fundamental. **The cell** (the stage skipped, a
+  test hook) reads `curve()` within 0.1 dB at every button: within 0.034 to 0.068 dB. **The whole
+  unit** reads `curve()` plus the stage's own gain on a sine's fundamental at that level and
+  reduction, within 0.1. **The stage pulls the fundamental down by up to 0.60 dB** (4:1, Input +20,
+  0 dBFS in: 28 dB of reduction, `k` about 1.45, a peak near −8.5 dBFS); 0.15 to 0.25 dB at the
+  other buttons. For Warren's ear: the level drawn and the level heard differ by that at the top.
+- **The held key's line above 4 kHz** (Warren, 2026-11-12): −80 dBFS, or 3 dB over the louder end
+  held still where that's over −80. With nothing moving, the stage reads −60.1 dBFS at Input +40
+  and −72.8 at Output +20: the line is for clicks, not colour. Those two controls' sweeps are
+  judged against −57 and −70; every other control of every unit keeps −80. On those two the line
+  can't see a click quieter than that above 4 kHz; the step check (no step over 1.1 times the held
+  ends') still covers them, and the same `Ramp` passes at −80 on the optical's Gain.
+- **The rigs are written once** (`src/rigs.rs`): the stepped sine streamed a step at a time
+  (`each_step`, `read_tail`), a control's grid for a held key (`grid`), the denormal timing
+  (`tail`) and `same`, gathered there from the units' tests in this step.

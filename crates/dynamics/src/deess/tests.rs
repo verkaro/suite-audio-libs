@@ -1,7 +1,7 @@
 //! `docs/spec-deess.md`, "Pinned by tests".
 
 use super::*;
-use crate::rigs::{self, level};
+use crate::rigs::{self, level, same};
 use as_envelope::measure::tone;
 use as_envelope::signal::{Rng, sine};
 
@@ -92,10 +92,6 @@ fn voice(rate: u32, n: usize, db: f64) -> Vec<f64> {
 fn pair(rate: u32, n: usize, shift: f64) -> Vec<f64> {
     let (e, v) = (ess(rate, n, -20.0 + shift), voice(rate, n, -12.0 + shift));
     e.iter().zip(&v).map(|(a, b)| a + b).collect()
-}
-
-fn same(a: &[f64], b: &[f64]) -> bool {
-    a.iter().zip(b).all(|(x, y)| x.to_bits() == y.to_bits())
 }
 
 /// The band's power out against in over the last second, in dB.
@@ -351,17 +347,7 @@ fn a_held_key_glides() {
     for rate in RATES {
         let x = pair(rate, rigs::held_key_len(rate), 0.0);
         let base = with(&[("thr", -30.0)]);
-        let grid = |id: &str| {
-            let c = as_control::find(controls(), id).unwrap();
-            let Kind::Value { lo, hi, .. } = c.kind else { unreachable!() };
-            let mut up = vec![lo];
-            while *up.last().unwrap() < hi {
-                up.push(c.step(*up.last().unwrap(), 1, as_control::Size::Fine));
-            }
-            let down: Vec<f64> = up.iter().rev().skip(1).cloned().collect();
-            up.extend(down);
-            up
-        };
+        let grid = |id: &str| rigs::grid(controls(), id);
         for (id, path) in [
             ("freq", grid("freq")),
             ("thr", grid("thr")),
@@ -426,34 +412,12 @@ fn one_detector_for_both_channels() {
     rigs::linked(|| unit(48_000, &with(&[("thr", -30.0)])), &x);
 }
 
-/// `specs/shared.md`, "Denormals": a second of the pair, then ten of silence, a block at the end
-/// no slower than one at the start (within 2×, by medians), and the filters fallen to 0.
+/// And the filters fallen to 0, the detectors with them.
 #[test]
 fn a_tail_to_silence_takes_no_longer() {
-    use std::time::Instant;
     let rate = 48_000;
     let mut u = unit(rate, &with(&[("thr", -30.0)]));
-    let x = pair(rate, rate as usize, 0.0);
-    let blocks = 11 * rate as usize / 1024;
-    let mut times = vec![];
-    for k in 0..blocks {
-        let mut l = [0.0; 1024];
-        if let Some(b) = x.get(k * 1024..(k + 1) * 1024) {
-            l.copy_from_slice(b);
-        }
-        let mut r = l;
-        let t = Instant::now();
-        u.process2(&mut l, &mut r);
-        times.push(t.elapsed().as_nanos());
-    }
-    let median = |t: &[u128]| {
-        let mut t = t.to_vec();
-        t.sort();
-        t[t.len() / 2]
-    };
-    let (start, end) = (median(&times[..40]), median(&times[times.len() - 90..]));
-    eprintln!("a block: {start} ns at the start, {end} ns at the end");
-    assert!(end < 2 * start.max(1), "{end} ns against {start}");
+    rigs::tail(&mut u, &pair(rate, rate as usize, 0.0), rate);
     assert!(u.mem.iter().flatten().all(|&v| v == 0.0), "fallen to 0");
     assert_eq!((u.band.ms(), u.whole.ms()), (0.0, 0.0));
 }

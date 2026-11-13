@@ -1,7 +1,7 @@
 # Spec: `as-dynamics`, the core its three units share
 
 From the suite's session, 2026-11-12. Read `../../../specs/shared.md` first. The units are
-`spec-deess.md`, `spec-opto.md` (beside this) and `fet.md` (in `../../../specs/`); this is what they're built on, built first,
+`spec-deess.md`, `spec-opto.md` and `spec-fet.md`, beside this; this is what they're built on, built first,
 with its own tests. Moved here from `specs/dynamics.md` when the crate was made (step 4,
 2026-11-12). Each unit's spec moves in beside it at its own step, as `docs/spec-deess.md` and so on.
 "As built", at the end, says what the builder chose and where it differs.
@@ -184,7 +184,7 @@ peak detector, its threshold ramped, a make-up gain and In).
   - **The burst reads a peak detector's attack slow, by its duty cycle.** On the test unit (4:1,
     hard knee), the 63% time on the 1 kHz burst is 1.69, 1.65 and 1.54 times the DC step's at
     1, 5 and 20 ms: the attack pulls only while the sine is near its crests, at any attack time.
-    Pinned as found (1.4 to 1.8). **`fet.md` asks the burst within 25% of the dial at ATK 1 and 4;
+    Pinned as found (1.4 to 1.8). **`spec-fet.md` asks the burst within 25% of the dial at ATK 1 and 4;
     with a peak detector that looks out of reach,** and is for step 7, with its advisor, to settle
     (the figure, or the method: the 63% time of a mean of the reduction over each cycle, say).
     The optical's mean-square detector may fare better; step 6 will say.
@@ -200,3 +200,6 @@ peak detector, its threshold ramped, a make-up gain and In).
     square. The de-esser's thresholds are relative, so that's its spec's to weigh (step 5).
 - **Step 6 added `Follower::attack_time` and `release_time`** (2026-11-12): one time set, the other
   left, one `exp`, for a cell whose times move with the level or its memory (the optical's).
+- **The held key's line, from step 7** (Warren, 2026-11-12): nothing above the band more than −80
+  dBFS, or 3 dB over the louder end held still where that's over −80. Only the FET's Input and
+  Output sweeps are over it; the burst's figure in `spec-fet.md` was settled there, as found.

@@ -80,7 +80,9 @@ tool's.
   of none passing to the bit, and the 10 ms crossfade. Its units are modules: `deess`, a
   de-esser with a relative threshold, split (a bell exactly as deep as the reduction) or wide, and
   Listen; `opto`, an optical compressor with a light, a cell of two releases and a memory, its
-  RACK voicing; the FET to come (`specs/shared.md`).
+  RACK voicing; `fet`, a FET compressor with an offset-tanh stage whose colour rises with the
+  reduction, its RACK voicing on the 1176's figures as commonly published, not checked against a
+  manual (attack 20 µs to 800 µs, release 50 ms to 1.1 s, 4, 8, 12, 20 and ALL).
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every
   machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass; any analog
   second-order section matched at DC, Nyquist and a chosen frequency, and from it a bell and

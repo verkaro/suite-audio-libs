@@ -482,34 +482,10 @@ fn a_fade_runs_to_its_end_and_the_latest_waits() {
     assert_eq!((f.target(), f.advance()), (7, (7, 7, 1.0)));
 }
 
-/// `specs/shared.md`, "Denormals": a second of noise, then ten falling past −300 dBFS to silence,
-/// timed a block at a time: a block at the end takes no longer than one at the start (within 2×,
-/// by medians).
 #[test]
 fn a_tail_to_silence_takes_no_longer() {
-    use std::time::Instant;
     let rate = 48_000;
     let mut u = Comp::new(rate, Set { release: 0.2, ..SET });
-    let x = noise(rate as usize, 1.0, 9);
-    let blocks = 11 * rate as usize / 1024;
-    let mut times = vec![];
-    for k in 0..blocks {
-        let mut l = [0.0; 1024];
-        if let Some(b) = x.get(k * 1024..(k + 1) * 1024) {
-            l.copy_from_slice(b);
-        }
-        let mut r = l;
-        let t = Instant::now();
-        u.process2(&mut l, &mut r);
-        times.push(t.elapsed().as_nanos());
-    }
-    let median = |t: &[u128]| {
-        let mut t = t.to_vec();
-        t.sort();
-        t[t.len() / 2]
-    };
-    let (start, end) = (median(&times[..40]), median(&times[times.len() - 90..]));
-    eprintln!("a block: {start} ns at the start, {end} ns at the end");
-    assert!(end < 2 * start.max(1), "{end} ns against {start}");
+    rigs::tail(&mut u, &noise(rate as usize, 1.0, 9), rate);
     assert_eq!(u.follower.rho(), 0.0, "released to exactly 0");
 }
