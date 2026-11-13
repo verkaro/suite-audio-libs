@@ -6,6 +6,10 @@ the git log.
 
 ## 2026-11-12
 
+- `as-dynamics`: **`deess`**, the de-esser (step 5 of `specs/shared.md`; its spec is
+  `crates/dynamics/docs/spec-deess.md`): `DeEsser` (`new`, `set`, `process`, `process2`,
+  `settings`, `settled`, `readouts`), `Settings`, `Mode`, `Listen`, `Readouts`, `controls`,
+  `response`, `band_q`. Nothing for a tool to do: sonorack takes it first, at its step 5.
 - `as-dynamics`, new (step 4 of `specs/shared.md`; its spec is `crates/dynamics/docs/spec.md`):
   the core the de-esser, optical and FET share: `Knee` (`ff`, `fb`, their slopes, `curve`,
   `curve_ff`), `Follower`, `peak_db`, `MeanSquare`, `one_pole`, `gain`, `Fade`, `samples`,

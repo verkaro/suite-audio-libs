@@ -79,9 +79,11 @@ version = "0.1.0"
 name = "as-dynamics"
 version = "0.1.0"
 dependencies = [
+ "as-biquad",
  "as-control",
  "as-envelope",
  "libm",
+ "realfft",
 ]
 
 [[package]]

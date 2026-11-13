@@ -2,8 +2,8 @@
 //! spec is `docs/spec.md`, the shape `RFC-eq-dynamics.md`). For sonorack first, then BRR, ducky,
 //! place and irma. Written here, not moved.
 //!
-//! This is the core the three units share; the units (`deess`, `opto`, `fet`) come as modules on
-//! it, one a step:
+//! The units are its modules, one a step: [`deess`], the de-esser (step 5); `opto` and `fet` to
+//! come. The core they share:
 //!
 //! - [`Knee`]: the gain computer, in dB, with a quadratic soft knee, fed forward ([`Knee::ff`]) or
 //!   back ([`Knee::fb`]), and the static curve a panel draws ([`Knee::curve`]).
@@ -18,6 +18,8 @@
 //! order: the same input and settings give the same bits at any block size, on any machine.
 
 pub use as_control::Ramp;
+
+pub mod deess;
 
 #[cfg(test)]
 mod rigs;

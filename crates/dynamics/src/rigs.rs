@@ -166,14 +166,14 @@ pub fn largest_step(y: &[f64], from: usize) -> f64 {
     y[from..].windows(2).map(|w| (w[1] - w[0]).abs()).fold(0.0, f64::max)
 }
 
-/// The loudest bin above 4 kHz in 4,096-sample Hann windows hopping by 1,024, in dBFS.
-pub fn loudest_above_4k(y: &[f64], from: usize, rate: u32) -> f64 {
+/// The loudest bin above `above` Hz in 4,096-sample Hann windows hopping by 1,024, in dBFS.
+pub fn loudest_above(y: &[f64], from: usize, rate: u32, above: f64) -> f64 {
     let n = 4096;
     let hann: Vec<f64> =
         (0..n).map(|k| 0.5 - 0.5 * libm::cos(core::f64::consts::TAU * k as f64 / n as f64)).collect();
     // Scaled so a sine's bin reads its peak: sine-referenced.
     let norm = n as f64 / hann.iter().sum::<f64>();
-    let lo = libm::ceil(4000.0 * n as f64 / rate as f64) as usize;
+    let lo = libm::ceil(above * n as f64 / rate as f64) as usize;
     let mut worst = -300.0f64;
     let mut at = from;
     while at + n <= y.len() {
@@ -182,6 +182,12 @@ pub fn loudest_above_4k(y: &[f64], from: usize, rate: u32) -> f64 {
         at += 1024;
     }
     worst
+}
+
+/// How long a held key's signal is: a quarter second, a second of changes, half a second.
+pub fn held_key_len(rate: u32) -> usize {
+    let r = rate as usize;
+    r / 4 + (0.002 * rate as f64) as usize * 500 + r / 2
 }
 
 /// `specs/shared.md`'s held key: a 1 kHz sine at −12 dBFS, faded in, `set` with each value of
@@ -197,10 +203,28 @@ pub fn held_key<U: Unit>(
     path: &[f64],
     what: &str,
 ) {
+    let x = faded(sine(1000.0, level(-12.0), held_key_len(rate), rate), rate as usize / 50);
+    held_key_on(&x, 4000.0, make, set, after, rate, path, what);
+}
+
+/// The held key on a signal of the unit's own ([`held_key_len`] long), the burst checked above
+/// `above` Hz. A switch's path (four values or fewer) bounds the steps by every position held,
+/// not its ends alone: the loudest may be in the middle (the de-esser's Listen band).
+#[allow(clippy::too_many_arguments)]
+pub fn held_key_on<U: Unit>(
+    x: &[f64],
+    above: f64,
+    make: impl Fn() -> U,
+    set: impl Fn(&mut U, f64),
+    after: impl Fn(&U, f64),
+    rate: u32,
+    path: &[f64],
+    what: &str,
+) {
     let r = rate as usize;
     let (pre, hop, changes) = (r / 4, (0.002 * rate as f64) as usize, 500);
-    let total = pre + hop * changes + r / 2;
-    let x = faded(sine(1000.0, level(-12.0), total, rate), r / 50);
+    assert_eq!(x.len(), held_key_len(rate));
+    let x = x.to_vec();
     let held = |v: f64| {
         let mut u = make();
         set(&mut u, v);
@@ -228,9 +252,10 @@ pub fn held_key<U: Unit>(
     let from = r / 10;
     let lo = path.iter().cloned().fold(f64::MAX, f64::min);
     let hi = path.iter().cloned().fold(f64::MIN, f64::max);
-    let bound = 1.1 * largest_step(&held(lo), from).max(largest_step(&held(hi), from));
+    let ends: Vec<f64> = if path.len() <= 4 { path.to_vec() } else { vec![lo, hi] };
+    let bound = 1.1 * ends.iter().map(|&v| largest_step(&held(v), from)).fold(0.0, f64::max);
     let step = largest_step(&y, from);
     assert!(step <= bound, "{what} at {rate}: a step of {step:e} against {bound:e}");
-    let burst = loudest_above_4k(&y, from, rate);
-    assert!(burst < -80.0, "{what} at {rate}: {burst:.1} dB above 4 kHz");
+    let burst = loudest_above(&y, from, rate, above);
+    assert!(burst < -80.0, "{what} at {rate}: {burst:.1} dB above {above} Hz");
 }

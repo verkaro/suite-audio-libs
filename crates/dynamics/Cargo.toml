@@ -7,8 +7,10 @@ rust-version.workspace = true
 description = "Gain reduction for the family's shaping units: soft-knee gain computers fed forward and back, a feedback loop corrected so its attack is the dial's at any ratio, detectors, ramps and crossfades, the same bits at any block size"
 
 [dependencies]
+as-biquad.workspace = true
 as-control.workspace = true
 libm.workspace = true
 
 [dev-dependencies]
 as-envelope.workspace = true
+realfft.workspace = true

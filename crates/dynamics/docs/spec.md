@@ -1,7 +1,7 @@
 # Spec: `as-dynamics`, the core its three units share
 
 From the suite's session, 2026-11-12. Read `../../../specs/shared.md` first. The units are
-`deess.md`, `opto.md` and `fet.md` in `../../../specs/`; this is what they're built on, built first,
+`spec-deess.md` (beside this), `opto.md` and `fet.md` (in `../../../specs/`); this is what they're built on, built first,
 with its own tests. Moved here from `specs/dynamics.md` when the crate was made (step 4,
 2026-11-12). Each unit's spec moves in beside it at its own step, as `docs/spec-deess.md` and so on.
 "As built", at the end, says what the builder chose and where it differs.
@@ -135,7 +135,7 @@ In `as-dynamics`' tests, from `as-envelope`, used by all three units:
   with the unit's, like with like.) **Differs from the RFCs.**
 - **The burst:** 1 kHz, −30 to −6 dBFS and back, the RFCs' signal, for a check within 25% of the
   DC-measured time.
-- **The ess and the corpus:** `deess.md`'s pair; `corpus::speech`, `phrases` and `impacts`.
+- **The ess and the corpus:** `spec-deess.md`'s pair; `corpus::speech`, `phrases` and `impacts`.
 - **The linked check:** a source in the left channel alone, then the same in the right alone, then
   in both: the gain on both channels is the same in each run, sample by sample, and the same between
   the left-only and right-only runs.

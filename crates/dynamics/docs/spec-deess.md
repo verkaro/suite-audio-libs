@@ -1,8 +1,9 @@
 # Spec: `as-dynamics`' `deess`, the de-esser
 
-From the suite's session, 2026-11-12. Read `shared.md` and `../crates/dynamics/docs/spec.md` first. The shape is
-`../RFC-deess.md` (settled 2026-11-12); this chooses what it left to the spec. Built first of the
-three, after the core.
+From the suite's session, 2026-11-12. Read `../../../specs/shared.md` and `spec.md` (beside this)
+first. The shape is `../../../RFC-deess.md` (settled 2026-11-12); this chooses what it left to the
+spec. Built first of the three, after the core. Moved here from `specs/deess.md` when it was built
+(step 5, 2026-11-12); "As built", at the end, says what the builder chose and where it differs.
 
 ## What was decided here, and why
 
@@ -115,3 +116,47 @@ over `corpus::voice` if those sit where the figures say), 48 kHz unless said:
 A sibilant voice, by ear. Listen for the three faults: a lisp (an ess turned to "th"), the whole
 voice dulled for an instant on each ess, pumping on bright words that aren't esses. **taken** is
 the quick way to hear the first two. If 12 dB of Range isn't enough on his voices, it's raised.
+
+## As built (step 5, 2026-11-12)
+
+`as_dynamics::deess`: `DeEsser` (`new`, `set`, `process`, `process2`, `settings`, `settled`,
+`readouts`), `Settings` (`get`, `set_by_id`, `held`), `Mode`, `Listen`, `Readouts`, `controls`,
+`response`, `band_q`, and the figures as constants. The tests are `src/deess/tests.rs`; the signal
+is made there: the ess as noise in exactly the octave about 6 kHz (flat, random phases, by an
+inverse FFT, so nothing of it lands on the voice's harmonics), the voice as 220 Hz and its
+harmonics to 2 kHz falling as 1/h. That pair reproduces the prototype's readings exactly (`ess`
+reads −9.10 dB, truly −9.71), so it's taken to be the prototype's.
+
+What was measured, and where it differs:
+
+- **The frequency glides linearly on `log2(f)` over 10 ms, not by a one-pole.** Differs from
+  decision 5. A one-pole of 10 ms set exactly within 1e-9 octave takes about 18 time constants
+  from a fine step (1/12 octave), 180 ms, and the held key asks every glide to have ended 50 ms
+  after the last setting. A linear ramp, retargeted from where it is, ends in 10 ms, as the other
+  settings' ramps do (`as_control::Ramp`), and lands on the frequency sent exactly. The held key on
+  FREQ passes (no step, nothing above 12 kHz over −80 dBFS) at all three rates.
+- **The voice alone is over the default threshold.** The prototype's voice alone reads `ess` at
+  −19.0 to −18.5 dB (the detectors ride its crests; its true band-over-whole is −23.7), over the
+  default −20, and takes up to 1.5 dB. So "the tone alone unmoved within 0.01 dB" is tested at a
+  threshold of −16, where it holds. **For Warren's gate:** a voice as bright as that one is
+  touched at the default threshold. If that's heard as pumping on bright words, the default
+  moves toward −16. A darker voice (harmonics as 1/h²) is under it, but then the pair's `ess`
+  reads 1.5 dB high, not 0.6: the readout's bias follows the voice's crest factor.
+- **The detector's time is pinned on a step in its power, not on the pair.** Fed a step in its
+  square, the band's detector is at 63% in 0.5 ms within 5% (exactly 24 samples at 48 kHz). On the
+  pair, it rides the band's crests and settles about 7 dB over the band's true power, so 63% of its
+  own settled state comes at 7.6 ms, which isn't its time. What's pinned on the pair is that it
+  reaches 63% of the band's true power within one attack time: 0.21 ms. The reduction is fully set
+  (at Range) within five attack times, and fully released, at a threshold the ess is 4 dB over,
+  in 113 ms, within five of the band's release times (200 ms).
+- **In, Mode and Listen are one crossfade,** between the outputs of what was and what is (In,
+  Mode and Listen together), so a change of two at once is one 10 ms fade.
+- **The held key bounds a switch's steps by every position held,** not its ends: Listen's band is
+  louder than off or taken (the rig, `held_key_on`).
+- **No follower on the reduction:** it's the gain computer's on the detectors' levels, held to
+  Range and scaled by the floor, sample by sample; the detectors' times are its times.
+- **`response`** is the band-pass's bilinear transform written out (the trapezoidal SVF is exactly
+  that, prewarped at its centre). The bell measured on sines matches it within 0.1 dB from 200 Hz
+  to 20 kHz at 44.1, 48 and 96 kHz, at 3, 6 and 12 dB; at the centre it's the depth within 1e-9.
+- On the pair at Threshold −40, Range 6, split: the reduction 6.0 dB, the band's power down 3.75 dB
+  (the bell predicts 3.75), the harmonics moved by the bell within 0.05 dB.

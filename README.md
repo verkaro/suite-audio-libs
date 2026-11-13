@@ -77,8 +77,9 @@ tool's.
 - `as-dynamics`: gain reduction for the shaping units: soft-knee gain computers fed forward and
   back, the static curve a panel draws, a feedback loop whose attack is corrected for the loop's
   gain so a step measures the dial's time at any ratio, peak and mean-square detectors, a reduction
-  of none passing to the bit, and the 10 ms crossfade. The de-esser, optical and FET come as its
-  modules, one a step (`specs/shared.md`).
+  of none passing to the bit, and the 10 ms crossfade. Its units are modules: `deess`, a
+  de-esser with a relative threshold, split (a bell exactly as deep as the reduction) or wide, and
+  Listen; the optical and FET to come, one a step (`specs/shared.md`).
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every
   machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass; any analog
   second-order section matched at DC, Nyquist and a chosen frequency, and from it a bell and

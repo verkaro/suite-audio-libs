@@ -64,10 +64,29 @@ writes the local patch.
 > With the compressors and de-esser, I'd like to hear an AI interpretation of the specs before I
 > add in hardware-informed compression models.
 
-So the RACK voicings, as `specs/deess.md`, `opto.md` and `fet.md` have them, are each built and
+So the RACK voicings, as `crates/dynamics/docs/spec-deess.md`, `specs/opto.md` and `specs/fet.md` have them, are each built and
 heard first. The LA-4 and KT76 voicings, fitted to his measured units, come only after all three
 RACK voicings have passed his ears. As `CLAUDE.md` has it now, the LA-4 is measured and voiced
 right after the optical's RACK voicing (step 6), before the FET's (step 7). The note moves both
 hardware voicings after step 7. **Measuring waits too** (Warren, 2026-11-12): `sonorack measure`,
 the loopback at the rig and both units measured all come after step 7, ahead of the LA-4 and KT76
 voicings. Write that into the order.
+
+## Step 5: the de-esser (2026-11-12)
+
+Written by the suite's session after step 5 here (`as_dynamics::deess`; its spec is
+`crates/dynamics/docs/spec-deess.md`, "As built" at its end). Pin the suite at the step's commit or
+later. **Opus 5.5, no advisor**, as step 1: the unit's tests pin the hard parts.
+
+- `DeEsser` as `Eq`: `new(rate)`, `set(&Settings)`, `process`, `process2`, `settings()`,
+  `settled()`, `readouts()`; `Settings` by id (`in`, `freq`, `thr`, `range`, `mode`, `listen`),
+  `controls()`. Its settings file keys as the EQ's, `deess.thr = -20`. **Out by default.**
+- **One detector for both channels:** two channels through `process2`. DUAL is two units.
+- **Readouts:** `gr_db`, `acting` (a light), and `ess_db`, the number the threshold is compared with,
+  for a bar with the threshold drawn across it. `response(&s, rate, hz, g)` draws the bell at a
+  depth `g = 10^(−gr_db/20)`.
+- **Listen** is a setting like the rest; sonorack's snapshots write it off.
+- **For Warren's gate,** beside the spec's three faults: a voice as bright as the RFC's test tone
+  reads `ess` near −19 dB with no ess in it, over the default threshold of −20, so the default may
+  touch bright vowels by a dB or so. If that's what's heard, the default moves toward −16 (a
+  decision for him, then a line in the spec).
