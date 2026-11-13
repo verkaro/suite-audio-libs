@@ -6,6 +6,12 @@ the git log.
 
 ## 2026-11-12
 
+- `as-dynamics`: **`opto`**, the optical, its RACK voicing (step 6 of `specs/shared.md`; its spec
+  is `crates/dynamics/docs/spec-opto.md`): `Opto` (`new`, `set`, `process`, `process2`,
+  `settings`, `settled`, `readouts`), `Settings` (`on`, `voicing`, `rack`), `Rack`, `Voicing`,
+  `Figures`, `RACK`, `Position`, `Readouts`, `controls`, `curve`, `threshold`, `reduce_for`.
+  `Follower::attack_time` and `release_time`, new. Nothing for a tool to do: sonorack takes it at
+  its step 6.
 - `as-dynamics`: **`deess`**, the de-esser (step 5 of `specs/shared.md`; its spec is
   `crates/dynamics/docs/spec-deess.md`): `DeEsser` (`new`, `set`, `process`, `process2`,
   `settings`, `settled`, `readouts`), `Settings`, `Mode`, `Listen`, `Readouts`, `controls`,

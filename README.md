@@ -79,7 +79,8 @@ tool's.
   gain so a step measures the dial's time at any ratio, peak and mean-square detectors, a reduction
   of none passing to the bit, and the 10 ms crossfade. Its units are modules: `deess`, a
   de-esser with a relative threshold, split (a bell exactly as deep as the reduction) or wide, and
-  Listen; the optical and FET to come, one a step (`specs/shared.md`).
+  Listen; `opto`, an optical compressor with a light, a cell of two releases and a memory, its
+  RACK voicing; the FET to come (`specs/shared.md`).
 - `as-biquad`: minimum-phase first- and second-order filters in `f64`, the same on every
   machine: a shelf and its exact inverse, a peak, a high-pass, a matched low-pass; any analog
   second-order section matched at DC, Nyquist and a chosen frequency, and from it a bell and

@@ -1,7 +1,7 @@
 # Spec: `as-dynamics`, the core its three units share
 
 From the suite's session, 2026-11-12. Read `../../../specs/shared.md` first. The units are
-`spec-deess.md` (beside this), `opto.md` and `fet.md` (in `../../../specs/`); this is what they're built on, built first,
+`spec-deess.md`, `spec-opto.md` (beside this) and `fet.md` (in `../../../specs/`); this is what they're built on, built first,
 with its own tests. Moved here from `specs/dynamics.md` when the crate was made (step 4,
 2026-11-12). Each unit's spec moves in beside it at its own step, as `docs/spec-deess.md` and so on.
 "As built", at the end, says what the builder chose and where it differs.
@@ -77,7 +77,7 @@ oscillates. So:
 `s(L)` is the slope at the level the detector just heard, so the correction follows the knee
 smoothly. All of it deterministic, per sample.
 
-A unit may correct its release the same way, and the optical does (`opto.md`: on dialogue, the
+A unit may correct its release the same way, and the optical does (`spec-opto.md`: on dialogue, the
 programme-dependent release is pumping). The FET doesn't. So the core offers both.
 
 ## Levels
@@ -198,3 +198,5 @@ peak detector, its threshold ramped, a make-up gain and In).
   - A branching mean-square detector with a fast attack rides a sine's crests and reads up to 3 dB
     over its mean square (−3.2 for −6 dBFS at 0.5 ms and 40 ms); symmetric, it reads the mean
     square. The de-esser's thresholds are relative, so that's its spec's to weigh (step 5).
+- **Step 6 added `Follower::attack_time` and `release_time`** (2026-11-12): one time set, the other
+  left, one `exp`, for a cell whose times move with the level or its memory (the optical's).

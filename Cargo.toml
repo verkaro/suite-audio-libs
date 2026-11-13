@@ -89,3 +89,7 @@ opt-level = 3
 opt-level = 3
 [profile.dev.package.as-dynamics]
 opt-level = 3
+[profile.dev.package.as-control]
+opt-level = 3
+[profile.dev.package.libm]
+opt-level = 3

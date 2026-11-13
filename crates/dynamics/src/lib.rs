@@ -2,8 +2,8 @@
 //! spec is `docs/spec.md`, the shape `RFC-eq-dynamics.md`). For sonorack first, then BRR, ducky,
 //! place and irma. Written here, not moved.
 //!
-//! The units are its modules, one a step: [`deess`], the de-esser (step 5); `opto` and `fet` to
-//! come. The core they share:
+//! The units are its modules, one a step: [`deess`], the de-esser (step 5); [`opto`], the optical
+//! (step 6); `fet` to come. The core they share:
 //!
 //! - [`Knee`]: the gain computer, in dB, with a quadratic soft knee, fed forward ([`Knee::ff`]) or
 //!   back ([`Knee::fb`]), and the static curve a panel draws ([`Knee::curve`]).
@@ -20,6 +20,7 @@
 pub use as_control::Ramp;
 
 pub mod deess;
+pub mod opto;
 
 #[cfg(test)]
 mod rigs;
@@ -221,6 +222,17 @@ impl Follower {
             }
         }
         self.rho
+    }
+
+    /// A new attack time, from the next sample, the release left as it is. One `exp`: for a unit
+    /// whose attack moves with the level (the optical's), called only while it attacks.
+    pub fn attack_time(&mut self, rate: f64, attack: f64) {
+        self.attack = one_pole(attack, rate);
+    }
+
+    /// A new release time, the attack left as it is.
+    pub fn release_time(&mut self, rate: f64, release: f64) {
+        self.release = one_pole(release, rate);
     }
 
     /// The reduction now, in dB.

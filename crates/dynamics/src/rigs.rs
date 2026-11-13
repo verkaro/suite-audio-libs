@@ -208,8 +208,9 @@ pub fn held_key<U: Unit>(
 }
 
 /// The held key on a signal of the unit's own ([`held_key_len`] long), the burst checked above
-/// `above` Hz. A switch's path (four values or fewer) bounds the steps by every position held,
-/// not its ends alone: the loudest may be in the middle (the de-esser's Listen band).
+/// `above` Hz. A switch's path (eight distinct values or fewer) bounds the steps by every position
+/// held, not its ends alone: the loudest may be in the middle (the de-esser's Listen band, the
+/// optical's 2:1).
 #[allow(clippy::too_many_arguments)]
 pub fn held_key_on<U: Unit>(
     x: &[f64],
@@ -252,7 +253,10 @@ pub fn held_key_on<U: Unit>(
     let from = r / 10;
     let lo = path.iter().cloned().fold(f64::MAX, f64::min);
     let hi = path.iter().cloned().fold(f64::MIN, f64::max);
-    let ends: Vec<f64> = if path.len() <= 4 { path.to_vec() } else { vec![lo, hi] };
+    let mut distinct = path.to_vec();
+    distinct.sort_by(f64::total_cmp);
+    distinct.dedup();
+    let ends = if distinct.len() <= 8 { distinct } else { vec![lo, hi] };
     let bound = 1.1 * ends.iter().map(|&v| largest_step(&held(v), from)).fold(0.0, f64::max);
     let step = largest_step(&y, from);
     assert!(step <= bound, "{what} at {rate}: a step of {step:e} against {bound:e}");

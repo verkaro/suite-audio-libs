@@ -64,7 +64,7 @@ writes the local patch.
 > With the compressors and de-esser, I'd like to hear an AI interpretation of the specs before I
 > add in hardware-informed compression models.
 
-So the RACK voicings, as `crates/dynamics/docs/spec-deess.md`, `specs/opto.md` and `specs/fet.md` have them, are each built and
+So the RACK voicings, as `crates/dynamics/docs/spec-deess.md`, `spec-opto.md` and `specs/fet.md` have them, are each built and
 heard first. The LA-4 and KT76 voicings, fitted to his measured units, come only after all three
 RACK voicings have passed his ears. As `CLAUDE.md` has it now, the LA-4 is measured and voiced
 right after the optical's RACK voicing (step 6), before the FET's (step 7). The note moves both
@@ -90,3 +90,20 @@ later. **Opus 5.5, no advisor**, as step 1: the unit's tests pin the hard parts.
   reads `ess` near −19 dB with no ess in it, over the default threshold of −20, so the default may
   touch bright vowels by a dB or so. If that's what's heard, the default moves toward −16 (a
   decision for him, then a line in the spec).
+
+## Step 6: the optical (2026-11-12)
+
+Written by the suite's session after step 6 here (`as_dynamics::opto`; its spec is
+`crates/dynamics/docs/spec-opto.md`, "As built" at its end, with every figure measured).
+
+- `Opto` as `DeEsser`; `Settings` by id (`in`, `reduce`, `gain`, `ratio`), the knobs in
+  `Settings::rack`, with `voicing` beside them for the LA-4 later. Out by default. `ratio` is a
+  switch, 0 to 5: 2A, 2, 4, 8, 12, 20; it shows `2A` and `4:1`. Reduce shows `40 (−18.9 dBFS)`.
+- **Readouts:** `gr_db` for the needle, and `held`, 0 to 1, the memory, for the panel.
+  `curve(&s, level_db)` draws the transfer, Gain included.
+- **For Warren's gate,** beside the spec's three faults: the slow part charges as fast as the
+  attack, so even a short loud word leaves half its reduction to come back over 0.5 s or more. If
+  a quiet line after one loud word sounds buried, that's where to look (the slow part's release,
+  0.5 s, or its share, a half).
+- **Build `libm` optimised in sonorack's dev profile** (`[profile.dev.package.libm] opt-level = 3`),
+  as the suite now does: unoptimised, the suite's optical tests ran three times slower.
