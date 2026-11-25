@@ -42,3 +42,30 @@ fn reconcile_makes_what_it_can_and_cuts_only_what_was_wanted() {
     assert_eq!(said, vec!["cut brr:out_R > mixer:live_01"]);
     assert!(g.connected("brr:out_L", "mixer:live_01"), "never someone else's");
 }
+
+/// [`reconcile`] or [`reconcile_make_first`].
+type Order = fn(&mut dyn Graph, &BTreeSet<(String, String)>, &[(String, String)]) -> Vec<String>;
+
+/// A destination playing one source, moved to another: what each order says it did.
+fn moved(order: Order) -> Vec<String> {
+    let ports = ["recv:track_3", "recv:track_9", "card:playback_1"];
+    let mut g = Fake(ports.iter().map(|s| s.to_string()).collect(), Default::default());
+    g.1.insert(link("recv:track_3", "card:playback_1"));
+    order(
+        &mut g,
+        &[link("recv:track_9", "card:playback_1")].into(),
+        &[link("recv:track_3", "card:playback_1")],
+    )
+}
+
+#[test]
+fn a_moved_destination_has_its_old_source_cut_before_the_new_is_made() {
+    let said = moved(reconcile);
+    assert_eq!(said, vec!["cut recv:track_3 > card:playback_1", "connected recv:track_9 > card:playback_1"]);
+}
+
+#[test]
+fn asked_to_make_first_the_new_source_is_there_before_the_old_is_cut() {
+    let said = moved(reconcile_make_first);
+    assert_eq!(said, vec!["connected recv:track_9 > card:playback_1", "cut recv:track_3 > card:playback_1"]);
+}

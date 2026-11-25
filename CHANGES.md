@@ -6,6 +6,9 @@ the git log.
 
 ## 2026-11-25
 
+- `as-jack-client`: **`reconcile_make_first`**, from vkro: `reconcile` in the other order, the
+  new connections made before the old are cut. `reconcile` still cuts first (Warren,
+  2026-11-25), and so do `as-jack-keeper` and `as-jack-capture`. Nothing for a tool to do.
 - `as-focusrite`: **`layout`**, from vkro: the 18i20's and the Clarett+ 8Pre's sixteen channels
   laid out for internal or external monitoring: `Layout` (`of`, `writes`, `apply`, `tape_of`),
   `Rig`, `Way`, `Monitor`, `Channel`, `Write`, `Unfit`, `LOOP_SOURCE`, `LOOP_OUT`, `RETURN`.

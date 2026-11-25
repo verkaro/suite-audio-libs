@@ -47,7 +47,8 @@ tool's.
 - `as-jack-capture`: a JACK client of two inputs read into a ring off JACK's thread, its
   connections kept, reattaching to jackd; it says when frames were lost or a new ring began.
 - `as-jack-client`: what the suite's JACK clients do alike: opening on the server named,
-  never starting one; locking memory; JACK's notices counted; the wanted connections kept.
+  never starting one; locking memory; JACK's notices counted; the wanted connections kept, cut first, or made first when
+  asked.
 - `as-transport`: where JACK's transport is, read and never moved: a client of no ports and no
   sync callback, polled from a thread of its own, `None` while the server is away and
   reattaching when it returns; and a simulated clock of the same shape.

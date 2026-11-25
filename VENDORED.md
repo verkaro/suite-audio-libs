@@ -204,6 +204,14 @@ From vkro at `448b61ea3dca116ef2c558b6018b36243332bc02` (2026-11-17), read with 
   repository is public. As it was otherwise: its comments still name vkro's steps and the
   documents it was designed from.
 
+From vkro at `914c095ece8087a7fb43535ebf549f49e1597934` (2026-11-16), read with `git show`
+(2026-11-25, Warren: no copies; `../Vkro.md`, step 4):
+
+- `crates/jack-client`: vkro's `reconcile` made the new connections before it cut the old. It
+  comes back as `reconcile_make_first`, an option, with its test; `reconcile` stays as it was
+  (Warren, 2026-11-25). Changed: the two orders share their cutting and connecting; the test
+  has a twin that pins the default's order, which none did.
+
 Written here, not moved:
 
 - `crates/bay/src/sheet.rs` (`as_bay::sheet`, 2026-11-11, `RFC-as-bay.md` b2, for jackbay):

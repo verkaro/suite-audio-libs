@@ -141,21 +141,47 @@ impl Graph for JackGraph<'_> {
     }
 }
 
-/// Makes every wanted connection whose ports both exist and isn't made, and cuts those in
-/// `cuts` (connections that were wanted and no longer are), never anyone else's. Returns what
-/// it did, for the log.
+/// Cuts those in `cuts` (connections that were wanted and no longer are), never anyone else's,
+/// then makes every wanted connection whose ports both exist and isn't made. So a destination
+/// moved from one source to another has none for a moment, and never two. Returns what it did,
+/// for the log.
 pub fn reconcile(
     g: &mut dyn Graph,
     links: &BTreeSet<(String, String)>,
     cuts: &[(String, String)],
 ) -> Vec<String> {
     let mut said = Vec::new();
+    cut(g, cuts, &mut said);
+    make(g, links, &mut said);
+    said
+}
+
+/// [`reconcile`] in the other order: the new are made before the old are cut, so a destination
+/// moved from one source to another is never left with none between. For that moment it has two
+/// sources, which JACK sums, and the step from one to the other is still a step, with no fade
+/// (vkro, 2026-11-16, an expectation for a client's solo, not yet heard). Only for a tool that
+/// asks: cut-first stays the default (Warren, 2026-11-25).
+pub fn reconcile_make_first(
+    g: &mut dyn Graph,
+    links: &BTreeSet<(String, String)>,
+    cuts: &[(String, String)],
+) -> Vec<String> {
+    let mut said = Vec::new();
+    make(g, links, &mut said);
+    cut(g, cuts, &mut said);
+    said
+}
+
+fn cut(g: &mut dyn Graph, cuts: &[(String, String)], said: &mut Vec<String>) {
     for (a, b) in cuts {
         if g.connected(a, b) {
             g.disconnect(a, b);
             said.push(format!("cut {a} > {b}"));
         }
     }
+}
+
+fn make(g: &mut dyn Graph, links: &BTreeSet<(String, String)>, said: &mut Vec<String>) {
     for (a, b) in links {
         if g.exists(a) && g.exists(b) && !g.connected(a, b) {
             match g.connect(a, b) {
@@ -164,5 +190,4 @@ pub fn reconcile(
             }
         }
     }
-    said
 }

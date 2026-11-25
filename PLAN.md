@@ -113,8 +113,8 @@ tool's `Cargo.toml` says which crates it's on. A pin behind the head is fine: a 
 when it's ready, reading `CHANGES.md` on the way. What `pins` can't say:
 
 - **BRR, Tape, ducky, irma, like110, focusrite-ctrl** were born on the suite and hold no copies.
-- **vkro** (in the family from 2026-11-25) holds a copy of `jack-client`, until `../Vkro.md`'s
-  step 4. Its other copies of suite crates are pins since that day.
+- **vkro** (in the family from 2026-11-25) holds no copy of a suite crate since that day
+  (`../Vkro.md`, steps 1 to 4).
 - **Dexter** is on `meter` (step 1); `ws`, `wav` and `http` are in PRs (#112 to #114, its step 2
   to 4). Its `focusrite`, `jack`, `system` (the interfaces), `localtime`, `bay-core`, `bay-jack`,
   `patch`, `mcu` and `surface` are second copies of suite crates by the "suite's half first"
