@@ -1,0 +1,289 @@
+1	CARD	0	Internal Validity	r	bool	1		1
+2	CARD	0	S/PDIF Validity	r	bool	1		1
+3	CARD	0	ADAT Validity	r	bool	1		1
+4	MIXER	0	Clock Source Clock Source	rw	enum	1	Internal|S/PDIF|ADAT	0
+5	CARD	0	Firmware Version	r	int	1	0,0,0	1955
+6	CARD	0	Minimum Firmware Version	r	int	1	0,0,0	0
+7	MIXER	0	Master HW Playback Volume	r	int	1	0,127,1;-12700,0	102
+8	MIXER	0	Line 01 (Monitor L) Playback Volume	r	int	1	0,127,1;-12700,0	102
+9	MIXER	0	Line 01 Mute Playback Switch	r	bool	1		0
+10	MIXER	0	Line Out 01 Volume Control Playback Enum	rw	enum	1	SW|HW	1
+11	MIXER	0	Line 02 (Monitor R) Playback Volume	r	int	1	0,127,1;-12700,0	102
+12	MIXER	0	Line 02 Mute Playback Switch	r	bool	1		0
+13	MIXER	0	Line Out 02 Volume Control Playback Enum	rw	enum	1	SW|HW	1
+14	MIXER	0	Line 03 Playback Volume	rw	int	1	0,127,1;-12700,0	127
+15	MIXER	0	Line 03 Mute Playback Switch	rw	bool	1		0
+16	MIXER	0	Line Out 03 Volume Control Playback Enum	rw	enum	1	SW|HW	0
+17	MIXER	0	Line 04 Playback Volume	rw	int	1	0,127,1;-12700,0	127
+18	MIXER	0	Line 04 Mute Playback Switch	rw	bool	1		0
+19	MIXER	0	Line Out 04 Volume Control Playback Enum	rw	enum	1	SW|HW	0
+20	MIXER	0	Line 05 Playback Volume	rw	int	1	0,127,1;-12700,0	127
+21	MIXER	0	Line 05 Mute Playback Switch	rw	bool	1		0
+22	MIXER	0	Line Out 05 Volume Control Playback Enum	rw	enum	1	SW|HW	0
+23	MIXER	0	Line 06 Playback Volume	rw	int	1	0,127,1;-12700,0	127
+24	MIXER	0	Line 06 Mute Playback Switch	rw	bool	1		0
+25	MIXER	0	Line Out 06 Volume Control Playback Enum	rw	enum	1	SW|HW	0
+26	MIXER	0	Line 07 (Headphones 1 L) Playback Volume	rw	int	1	0,127,1;-12700,0	127
+27	MIXER	0	Line 07 Mute Playback Switch	rw	bool	1		0
+28	MIXER	0	Line Out 07 Volume Control Playback Enum	rw	enum	1	SW|HW	0
+29	MIXER	0	Line 08 (Headphones 1 R) Playback Volume	rw	int	1	0,127,1;-12700,0	127
+30	MIXER	0	Line 08 Mute Playback Switch	rw	bool	1		0
+31	MIXER	0	Line Out 08 Volume Control Playback Enum	rw	enum	1	SW|HW	0
+32	MIXER	0	Line 09 (Headphones 2 L) Playback Volume	rw	int	1	0,127,1;-12700,0	127
+33	MIXER	0	Line 09 Mute Playback Switch	rw	bool	1		0
+34	MIXER	0	Line Out 09 Volume Control Playback Enum	rw	enum	1	SW|HW	0
+35	MIXER	0	Line 10 (Headphones 2 R) Playback Volume	rw	int	1	0,127,1;-12700,0	127
+36	MIXER	0	Line 10 Mute Playback Switch	rw	bool	1		0
+37	MIXER	0	Line Out 10 Volume Control Playback Enum	rw	enum	1	SW|HW	0
+38	MIXER	0	Mute Playback Switch	rw	bool	1		0
+39	MIXER	0	Dim Playback Switch	rw	bool	1		0
+40	MIXER	0	Line In 1 Level Capture Enum	rw	enum	1	Line|Inst	0
+41	MIXER	0	Line In 2 Level Capture Enum	rw	enum	1	Line|Inst	0
+42	MIXER	0	Line In 1 Air Capture Switch	rw	bool	1		0
+43	MIXER	0	Line In 2 Air Capture Switch	rw	bool	1		0
+44	MIXER	0	Line In 3 Air Capture Switch	rw	bool	1		0
+45	MIXER	0	Line In 4 Air Capture Switch	rw	bool	1		0
+46	MIXER	0	Line In 5 Air Capture Switch	rw	bool	1		0
+47	MIXER	0	Line In 6 Air Capture Switch	rw	bool	1		0
+48	MIXER	0	Line In 7 Air Capture Switch	rw	bool	1		0
+49	MIXER	0	Line In 8 Air Capture Switch	rw	bool	1		0
+50	MIXER	0	Analogue Output 01 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	19
+51	MIXER	0	Analogue Output 02 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	20
+52	MIXER	0	Analogue Output 03 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+53	MIXER	0	Analogue Output 04 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+54	MIXER	0	Analogue Output 05 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+55	MIXER	0	Analogue Output 06 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+56	MIXER	0	Analogue Output 07 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+57	MIXER	0	Analogue Output 08 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+58	MIXER	0	Analogue Output 09 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+59	MIXER	0	Analogue Output 10 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+60	MIXER	0	S/PDIF Output 1 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	48
+61	MIXER	0	S/PDIF Output 2 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	4
+62	MIXER	0	ADAT Output 1 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	39
+63	MIXER	0	ADAT Output 2 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	40
+64	MIXER	0	ADAT Output 3 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	41
+65	MIXER	0	ADAT Output 4 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	42
+66	MIXER	0	ADAT Output 5 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	43
+67	MIXER	0	ADAT Output 6 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	44
+68	MIXER	0	ADAT Output 7 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	45
+69	MIXER	0	ADAT Output 8 Playback Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	46
+70	MIXER	0	Mixer Input 01 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+71	MIXER	0	Mixer Input 02 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+72	MIXER	0	Mixer Input 03 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	29
+73	MIXER	0	Mixer Input 04 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	30
+74	MIXER	0	Mixer Input 05 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	5
+75	MIXER	0	Mixer Input 06 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	6
+76	MIXER	0	Mixer Input 07 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	3
+77	MIXER	0	Mixer Input 08 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	4
+78	MIXER	0	Mixer Input 09 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	1
+79	MIXER	0	Mixer Input 10 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	2
+80	MIXER	0	Mixer Input 11 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	13
+81	MIXER	0	Mixer Input 12 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	14
+82	MIXER	0	Mixer Input 13 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	15
+83	MIXER	0	Mixer Input 14 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	16
+84	MIXER	0	Mixer Input 15 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	17
+85	MIXER	0	Mixer Input 16 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	18
+86	MIXER	0	Mixer Input 17 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	7
+87	MIXER	0	Mixer Input 18 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	8
+88	MIXER	0	PCM 01 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	1
+89	MIXER	0	PCM 02 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	2
+90	MIXER	0	PCM 03 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+91	MIXER	0	PCM 04 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+92	MIXER	0	PCM 05 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+93	MIXER	0	PCM 06 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+94	MIXER	0	PCM 07 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+95	MIXER	0	PCM 08 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+96	MIXER	0	PCM 09 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	19
+97	MIXER	0	PCM 10 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	20
+98	MIXER	0	PCM 11 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+99	MIXER	0	PCM 12 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+100	MIXER	0	PCM 13 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+101	MIXER	0	PCM 14 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+102	MIXER	0	PCM 15 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+103	MIXER	0	PCM 16 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+104	MIXER	0	PCM 17 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+105	MIXER	0	PCM 18 Capture Enum	rw	enum	1	Off|Analogue 1|Analogue 2|Analogue 3|Analogue 4|Analogue 5|Analogue 6|Analogue 7|Analogue 8|S/PDIF 1|S/PDIF 2|ADAT 1|ADAT 2|ADAT 3|ADAT 4|ADAT 5|ADAT 6|ADAT 7|ADAT 8|Mix A|Mix B|Mix C|Mix D|Mix E|Mix F|Mix G|Mix H|Mix I|Mix J|PCM 1|PCM 2|PCM 3|PCM 4|PCM 5|PCM 6|PCM 7|PCM 8|PCM 9|PCM 10|PCM 11|PCM 12|PCM 13|PCM 14|PCM 15|PCM 16|PCM 17|PCM 18|PCM 19|PCM 20	0
+106	MIXER	0	Mix A Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+107	MIXER	0	Mix A Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+108	MIXER	0	Mix A Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+109	MIXER	0	Mix A Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+110	MIXER	0	Mix A Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+111	MIXER	0	Mix A Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+112	MIXER	0	Mix A Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+113	MIXER	0	Mix A Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+114	MIXER	0	Mix A Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+115	MIXER	0	Mix A Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+116	MIXER	0	Mix A Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+117	MIXER	0	Mix A Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+118	MIXER	0	Mix A Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+119	MIXER	0	Mix A Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+120	MIXER	0	Mix A Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+121	MIXER	0	Mix A Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+122	MIXER	0	Mix A Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+123	MIXER	0	Mix A Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+124	MIXER	0	Mix B Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+125	MIXER	0	Mix B Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+126	MIXER	0	Mix B Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+127	MIXER	0	Mix B Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+128	MIXER	0	Mix B Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+129	MIXER	0	Mix B Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+130	MIXER	0	Mix B Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+131	MIXER	0	Mix B Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+132	MIXER	0	Mix B Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+133	MIXER	0	Mix B Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+134	MIXER	0	Mix B Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+135	MIXER	0	Mix B Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+136	MIXER	0	Mix B Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+137	MIXER	0	Mix B Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+138	MIXER	0	Mix B Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+139	MIXER	0	Mix B Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+140	MIXER	0	Mix B Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+141	MIXER	0	Mix B Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+142	MIXER	0	Mix C Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+143	MIXER	0	Mix C Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+144	MIXER	0	Mix C Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+145	MIXER	0	Mix C Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+146	MIXER	0	Mix C Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+147	MIXER	0	Mix C Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+148	MIXER	0	Mix C Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+149	MIXER	0	Mix C Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+150	MIXER	0	Mix C Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+151	MIXER	0	Mix C Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+152	MIXER	0	Mix C Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+153	MIXER	0	Mix C Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+154	MIXER	0	Mix C Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+155	MIXER	0	Mix C Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+156	MIXER	0	Mix C Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+157	MIXER	0	Mix C Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+158	MIXER	0	Mix C Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+159	MIXER	0	Mix C Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+160	MIXER	0	Mix D Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+161	MIXER	0	Mix D Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+162	MIXER	0	Mix D Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+163	MIXER	0	Mix D Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+164	MIXER	0	Mix D Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+165	MIXER	0	Mix D Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+166	MIXER	0	Mix D Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+167	MIXER	0	Mix D Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+168	MIXER	0	Mix D Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+169	MIXER	0	Mix D Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+170	MIXER	0	Mix D Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+171	MIXER	0	Mix D Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+172	MIXER	0	Mix D Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+173	MIXER	0	Mix D Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+174	MIXER	0	Mix D Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+175	MIXER	0	Mix D Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+176	MIXER	0	Mix D Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+177	MIXER	0	Mix D Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+178	MIXER	0	Mix E Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+179	MIXER	0	Mix E Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+180	MIXER	0	Mix E Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+181	MIXER	0	Mix E Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+182	MIXER	0	Mix E Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+183	MIXER	0	Mix E Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+184	MIXER	0	Mix E Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+185	MIXER	0	Mix E Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+186	MIXER	0	Mix E Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+187	MIXER	0	Mix E Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+188	MIXER	0	Mix E Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+189	MIXER	0	Mix E Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+190	MIXER	0	Mix E Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+191	MIXER	0	Mix E Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+192	MIXER	0	Mix E Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+193	MIXER	0	Mix E Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+194	MIXER	0	Mix E Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+195	MIXER	0	Mix E Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+196	MIXER	0	Mix F Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+197	MIXER	0	Mix F Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+198	MIXER	0	Mix F Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+199	MIXER	0	Mix F Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+200	MIXER	0	Mix F Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+201	MIXER	0	Mix F Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+202	MIXER	0	Mix F Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+203	MIXER	0	Mix F Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+204	MIXER	0	Mix F Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+205	MIXER	0	Mix F Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+206	MIXER	0	Mix F Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+207	MIXER	0	Mix F Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+208	MIXER	0	Mix F Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+209	MIXER	0	Mix F Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+210	MIXER	0	Mix F Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+211	MIXER	0	Mix F Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+212	MIXER	0	Mix F Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+213	MIXER	0	Mix F Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+214	MIXER	0	Mix G Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+215	MIXER	0	Mix G Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+216	MIXER	0	Mix G Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+217	MIXER	0	Mix G Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+218	MIXER	0	Mix G Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+219	MIXER	0	Mix G Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+220	MIXER	0	Mix G Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+221	MIXER	0	Mix G Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+222	MIXER	0	Mix G Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+223	MIXER	0	Mix G Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+224	MIXER	0	Mix G Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+225	MIXER	0	Mix G Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+226	MIXER	0	Mix G Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+227	MIXER	0	Mix G Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+228	MIXER	0	Mix G Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+229	MIXER	0	Mix G Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+230	MIXER	0	Mix G Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+231	MIXER	0	Mix G Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+232	MIXER	0	Mix H Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+233	MIXER	0	Mix H Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+234	MIXER	0	Mix H Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+235	MIXER	0	Mix H Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+236	MIXER	0	Mix H Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+237	MIXER	0	Mix H Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+238	MIXER	0	Mix H Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+239	MIXER	0	Mix H Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+240	MIXER	0	Mix H Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+241	MIXER	0	Mix H Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+242	MIXER	0	Mix H Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+243	MIXER	0	Mix H Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+244	MIXER	0	Mix H Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+245	MIXER	0	Mix H Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+246	MIXER	0	Mix H Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+247	MIXER	0	Mix H Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+248	MIXER	0	Mix H Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+249	MIXER	0	Mix H Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+250	MIXER	0	Mix I Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+251	MIXER	0	Mix I Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+252	MIXER	0	Mix I Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+253	MIXER	0	Mix I Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+254	MIXER	0	Mix I Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+255	MIXER	0	Mix I Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+256	MIXER	0	Mix I Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+257	MIXER	0	Mix I Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+258	MIXER	0	Mix I Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+259	MIXER	0	Mix I Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+260	MIXER	0	Mix I Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+261	MIXER	0	Mix I Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+262	MIXER	0	Mix I Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+263	MIXER	0	Mix I Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+264	MIXER	0	Mix I Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+265	MIXER	0	Mix I Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+266	MIXER	0	Mix I Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+267	MIXER	0	Mix I Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+268	MIXER	0	Mix J Input 01 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+269	MIXER	0	Mix J Input 02 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+270	MIXER	0	Mix J Input 03 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+271	MIXER	0	Mix J Input 04 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+272	MIXER	0	Mix J Input 05 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+273	MIXER	0	Mix J Input 06 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+274	MIXER	0	Mix J Input 07 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+275	MIXER	0	Mix J Input 08 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+276	MIXER	0	Mix J Input 09 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+277	MIXER	0	Mix J Input 10 Playback Volume	rw	int	1	0,184,1;-8000,1200	160
+278	MIXER	0	Mix J Input 11 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+279	MIXER	0	Mix J Input 12 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+280	MIXER	0	Mix J Input 13 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+281	MIXER	0	Mix J Input 14 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+282	MIXER	0	Mix J Input 15 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+283	MIXER	0	Mix J Input 16 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+284	MIXER	0	Mix J Input 17 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+285	MIXER	0	Mix J Input 18 Playback Volume	rw	int	1	0,184,1;-8000,1200	0
+286	PCM	0	Level Meter	r	int	56	0,4095,1	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+287	MIXER	0	Sync Status	r	enum	1	Unlocked|Locked	1
+288	MIXER	0	Standalone Switch	rw	bool	1		1
+289	MIXER	0	S/PDIF Source Capture Enum	rw	enum	1	None|Optical|RCA	2

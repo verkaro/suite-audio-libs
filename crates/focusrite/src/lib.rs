@@ -9,6 +9,8 @@
 //!   18i20, `testdata/18i20-gen3.txt`, read from Warren's).
 //! - [`interface`]: a Focusrite as its controls describe it.
 //! - [`plan`]: what's set on it for a project's mixes and tracks.
+//! - [`layout`]: the 18i20's and the Clarett+ 8Pre's sixteen channels, laid out for internal or
+//!   external monitoring (vkro, 2026-11-17).
 //! - [`mixer`]: setting it, and keeping its gains with the deck on a thread of its own.
 //! - [`panel`]: its own controls beside the mixer: the inputs' switches, 48V, the clock, DIM
 //!   and MUTE (`docs/interface.md`), the lines, standalone.
@@ -22,6 +24,7 @@ pub mod card;
 pub mod controls;
 pub mod hand;
 pub mod interface;
+pub mod layout;
 pub mod mixer;
 pub mod panel;
 pub mod plan;
@@ -36,6 +39,10 @@ pub use plan::{Loop, Plan, Print, Request, Setting, Settings, Switches, Want};
 
 /// The 18i20 (3rd gen) as read from Warren's on 2026-10-13, for the tests.
 pub const SCARLETT_18I20_GEN3: &str = include_str!("../testdata/18i20-gen3.txt");
+
+/// The Clarett+ 8Pre as read from Warren's on 2026-11-17 (firmware 1955, kernel 6.12), with
+/// an OctoPre on ADAT and Dexter's loop and return routed (`examples/dump.rs`), for the tests.
+pub const CLARETT_PLUS_8PRE: &str = include_str!("../testdata/clarett-plus-8pre.txt");
 
 /// The Clarett 2Pre USB as read from Warren's on 2026-11-10 (firmware 1246, kernel 6.12), for
 /// the tests.

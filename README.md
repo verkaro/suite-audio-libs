@@ -108,8 +108,9 @@ tool's.
   3rd gen's and the Clarett 2Pre's), the interface as its controls describe it (inputs, mixer,
   outputs, meters), its own switches (48V, AIR, INST, the clock, DIM and MUTE, the lines,
   standalone), a plan of mixes set on it, the mixer kept on a thread of its own, routing and
-  the mixer set by hand with its inputs shared out by need, and every control put back as it
-  was found.
+  the mixer set by hand with its inputs shared out by need, every control put back as it was
+  found, and the 18i20's and the Clarett+ 8Pre's sixteen channels laid out for internal or
+  external monitoring (`layout`, from vkro).
 - `as-interfaces`: the audio interfaces by what they are (a USB box by its `/dev/snd/by-id`
   name, with its serial), their rates and channels at each, found again at their `hw:N`;
   whether JACK may run realtime. Only reads, under a root tests fake. No JACK.

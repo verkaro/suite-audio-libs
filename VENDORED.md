@@ -193,6 +193,17 @@ has no licence file; here, as in Dexter, they're MIT (Warren, 2026-10-03). bay-r
 and `SYNTAX.md`, which the comments name, aren't here yet (`RFC-as-bay.md`, Settled 4). From
 now on the bay is changed here. Dexter keeps its own copies until its step 9.
 
+From vkro at `448b61ea3dca116ef2c558b6018b36243332bc02` (2026-11-17), read with `git show`
+(2026-11-25, Warren: no copies; `../Vkro.md`, step 3). vkro's `as-focusrite` was this crate at
+`a8db73f`, and what it added comes back:
+
+- `crates/focusrite`'s `src/layout.rs` and `src/layout/tests.rs`, `examples/dump.rs` and
+  `examples/layout.rs`, `testdata/clarett-plus-8pre.txt` (the Clarett+ 8Pre's controls, read
+  from Warren's, a list of controls and not a recording), and their lines in `src/lib.rs`.
+  Changed: in the two examples' comments, the device's serial number is `SERIAL`, since this
+  repository is public. As it was otherwise: its comments still name vkro's steps and the
+  documents it was designed from.
+
 Written here, not moved:
 
 - `crates/bay/src/sheet.rs` (`as_bay::sheet`, 2026-11-11, `RFC-as-bay.md` b2, for jackbay):

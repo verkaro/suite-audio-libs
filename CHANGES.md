@@ -4,6 +4,14 @@ What changed in an interface or a behaviour, newest first: a line for each, nami
 what a tool has to do about it. Read it before moving a pin. Begun 2026-11-07; for before that,
 the git log.
 
+## 2026-11-25
+
+- `as-focusrite`: **`layout`**, from vkro: the 18i20's and the Clarett+ 8Pre's sixteen channels
+  laid out for internal or external monitoring: `Layout` (`of`, `writes`, `apply`, `tape_of`),
+  `Rig`, `Way`, `Monitor`, `Channel`, `Write`, `Unfit`, `LOOP_SOURCE`, `LOOP_OUT`, `RETURN`.
+  Also `CLARETT_PLUS_8PRE`, the 8Pre's controls for `Fake`, and the `dump` and `layout`
+  examples, which only read a card. Additions only: nothing for a tool to do.
+
 ## 2026-11-12
 
 - `as-dynamics`: **`fet`**, the FET, its RACK voicing (step 7 of `specs/shared.md`; its spec is
