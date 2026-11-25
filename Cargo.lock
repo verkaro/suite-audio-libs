@@ -279,6 +279,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "as-surface"
+version = "0.1.0"
+dependencies = [
+ "as-mcu",
+ "as-rawmidi",
+ "libc",
+]
+
+[[package]]
 name = "as-tar"
 version = "0.1.0"
 

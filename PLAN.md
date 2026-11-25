@@ -118,7 +118,8 @@ when it's ready, reading `CHANGES.md` on the way. What `pins` can't say:
 - **Dexter** is on `meter` (step 1); `ws`, `wav` and `http` are in PRs (#112 to #114, its step 2
   to 4). Its `focusrite`, `jack`, `system` (the interfaces), `localtime`, `bay-core`, `bay-jack`,
   `patch`, `mcu` and `surface` are second copies of suite crates by the "suite's half first"
-  decisions (2026-11-10 and 11), until its steps 7 to 11.
+  decisions (2026-11-10 and 11), until its steps 7 to 11. (`mcu` and `surface`, less Dexter's
+  adapter, came in as `as-mcu` and `as-surface` on 2026-11-25.)
 - **dexter-place** holds `wav`, `flac`, `ws`, `meter`, `jack` (the keeper), its server's `http.rs`,
   and in `core` `conv.rs`, `opening.rs`, `tilt.rs`, `convert.rs` (a resampler of its own); in
   `library` `ir.rs`, the onset in `numbers.rs`, and its save-and-rename (`as-keep`).

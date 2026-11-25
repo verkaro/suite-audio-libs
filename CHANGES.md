@@ -6,6 +6,13 @@ the git log.
 
 ## 2026-11-25
 
+- `as-surface`, new: Dexter's `crates/surface` less its adapter (`RFC-as-surface.md`, s2), for
+  sonofader2 first. Nothing for a tool to do until it takes it. Dexter, at its step 11: its
+  crate becomes the adapter alone on this one, and three things differ. **`Taper` is data:**
+  `Taper::Dexter` is `Taper::DEXTER`, and a desk may give its own (`Taper::new`). **`testbed`
+  is public.** **`process` is `lock`:** `take`, `running` and `stop` take the lock file's own
+  path, and `lock_path` is gone, so Dexter passes `<socket>.surface`. Dexter's open asks on
+  the surface's rules are built here from now on (RFC, question 5).
 - `as-mcu`, new: Dexter's `crates/mcu` (`RFC-as-surface.md`, s1). Mackie Control, the
   FaderPort V2's table, and the surface's port kept open. A port that goes between being found
   and being opened reads `Status::Missing`, where Dexter's said `Failed`. Nothing for a tool

@@ -8,6 +8,10 @@ nothing run and nothing moved. Dexter isn't touched: its copies stay its own unt
 
 **Settled 2026-11-11** (see the end): all six as recommended.
 
+**s1 and s2 built 2026-11-25.** One name differs from "The proposal": `as-rawmidi`'s new finder
+is `find_wanted`, since its `find(root, card_id, device)` stays for dexter-like110. `CHANGES.md`
+and `VENDORED.md` have what changed in the move.
+
 ## What's there
 
 Two crates, both from `verkaro/dexter-surface` (archived; brought into Dexter 2026-10-18 at

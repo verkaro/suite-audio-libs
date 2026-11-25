@@ -231,6 +231,18 @@ took it on 2026-10-18 from `verkaro/dexter-surface` (archived) at
 
 Dexter keeps its own copy until its step 11.
 
+The same day and from the same commit (`RFC-as-surface.md`, s2; `crates/surface` unchanged up
+to Dexter's `90a40f5`):
+
+- `crates/surface`, now `as-surface` (`crates/surface`), with `desk`, `binding`, `run`,
+  `testbed` and their tests: all but the adapter (`dexter.rs`, `dexter_tests.rs`), which stays
+  Dexter's. Changed: renamed, first comments, and those that named dexter-surface's
+  `docs/design.md`; `Taper` is data (`Taper::new`, `Taper::DEXTER`, two tests added);
+  `testbed` public, its top fader level read from the taper; `process.rs` is `lock.rs`, its
+  functions taking the lock file's path; `run_tests.rs` plays the testbed, where it played the
+  adapter on `dexter-sim`, with a wrapper that adds what a desk with a screen does. As it was
+  otherwise. Dexter keeps its own copy until its step 11.
+
 Written here, not moved:
 
 - `crates/bay/src/sheet.rs` (`as_bay::sheet`, 2026-11-11, `RFC-as-bay.md` b2, for jackbay):

@@ -137,6 +137,11 @@ tool's.
 - `as-mcu`: Mackie Control: a surface's bytes to its events and back (LEDs, the motor, the
   ring), a table only where a device differs (the FaderPort V2's, with its capture), a capture
   file checked, and the surface's port kept open on a thread of its own.
+- `as-surface`: a surface playing a desk: the seam (`desk`: strips and a transport, each
+  strip's fader law as data, `Taper::DEXTER` one of them), the surface's rules as pure
+  functions (`binding`), the loop between the device and the desk (`run`), a silent desk to
+  try them on (`testbed`), and one program at a time as the surface (`lock`, on a file the
+  tool names).
 - `as-pitch`: a tone's pitch by YIN and a staged long-lag refinement, good to a few cents from
   A0 to C8; and a frame-by-frame track for vibrato.
 - `as-sfz`: an SFZ instrument written as text, its headers, opcodes and values checked.
