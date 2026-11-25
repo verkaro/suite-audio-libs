@@ -212,6 +212,25 @@ From vkro at `914c095ece8087a7fb43535ebf549f49e1597934` (2026-11-16), read with 
   (Warren, 2026-11-25). Changed: the two orders share their cutting and connecting; the test
   has a twin that pins the default's order, which none did.
 
+From Dexter at `e98d44f77be270380e4d086240506777ac3c62f6` (2026-11-11), copied 2026-11-25
+(`RFC-as-surface.md`, s1; its `crates/mcu` was unchanged up to Dexter's `90a40f5`). Dexter
+took it on 2026-10-18 from `verkaro/dexter-surface` (archived) at
+`87ea53a43e9a022d97ad9ea7926e975e5427a516`, under the MIT licence:
+
+- `crates/mcu`, now `as-mcu` (`crates/mcu`), with its tests and `testdata/` (the FaderPort
+  V2's capture, its findings and the machine's card list; `standard.txt`). Changed: renamed;
+  its first comment, and `capture.rs`'s, which names Dexter's documents; `port.rs` gone into
+  `as-rawmidi` (below), `surface.rs` using it, where a port gone between being found and being
+  opened is now `Status::Missing`, not `Failed`; the test that found ports is `as-rawmidi`'s,
+  with a short one here for the table's card names. As it was otherwise. The capture scripts
+  stay Dexter's.
+- Its `src/port.rs`, into `as-rawmidi`: `Card` and `cards` (one reader of
+  `/proc/asound/cards` now), `Want`, `find` as `find_wanted` (the crate had a `find`), and
+  `open`. Its `Refused` is `as-rawmidi`'s own: `NoAccess` is `Denied`, and `Other` keeps the
+  `io::Error`. Its test is `finding_by_what_is_wanted`.
+
+Dexter keeps its own copy until its step 11.
+
 Written here, not moved:
 
 - `crates/bay/src/sheet.rs` (`as_bay::sheet`, 2026-11-11, `RFC-as-bay.md` b2, for jackbay):

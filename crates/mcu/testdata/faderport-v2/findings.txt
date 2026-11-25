@@ -1,0 +1,37 @@
+# What capture.txt's lines mean where they aren't as Mackie Control has it: read with
+# Warren's two --monitor passes and his notes, 2026-10-12. The capture is as it was made;
+# this is how it's read. Each line here must explain a line there that the check flags.
+#
+# The FaderPort keeps what it sends while no one has its port open, and hands it over when
+# it's opened again: capture.sh opens it afresh for each control, so a few controls' bytes
+# landed under the next control's name.
+#
+# SHIFT sends nothing of its own. Tapped, it's held only while it's held; held about four
+# seconds, it latches until held again. It was latched for much of the capture: the knob, the
+# knob's push, MASTER to MARKER, PREV and NEXT sent what they send with SHIFT.
+#
+# PAN, CHANNEL, SCROLL, MASTER, CLICK, SECTION and MARKER are the knob's modes, kept in the
+# unit; PREV and NEXT move it along Mackie Control's eight strips, saying where with SELECT.
+
+button shift: sends nothing; the unit keeps SHIFT to itself (and the second try latched it)
+button read: pressed twice; READ is 4A (its LED answers)
+button scroll: a mode, sending nothing of its own; 18 64 are SELECT and ZOOM, held over from before
+button master: what was held over (LINK, SELECT, ZOOM), then MASTER with SHIFT latched, 36 (F1)
+fader touch: landed under "fader up", which starts with it: 68 touched and let go
+knob one click right: SHIFT was latched: with SHIFT the knob is the cursor, 63; without, V-Pot CC 10 (monitor)
+knob one click left: SHIFT was latched: cursor 62; without, V-Pot CC 10, 41 (monitor)
+knob fast to the right: SHIFT was latched: one cursor note a click, however fast
+knob fast to the left: SHIFT was latched: one cursor note a click, however fast
+knob push: SHIFT was latched: nothing; without, note 20 (monitor)
+led write 4A: 4A is READ's LED; WRITE is 4B, and it lit
+led prev 4C: PREV has no LED; PAN's was lit by the unit, as its mode
+led next 4F: NEXT has no LED; PAN's lit as its mode
+led channel 32: 32 is PAN's LED (CHANNEL sent nothing: a lag)
+led scroll 18: SELECT's note; the FaderPort has no SELECT button to light
+led master 50: 50 is LINK's LED, which lit before
+led master 36: the modes' LEDs are the unit's own
+led click 37: the modes' LEDs are the unit's own
+led section 38: the modes' LEDs are the unit's own
+led marker 39: the modes' LEDs are the unit's own
+led blink 08: sent 01, an LED doesn't blink: the binding blinks it (the table's blinks: false)
+motor E0 00 00 (bottom): the first, already at the bottom; the last went just shy of dead bottom (Warren)

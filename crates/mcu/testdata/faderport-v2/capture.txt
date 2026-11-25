@@ -1,0 +1,73 @@
+# faderport-v2: what each control sent (hex), then whether the LEDs and motor answered
+button solo: 90 08 7F 90 08 00
+button mute: 90 10 7F 90 10 00
+button arm: 90 00 7F 90 00 00
+button shift: 
+button shift: 
+button bypass: 90 4E 7F 90 4E 00
+button touch: 90 4D 7F 90 4D 00
+button write: 90 4A 7F 90 4A 00
+button write: 90 4B 7F 90 4B 00
+button read: 90 4A 7F 90 4A 00 90 4A 7F 90 4A 00
+button read: 90 4A 7F 90 4A 00
+button prev: 90 4C 7F 90 4C 00
+button next: 90 4F 7F 90 4F 00
+button link: 90 50 7F 90 50 00
+button pan: 90 32 7F 90 32 00
+button channel: 90 32 7F 90 32 00
+button scroll: 90 18 7F 90 18 00 90 64 7F 90 64 00
+button scroll: 
+button scroll: 
+button master: 90 50 00 90 18 7F 90 18 00 90 64 7F 90 64 00 90 50 7F 90 50 00 90 50 7F 90 50 00 90 36 7F 90 36 00
+button master: 90 36 7F 90 36 00
+button click: 90 37 7F 90 37 00
+button section: 90 38 7F 90 38 00
+button marker: 90 39 7F 90 39 00
+button loop: 90 56 7F 90 56 00
+button rewind: 90 5B 7F 90 5B 00
+button fast-forward: 90 5C 7F 90 5C 00
+button stop: 90 5D 7F 90 5D 00
+button play-pause: 90 5E 7F 90 5E 00
+button record: 90 5F 7F 90 5F 00
+fader touch: 
+fader up: 90 68 7F 90 68 00 90 68 7F E0 40 73 E0 30 63 E0 20 40 E0 50 19 E0 00 00 E0 50 00 E0 70 00 E0 70 02 E0 40 04 E0 10 06 E0 70 07 E0 30 09 E0 30 0B E0 30 0D E0 50 0F E0 70 11 E0 20 14 E0 50 15 E0 00 17 E0 40 18 E0 20 1A E0 70 1B E0 50 1D E0 40 1F E0 60 21 E0 00 24 E0 20 26 E0 50 28 E0 30 2B E0 40 2E E0 50 33 E0 60 38 E0 30 3D E0 60 41 E0 10 46 E0 10 4A E0 60 4D E0 10 50 E0 60 52 E0 50 54 E0 60 56 E0 20 59 E0 10 5B E0 20 5D E0 10 5F E0 20 61 E0 70 62 E0 60 64 E0 50 66 E0 50 68 E0 70 69 E0 50 6A E0 40 6B E0 30 6C E0 40 6D E0 60 6E E0 70 6F E0 10 72 E0 20 74 E0 70 75 E0 60 77 E0 20 79 E0 30 7B E0 30 7D E0 50 7F E0 70 7F 90 68 00
+fader down: 90 68 7F E0 30 7F E0 30 7E E0 10 7D E0 00 7C E0 20 7B E0 10 7A E0 00 79 E0 60 77 E0 50 76 E0 10 75 E0 40 73 E0 20 72 E0 00 71 E0 50 6F E0 60 6E E0 70 6D E0 60 6C E0 00 6C E0 00 6B E0 70 69 E0 20 68 E0 00 67 E0 70 65 E0 50 64 E0 30 63 E0 10 62 E0 70 60 E0 50 5F E0 30 5E E0 30 5D E0 10 5C E0 40 5A E0 00 59 E0 10 57 E0 50 55 E0 30 54 E0 00 53 E0 70 51 E0 50 50 E0 70 4E E0 10 4D E0 30 4A E0 70 47 E0 00 45 E0 20 42 E0 20 40 E0 50 3D E0 60 3A E0 20 38 E0 60 35 E0 10 33 E0 50 30 E0 40 2E E0 50 2C E0 00 2B E0 10 29 E0 20 27 E0 30 25 E0 70 23 E0 40 22 E0 00 21 E0 50 1F E0 30 1E E0 50 1D E0 7F 1C E0 30 1C E0 60 1B E0 10 1B E0 20 1A E0 30 19 E0 40 18 E0 40 17 E0 60 16 E0 00 16 E0 20 15 E0 40 14 E0 70 13 E0 60 12 E0 50 11 E0 40 10 E0 30 0F E0 20 0E E0 10 0D E0 70 0B E0 60 0A E0 50 09 E0 50 08 E0 50 07 E0 70 06 E0 1F 06 E0 1F 05 E0 40 04 E0 00 04 E0 00 03 E0 70 01 E0 50 00 E0 10 01 E0 00 00 90 68 00
+knob one click right: 90 63 7F 90 63 00
+knob one click left: 90 62 7F 90 62 00
+knob fast to the right: 90 63 7F 90 63 00 90 63 7F 90 63 00 90 63 7F 90 63 00 90 63 7F 90 63 00 90 63 7F 90 63 00 90 63 7F 90 63 00 90 63 7F 90 63 00 90 63 7F 90 63 00
+knob fast to the left: 90 62 7F 90 62 00 90 62 7F 90 62 00 90 62 7F 90 62 00 90 62 7F 90 62 00 90 62 7F 90 62 00 90 62 7F 90 62 00 90 62 7F 90 62 00 90 62 7F 90 62 00
+knob push: 
+other footswitch: 
+other footswitch: 90 67 7F 90 67 00
+led solo 08: y
+led mute 10: y
+led arm 00: y
+led bypass 4E: y
+led touch 4D: y
+led write 4A: read
+led write 4B: y
+led read 4A: y
+led read 4A: y
+led prev 4C: pan
+led next 4F: pan
+led link 50: y
+led pan 32: y
+led channel 32: pan
+led scroll 18: pan
+led master 50: pan
+led master 36: n
+led click 37: n
+led section 38: n
+led marker 39: n
+led loop 56: y
+led rewind 5B: y
+led fast-forward 5C: y
+led stop 5D: y
+led play-pause 5E: y
+led record 5F: y
+led blink 08: n
+motor E0 00 00 (bottom): n
+motor E0 00 40 (middle): y
+motor E0 00 60 (three quarters): y
+motor E0 7F 7F (top): y
+motor E0 00 00 (bottom): n

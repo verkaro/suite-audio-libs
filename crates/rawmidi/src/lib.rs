@@ -1,7 +1,8 @@
-//! ALSA raw MIDI out: the ports under `/dev/snd` found by card, a port opened for writing, and
-//! the messages a keyboard needs (note on and off, program change, controllers, panic), written
-//! as bytes. No dependency but `libc`. Written for dexter-like110, 2026-11-04, after the way
-//! dexter-surface finds its ports (`crates/mcu/src/port.rs`).
+//! ALSA raw MIDI: the ports under `/dev/snd` found by card, a port opened for writing, or for
+//! reading and writing, and the messages a keyboard needs (note on and off, program change,
+//! controllers, panic), written as bytes. No dependency but `libc`. Written for dexter-like110,
+//! 2026-11-04, after the way dexter-surface finds its ports. 2026-11-25: [`Card`], [`Want`],
+//! [`find_wanted`] and [`open`] from Dexter's `crates/mcu/src/port.rs`, for `as-mcu`.
 //!
 //! Every message carries its status byte (running status is never used). Channels are 0 to 15
 //! here; a page shows them as 1 to 16.
@@ -26,20 +27,35 @@ pub struct Port {
     pub name: String,
 }
 
-/// The cards `root/proc/asound/cards` lists: number, id, name.
-fn cards(root: &Path) -> Vec<(u32, String, String)> {
+/// A sound card, as `/proc/asound/cards` has it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Card {
+    pub number: u32,
+    /// Its short id, in the brackets, trimmed (`FP2`).
+    pub id: String,
+    /// Its name after " - " (`PreSonus FP2`).
+    pub name: String,
+    /// The line under it.
+    pub long: String,
+}
+
+/// The cards `root/proc/asound/cards` lists, in its order.
+pub fn cards(root: &Path) -> Vec<Card> {
     let text = fs::read_to_string(root.join("proc/asound/cards")).unwrap_or_default();
-    let mut out = Vec::new();
+    let mut out: Vec<Card> = Vec::new();
     for line in text.lines() {
-        // ` 2 [USB            ]: USB-Audio - Clarett 2Pre USB`; the line under it is indented.
+        // ` 2 [USB            ]: USB-Audio - Clarett 2Pre USB`, then the long name indented.
         let t = line.trim_start();
-        let Some((num, rest)) = t.split_once(' ') else { continue };
-        let (Ok(number), Some(rest)) = (num.parse::<u32>(), rest.trim_start().strip_prefix('[')) else {
-            continue;
-        };
-        let Some((id, rest)) = rest.split_once(']') else { continue };
-        let name = rest.split_once(" - ").map_or("", |(_, n)| n).trim();
-        out.push((number, id.trim().to_string(), name.to_string()));
+        let head = t
+            .split_once(' ')
+            .and_then(|(num, rest)| Some((num.parse::<u32>().ok()?, rest.trim_start().strip_prefix('[')?)));
+        if let Some((number, rest)) = head {
+            let Some((id, rest)) = rest.split_once(']') else { continue };
+            let name = rest.split_once(" - ").map_or("", |(_, n)| n).trim();
+            out.push(Card { number, id: id.trim().into(), name: name.into(), long: String::new() });
+        } else if let Some(c) = out.last_mut().filter(|c| c.long.is_empty()) {
+            c.long = t.trim().into();
+        }
     }
     out
 }
@@ -56,13 +72,13 @@ pub fn ports(root: &Path) -> Vec<Port> {
             let file = e.file_name().into_string().ok()?;
             let (c, d) = file.strip_prefix("midiC")?.split_once('D')?;
             let (card, device) = (c.parse().ok()?, d.parse().ok()?);
-            let listed = cards.iter().find(|k| k.0 == card);
+            let listed = cards.iter().find(|k| k.number == card);
             Some(Port {
                 path: e.path(),
                 card,
                 device,
-                card_id: listed.map_or(String::new(), |k| k.1.clone()),
-                name: listed.map_or(format!("hw:{card}"), |k| k.2.clone()),
+                card_id: listed.map_or(String::new(), |k| k.id.clone()),
+                name: listed.map_or(format!("hw:{card}"), |k| k.name.clone()),
             })
         })
         .collect();
@@ -73,6 +89,57 @@ pub fn ports(root: &Path) -> Vec<Port> {
 /// The port with this card id and device, if it's there now.
 pub fn find(root: &Path, card_id: &str, device: u32) -> Option<Port> {
     ports(root).into_iter().find(|p| p.card_id == card_id && p.device == device)
+}
+
+/// A port as a person names it, as on a command line.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Want {
+    /// Part of a card's id, name or long name, any case.
+    Name(String),
+    /// `hw:N,M` (a subdevice after it is ignored).
+    Hw(u32, u32),
+    /// A port's path.
+    Path(PathBuf),
+}
+
+impl Want {
+    pub fn parse(s: &str) -> Want {
+        if s.starts_with('/') {
+            return Want::Path(s.into());
+        }
+        let hw = s.strip_prefix("hw:").and_then(|r| {
+            let mut n = r.split(',').map(|x| x.trim().parse::<u32>());
+            match (n.next(), n.next()) {
+                (Some(Ok(c)), Some(Ok(d))) => Some(Want::Hw(c, d)),
+                (Some(Ok(c)), None) => Some(Want::Hw(c, 0)),
+                _ => None,
+            }
+        });
+        hw.unwrap_or_else(|| Want::Name(s.into()))
+    }
+}
+
+/// The first port under root that any of wants names, in the order of wants.
+pub fn find_wanted(root: &Path, wants: &[Want]) -> Option<Port> {
+    let ports = ports(root);
+    let cards = cards(root);
+    let named = |p: &Port, n: &str| {
+        let n = n.to_lowercase();
+        cards
+            .iter()
+            .filter(|c| c.number == p.card)
+            .any(|c| [&c.id, &c.name, &c.long].iter().any(|s| s.to_lowercase().contains(&n)))
+    };
+    wants
+        .iter()
+        .find_map(|w| {
+            ports.iter().find(|p| match w {
+                Want::Name(n) => named(p, n),
+                Want::Hw(c, d) => p.card == *c && p.device == *d,
+                Want::Path(path) => p.path.ends_with(path.strip_prefix("/").unwrap_or(path)),
+            })
+        })
+        .cloned()
 }
 
 /// Why a port couldn't be opened.
@@ -102,6 +169,14 @@ fn refused(e: io::Error) -> Refused {
         Some(libc::EACCES | libc::EPERM) => Refused::Denied,
         _ => Refused::Other(e),
     }
+}
+
+/// Opens a port for reading and writing (without `O_NONBLOCK`), never creating it: a reader and
+/// a writer on the one opening, for a surface that's read and written to.
+pub fn open(path: &Path) -> Result<(File, File), Refused> {
+    let f = OpenOptions::new().read(true).write(true).open(path).map_err(refused)?;
+    let w = f.try_clone().map_err(refused)?;
+    Ok((f, w))
 }
 
 /// A port open for writing.

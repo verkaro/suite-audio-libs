@@ -33,6 +33,7 @@ as-jack-client = { path = "crates/jack-client" }
 as-keep = { path = "crates/keep" }
 as-localtime = { path = "crates/localtime" }
 as-loudness = { path = "crates/loudness" }
+as-mcu = { path = "crates/mcu" }
 as-meter = { path = "crates/meter" }
 as-opening = { path = "crates/opening" }
 as-pitch = { path = "crates/pitch" }

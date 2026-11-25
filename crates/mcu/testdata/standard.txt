@@ -1,0 +1,18 @@
+# What a surface keeping to Mackie Control's own map would send: not a device's capture,
+# but the shape of one, for the tests.
+button PLAY: 90 5E 7F 90 5E 00
+button STOP: 90 5D 7F 80 5D 00
+button REC: 90 5F 7F 5F 00
+button SHIFT: 90 46 7F 90 46 00
+fader touch: 90 68 7F 90 68 00
+fader up: E0 00 00 E0 00 20 00 40 E0 7F 7F
+fader down: E0 7F 7F 00 40 E0 00 00
+knob one click right: B0 10 01
+knob one click left: B0 10 41
+knob fast to the right: B0 10 03 10 04
+knob fast to the left: B0 10 43
+knob push: 90 20 7F 90 20 00
+led PLAY 5E: y
+led blink 5E: y
+motor E0 00 00 (bottom): y
+motor E0 7F 7F (top): y

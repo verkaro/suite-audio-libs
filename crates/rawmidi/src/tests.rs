@@ -1,5 +1,6 @@
 use super::*;
 use std::fs;
+use std::io::Write;
 
 fn scratch(name: &str) -> PathBuf {
     let d = std::env::temp_dir().join(format!("as-rawmidi-{name}-{}", std::process::id()));
@@ -70,4 +71,83 @@ fn refused_missing() {
     let root = scratch("missing");
     assert!(matches!(Out::open(&root.join("nope")), Err(Refused::Missing)));
     assert_eq!(Refused::Missing.to_string(), "no such port (unplugged?)");
+}
+
+/// A scratch root with the cards and ports of a machine with a FaderPort as card 1.
+fn machine(name: &str) -> PathBuf {
+    let root = scratch(name);
+    fs::create_dir_all(root.join("dev/snd")).unwrap();
+    fs::create_dir_all(root.join("proc/asound")).unwrap();
+    fs::write(
+        root.join("proc/asound/cards"),
+        " 0 [PCH            ]: HDA-Intel - HDA Intel PCH\n                      HDA Intel PCH at 0xf7f10000 irq 32\n \
+         1 [FP2            ]: USB-Audio - PreSonus FP2\n                      PreSonus PreSonus FP2 at usb-0000:00:14.0-2, full speed\n\
+         10 [Interface      ]: USB-Audio - Interface\n                      Some Interface at usb-0000:00:14.0-3, high speed\n",
+    )
+    .unwrap();
+    for f in ["midiC10D0", "midiC1D0", "pcmC0D0p", "controlC1"] {
+        fs::write(root.join("dev/snd").join(f), "").unwrap();
+    }
+    root
+}
+
+#[test]
+fn finding_by_what_is_wanted() {
+    let root = machine("wanted");
+    assert_eq!(
+        cards(&root)[1],
+        Card {
+            number: 1,
+            id: "FP2".into(),
+            name: "PreSonus FP2".into(),
+            long: "PreSonus PreSonus FP2 at usb-0000:00:14.0-2, full speed".into()
+        }
+    );
+    let p = ports(&root);
+    assert_eq!(
+        p.iter().map(|p| (p.card, p.device, p.name.as_str())).collect::<Vec<_>>(),
+        [(1, 0, "PreSonus FP2"), (10, 0, "Interface")]
+    );
+    let found = |w: &[&str]| {
+        find_wanted(&root, &w.iter().map(|s| Want::parse(s)).collect::<Vec<_>>()).map(|p| p.card)
+    };
+    // The first of the wants that's there, by id, name or long name, any case.
+    assert_eq!(found(&["FaderPort", "FP2"]), Some(1));
+    assert_eq!(found(&["fp2"]), Some(1));
+    assert_eq!(found(&["some interface at"]), Some(10));
+    assert_eq!(found(&["hw:10,0"]), Some(10));
+    assert_eq!(found(&["hw:10,0,0"]), Some(10));
+    assert_eq!(found(&["hw:1"]), Some(1));
+    assert_eq!(found(&["/dev/snd/midiC10D0"]), Some(10));
+    assert_eq!(found(&["X-Touch"]), None);
+    assert_eq!(found(&["hw:2,0"]), None);
+    assert_eq!(Want::parse("hw:x"), Want::Name("hw:x".into()));
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn open_reads_and_writes() {
+    use std::io::Read;
+    let root = scratch("both");
+    let path = root.join("midiC1D0");
+    fs::write(&path, [0x90, 0x5e, 0x7f]).unwrap();
+    let (mut r, mut w) = open(&path).unwrap();
+    let mut got = [0u8; 3];
+    r.read_exact(&mut got).unwrap();
+    assert_eq!(got, [0x90, 0x5e, 0x7f]);
+    w.write_all(&[0x90, 0x5e, 0x00]).unwrap();
+    assert_eq!(fs::read(&path).unwrap(), [0x90, 0x5e, 0x7f, 0x90, 0x5e, 0x00]);
+    assert!(matches!(open(&root.join("nope")), Err(Refused::Missing)));
+    assert!(!root.join("nope").exists(), "never created");
+    let _ = fs::remove_dir_all(&root);
+}
+
+#[test]
+fn refused_by_the_error() {
+    let of = |e: i32| refused(io::Error::from_raw_os_error(e));
+    assert!(matches!(of(libc::EBUSY), Refused::Busy));
+    assert!(matches!(of(libc::EACCES), Refused::Denied));
+    assert!(matches!(of(libc::EPERM), Refused::Denied));
+    assert!(matches!(of(libc::ENODEV), Refused::Missing));
+    assert!(matches!(of(libc::EIO), Refused::Other(_)));
 }

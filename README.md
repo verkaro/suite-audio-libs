@@ -130,8 +130,13 @@ tool's.
   tool's name).
 - `as-localtime`: local wall-clock time through the C library, in the formats Dexter's files
   use.
-- `as-rawmidi`: ALSA raw MIDI out: ports found by card under `/dev/snd`, a port opened for
-  writing, note on and off, program change, controllers and panic as bytes.
+- `as-rawmidi`: ALSA raw MIDI: ports found by card under `/dev/snd`, or by what a person
+  names (a card's name, `hw:N,M`, a path); a port opened for writing, or for reading and
+  writing, saying busy from not allowed; note on and off, program change, controllers and
+  panic as bytes.
+- `as-mcu`: Mackie Control: a surface's bytes to its events and back (LEDs, the motor, the
+  ring), a table only where a device differs (the FaderPort V2's, with its capture), a capture
+  file checked, and the surface's port kept open on a thread of its own.
 - `as-pitch`: a tone's pitch by YIN and a staged long-lag refinement, good to a few cents from
   A0 to C8; and a frame-by-frame track for vibrato.
 - `as-sfz`: an SFZ instrument written as text, its headers, opcodes and values checked.

@@ -6,6 +6,13 @@ the git log.
 
 ## 2026-11-25
 
+- `as-mcu`, new: Dexter's `crates/mcu` (`RFC-as-surface.md`, s1). Mackie Control, the
+  FaderPort V2's table, and the surface's port kept open. A port that goes between being found
+  and being opened reads `Status::Missing`, where Dexter's said `Failed`. Nothing for a tool
+  to do until it takes it: sonofader2 first, Dexter at its step 11.
+- `as-rawmidi`: **`Card`, `cards`, `Want`, `find_wanted` and `open`** (read and write), from
+  Dexter's port finder. `ports`, `find`, `Out` and `Refused` are as they were. Nothing for a
+  tool to do.
 - `as-jack-client`: **`reconcile_make_first`**, from vkro: `reconcile` in the other order, the
   new connections made before the old are cut. `reconcile` still cuts first (Warren,
   2026-11-25), and so do `as-jack-keeper` and `as-jack-capture`. Nothing for a tool to do.
