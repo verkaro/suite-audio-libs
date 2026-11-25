@@ -129,6 +129,7 @@ version = "0.1.0"
 name = "as-interfaces"
 version = "0.1.0"
 dependencies = [
+ "as-rawmidi",
  "serde",
 ]
 

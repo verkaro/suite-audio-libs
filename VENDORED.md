@@ -224,8 +224,8 @@ took it on 2026-10-18 from `verkaro/dexter-surface` (archived) at
   opened is now `Status::Missing`, not `Failed`; the test that found ports is `as-rawmidi`'s,
   with a short one here for the table's card names. As it was otherwise. The capture scripts
   stay Dexter's.
-- Its `src/port.rs`, into `as-rawmidi`: `Card` and `cards` (one reader of
-  `/proc/asound/cards` now), `Want`, `find` as `find_wanted` (the crate had a `find`), and
+- Its `src/port.rs`, into `as-rawmidi`: `Card` and `cards` (`as-interfaces` takes its cards
+  from here too, its own reader gone, so the suite reads `/proc/asound/cards` once), `Want`, `find` as `find_wanted` (the crate had a `find`), and
   `open`. Its `Refused` is `as-rawmidi`'s own: `NoAccess` is `Denied`, and `Other` keeps the
   `io::Error`. Its test is `finding_by_what_is_wanted`.
 

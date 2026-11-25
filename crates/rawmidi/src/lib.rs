@@ -33,13 +33,14 @@ pub struct Card {
     pub number: u32,
     /// Its short id, in the brackets, trimmed (`FP2`).
     pub id: String,
-    /// Its name after " - " (`PreSonus FP2`).
+    /// Its name after the driver and " - " (`PreSonus FP2`).
     pub name: String,
     /// The line under it.
     pub long: String,
 }
 
-/// The cards `root/proc/asound/cards` lists, in its order.
+/// The cards `root/proc/asound/cards` lists, in its order: the suite's one reader of that file
+/// (`as-interfaces` takes its cards from here).
 pub fn cards(root: &Path) -> Vec<Card> {
     let text = fs::read_to_string(root.join("proc/asound/cards")).unwrap_or_default();
     let mut out: Vec<Card> = Vec::new();
@@ -51,7 +52,9 @@ pub fn cards(root: &Path) -> Vec<Card> {
             .and_then(|(num, rest)| Some((num.parse::<u32>().ok()?, rest.trim_start().strip_prefix('[')?)));
         if let Some((number, rest)) = head {
             let Some((id, rest)) = rest.split_once(']') else { continue };
-            let name = rest.split_once(" - ").map_or("", |(_, n)| n).trim();
+            // ": USB-Audio - Clarett 2Pre USB": the driver, then the card's name.
+            let full = rest.trim_start_matches(':');
+            let name = full.split_once(" - ").map_or(full, |(_, n)| n).trim();
             out.push(Card { number, id: id.trim().into(), name: name.into(), long: String::new() });
         } else if let Some(c) = out.last_mut().filter(|c| c.long.is_empty()) {
             c.long = t.trim().into();

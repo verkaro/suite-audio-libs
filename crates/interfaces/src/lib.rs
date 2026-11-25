@@ -7,10 +7,12 @@
 //! Moved in from Dexter's `dexter-system` (`src/interfaces.rs`, with `cards` and `limit` from its
 //! `lib.rs`) at `e98d44f` (2026-11-11), for `as-jackd` and jackbay (`RFC-as-jackd.md`). As it was.
 //! No JACK here, so a tool that never links JACK can name its card by the same id.
+//! 2026-11-25: the cards come from `as_rawmidi::cards`, where this had a reader of its own.
 
 use std::fs;
 use std::path::Path;
 
+use as_rawmidi::Card;
 use serde::Serialize;
 
 /// The rates offered for a card that doesn't list its own (PCI, onboard).
@@ -78,12 +80,11 @@ fn links(root: &Path, dir: &str) -> Vec<(String, u32)> {
 
 /// Every interface there is now, by card number.
 pub fn interfaces(root: &Path) -> Vec<Interface> {
-    let cards = cards(&fs::read_to_string(root.join("proc/asound/cards")).unwrap_or_default());
     let by_id = links(root, "dev/snd/by-id");
     let by_path = links(root, "dev/snd/by-path");
-    cards
+    as_rawmidi::cards(root)
         .into_iter()
-        .filter_map(|(n, alsa, name)| {
+        .filter_map(|Card { number: n, id: alsa, name, .. }| {
             // by-path: the plain name, not USB's second (usbv2) one.
             let path = by_path
                 .iter()
@@ -196,21 +197,6 @@ pub fn realtime_allowed(root: &Path) -> bool {
     let limits = fs::read_to_string(root.join("proc/self/limits")).unwrap_or_default();
     matches!(limit(&limits, "Max realtime priority"), Some(None))
         || matches!(limit(&limits, "Max realtime priority"), Some(Some(p)) if p >= 70)
-}
-
-/// The sound cards in `/proc/asound/cards`: number, id and name (without the driver).
-fn cards(text: &str) -> Vec<(u32, String, String)> {
-    text.lines()
-        .filter_map(|l| {
-            let (n, rest) = l.trim_start().split_once(' ')?;
-            let n = n.parse().ok()?;
-            let id = rest.split_once('[')?.1.split_once(']')?.0.trim().to_string();
-            // "USB-Audio - Clarett 2Pre USB": the driver, then the card's name.
-            let full = rest.split_once("]: ")?.1.trim();
-            let name = full.split_once(" - ").map_or(full, |(_, n)| n).to_string();
-            Some((n, id, name))
-        })
-        .collect()
 }
 
 /// A soft limit from `/proc/self/limits`: None is unlimited.

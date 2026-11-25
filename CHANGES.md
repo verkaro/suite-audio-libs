@@ -18,8 +18,13 @@ the git log.
   and being opened reads `Status::Missing`, where Dexter's said `Failed`. Nothing for a tool
   to do until it takes it: sonofader2 first, Dexter at its step 11.
 - `as-rawmidi`: **`Card`, `cards`, `Want`, `find_wanted` and `open`** (read and write), from
-  Dexter's port finder. `ports`, `find`, `Out` and `Refused` are as they were. Nothing for a
-  tool to do.
+  Dexter's port finder. `ports`, `find`, `Out` and `Refused` are as they were, but a card
+  listed with no " - " is named by the whole text, where it had no name (ALSA writes the
+  " - "). Nothing for a tool to do.
+- `as-interfaces`: its cards come from `as_rawmidi::cards`, the one reader of
+  `/proc/asound/cards` now, where it had its own (one of each thing). What it returns is as it
+  was. It brings `as-rawmidi` with it: a tool that patches the suite by crate may want that
+  line too (`../family.sh patches`).
 - `as-jack-client`: **`reconcile_make_first`**, from vkro: `reconcile` in the other order, the
   new connections made before the old are cut. `reconcile` still cuts first (Warren,
   2026-11-25), and so do `as-jack-keeper` and `as-jack-capture`. Nothing for a tool to do.

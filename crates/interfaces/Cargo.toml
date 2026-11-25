@@ -7,4 +7,5 @@ rust-version.workspace = true
 description = "The audio interfaces by what they are (/dev/snd/by-id), their rates and channels, and a rig's interface found at hw:N"
 
 [dependencies]
+as-rawmidi.workspace = true
 serde.workspace = true
