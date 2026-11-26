@@ -26,6 +26,7 @@ cargo test -p as-wav NAME                                 # one test in one crat
 BLESS=1 cargo test -p as-wav reference_files              # rewrites testdata/: on purpose only
 SUITE_JACK_TEST=1 cargo test -p as-jack-keeper --test dummy   # also as-transport, as-jack-capture, as-jackd, as-bench; as-bay-jack's is --test live
 python3 -I tools/cdp.py                                   # drives a page in Falkon offscreen (as-page-kit, tools' page tests)
+SUITE_PAGE_TEST=1 cargo test -p as-page-kit --test wave   # the page's waveform, in Falkon offscreen
 ```
 
 Building needs JACK2's dev package (`libjack-jackd2-dev`).

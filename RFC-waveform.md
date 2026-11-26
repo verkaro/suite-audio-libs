@@ -6,6 +6,19 @@ picture's numbers here, the view in `suite-light-panel` and `as-page-kit`.
 
 **Settled 2026-11-11** (see the end): all four as recommended.
 
+**w1 and w2 built 2026-11-25.** Decided while building, for Warren to change:
+- The window is **40 steps across** ("say forty", above), and the mark is kept **2 steps** inside
+  either edge as it scrolls, so there's always some of what's ahead to see. A new step changes
+  the width with the mark staying where it is across.
+- `whole` in the `wave` message is the whole sound's picture (`from`, `to`, `lo`, `hi`).
+- The overview strip marks the window with a bar over and under the sound, in rows of their
+  own, so the quiet at the bottom of a dB picture is never covered. Its ground stays the well:
+  a lit ground in the key colour wouldn't carry the sound's colour in 70s.
+- A close span of a FLAC is refused until `as-flac` can seek (irma's `RFC-flac-from-disk.md`).
+  A FLAC's overview works.
+
+w3 is irma's, in its own session. Nothing has been tried on a real screen.
+
 **What it's for (Warren, 2026-11-11):** a visual guide for fine work, not scrubbing. Dropping or
 moving a mark across a waveform, setting an IR's trim, seeing an IR. Dexter's `f` mode moves a
 mark by ear, a step at a time, and that's trial and error. A picture of where the quiet is would

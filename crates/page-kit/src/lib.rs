@@ -22,6 +22,8 @@ mod tests {
             "function kitKeysOver",
             "const kitBar",
             "function kitSection",
+            "function kitWave(",
+            "function kitWaveFollow",
         ] {
             assert!(super::JS.contains(f), "{f}");
         }

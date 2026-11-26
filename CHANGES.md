@@ -6,6 +6,15 @@ the git log.
 
 ## 2026-11-25
 
+- `as-page-kit`: **`kitWave(r, msg, o)`**, the waveform on a page (`RFC-waveform.md`, w2), from
+  the `wave` message `as-wave`'s doc has: straight or dB, times, markers, a curve, and with the
+  whole sound's picture a window that's empty past its ends over an overview strip. With it:
+  `kitWaveOpen`, `kitWaveFollow` (the window that follows a mark, `KIT_WAVE.steps` of its
+  nudge steps across), `kitWaveSplit`, `kitWavePlot`, `kitWaveTimeAt`, `kitWaveStripTimeAt`.
+  Every new name starts `kitWave` or `KIT_WAVE`. No key is added to `KEYS`. Its panel half is
+  `lp-paint`'s `Wave`, `Window` and `Whole`; both halves are held to
+  `crates/page-kit/testdata/wave-view.txt`. `SUITE_PAGE_TEST=1 cargo test -p as-page-kit
+  --test wave` runs it in Falkon offscreen. Nothing for a tool to do until it takes it.
 - `as-wave`, new (`RFC-waveform.md`, w1): `picture` (irma's, to the bit; **the onset is now
   `Option<usize>`**, and with `None` there's no decay), `file_picture` (a WAV's span, only its
   frames read), `overview` (a whole WAV or FLAC), `cached_overview` (kept in a folder the tool

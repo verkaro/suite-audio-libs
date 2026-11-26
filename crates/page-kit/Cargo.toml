@@ -7,3 +7,6 @@ rust-version.workspace = true
 description = "The Dexter family's page kit: skins, LEDs, ladders, keys and readouts, as one script a page loads"
 
 [dependencies]
+
+[dev-dependencies]
+libc.workspace = true

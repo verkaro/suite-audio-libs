@@ -57,7 +57,8 @@ tool's.
   reattaching when it returns; and a simulated clock of the same shape.
 - `as-http`, `as-ws`, `as-meter`, `as-page-kit`: a tool's page: just enough HTTP, the
   WebSocket, the LED ladders' ballistics, and the skins and drawing as one script the page
-  loads. `tools/cdp.py` drives a page in Falkon offscreen, for its tests.
+  loads, with the waveform among it (`kitWave`, its window following a mark). `tools/cdp.py`
+  drives a page in Falkon offscreen, for its tests.
 - `as-serve`: a tool's server over the two: the listener, each connection's checks, the WebSocket
   at `/ws`, the clients and what's sent to them, a tick. A tool brings its hello, its commands, the
   words of a refusal, and what it does when a client leaves.
@@ -165,6 +166,7 @@ SUITE_JACK_TEST=1 cargo test -p as-jack-keeper --test dummy   # on a dummy JACK 
 SUITE_JACK_TEST=1 cargo test -p as-transport --test dummy     # likewise
 SUITE_JACK_TEST=1 cargo test -p as-jack-capture --test dummy    # likewise
 SUITE_JACK_TEST=1 cargo test -p as-bench --test dummy           # likewise
+SUITE_PAGE_TEST=1 cargo test -p as-page-kit --test wave         # in Falkon offscreen, scratch HOME
 ```
 
 Building needs JACK2's dev package, `libjack-jackd2-dev`.

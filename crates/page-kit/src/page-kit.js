@@ -447,3 +447,185 @@ function readout(r, str, color) {
   text(str, r.x + r.w - 8, r.y + r.h / 2 + 0.5, "700 13px monospace", color || C.readout, "right");
 }
 
+// ---------- the waveform ----------
+// To place a mark by (RFC-waveform.md, w2): the page's half of lp-paint's Wave, Window and
+// Whole, drawn from the `view` and `wave` messages as-wave's doc has. For looking: nothing
+// plays from it. A window follows the mark, KIT_WAVE.steps of its nudge steps across; the two
+// halves are held to one table of numbers (testdata/wave-view.txt), and lp-paint's test reads
+// KIT_WAVE here, as JSON.
+const KIT_WAVE = { "steps": 40, "edge": 2 };
+// The strip along the bottom for the times, the overview strip, and the gap over it.
+const KIT_WAVE_AXIS = 13, KIT_WAVE_STRIP = 24, KIT_WAVE_GAP = 3;
+// A window opened on mark while its nudge step is step: { from, to }, the mark centred.
+function kitWaveOpen(mark, step) {
+  const from = mark - KIT_WAVE.steps * step / 2;
+  return { from, to: from + KIT_WAVE.steps * step };
+}
+// The window after the mark, or the step, may have moved: it scrolls as little as keeps the mark
+// KIT_WAVE.edge steps inside. A new step changes the width with the mark where it was across.
+// With no step, or no mark, the window stays. Gives a new { from, to }.
+function kitWaveFollow(win, mark, step) {
+  const width = KIT_WAVE.steps * step;
+  if (!(width > 0 && Number.isFinite(width) && Number.isFinite(mark))) return { from: win.from, to: win.to };
+  const edge = KIT_WAVE.edge / KIT_WAVE.steps, was = win.to - win.from;
+  let from = win.from;
+  if (Math.abs(width - was) > width * 1e-9) {
+    const across = was > 0 ? Math.min(Math.max((mark - from) / was, edge), 1 - edge) : 0.5;
+    from = mark - across * width;
+  }
+  const margin = edge * width;
+  if (mark < from + margin) from = mark - margin;
+  else if (mark > from + width - margin) from = mark - width + margin;
+  return { from, to: from + width };
+}
+// r for a window over its overview strip.
+function kitWaveSplit(r) {
+  return {
+    window: { x: r.x, y: r.y, w: r.w, h: Math.max(0, r.h - KIT_WAVE_STRIP - KIT_WAVE_GAP) },
+    strip: { x: r.x, y: r.y + r.h - KIT_WAVE_STRIP, w: r.w, h: KIT_WAVE_STRIP },
+  };
+}
+// Where the columns are drawn in a window's box: within its edge and above the times.
+function kitWavePlot(r) { return { x: r.x + 1, y: r.y + 1, w: Math.max(0, r.w - 2), h: Math.max(0, r.h - 2 - KIT_WAVE_AXIS) }; }
+// The time at x of a window drawn in the box r over from..to: where a tap fell. Held to the span.
+function kitWaveTimeAt(r, from, to, x) {
+  const p = kitWavePlot(r);
+  return from + (to - from) * Math.min(Math.max((x - p.x) / Math.max(1, p.w), 0), 1);
+}
+// The time at x of the overview strip in strip, in the whole sound ({ from, to }).
+function kitWaveStripTimeAt(strip, whole, x) {
+  return whole.from + (whole.to - whole.from) * Math.min(Math.max((x - strip.x - 1) / Math.max(1, strip.w - 2), 0), 1);
+}
+// A step of 1, 2 or 5 times a power of ten, the smallest that's at least `least`.
+function kitWaveRound(least) {
+  if (!(least > 0 && Number.isFinite(least))) return 1;
+  const p = Math.pow(10, Math.floor(Math.log10(least)));
+  return ([1, 2, 5, 10].map((m) => m * p).find((s) => s >= least * 0.999999)) || 10 * p;
+}
+// The lowest and highest of the columns that fall on pixel px of `across`.
+function kitWaveFold(lo, hi, n, px, across) {
+  const a = Math.min(Math.floor(px * n / across), n - 1), b = Math.min(Math.max(Math.floor((px + 1) * n / across), a + 1), n);
+  let l = Infinity, h = -Infinity;
+  for (let k = a; k < b; k++) { l = Math.min(l, lo[k]); h = Math.max(h, hi[k]); }
+  return [l, h];
+}
+// One pixel across of the sound, in the box d, at x, `thin` wide. floor: dB at the bottom, or
+// none for a straight picture.
+function kitWaveColumn(d, x, thin, lo, hi, floor, color) {
+  ctx.fillStyle = color;
+  if (floor === undefined || floor === null) {
+    const half = d.h / 2, at = (v) => half - Math.min(Math.max(v, -1), 1) * half;
+    const y0 = Math.min(Math.max(at(hi), 0), d.h - thin);
+    ctx.fillRect(x, d.y + y0, thin, Math.min(Math.max(at(lo) - y0, thin), d.h - y0));
+    return;
+  }
+  const peak = Math.max(Math.abs(lo), Math.abs(hi)), db = 20 * Math.log10(peak);
+  if (peak > 0 && db > floor) {
+    const h = Math.min(Math.max(d.h * (1 - Math.min(db, 0) / floor), thin), d.h);
+    ctx.fillRect(x, d.y + d.h - h, thin, h);
+  }
+}
+// A device pixel, in the canvas's own units, and how many fit across w.
+function kitWavePixels(w) {
+  const a = ctx.getTransform().a || 1, n = Math.max(0, Math.round(w * a));
+  return { n, thin: n ? w / n : 1 };
+}
+function kitWaveStrip(r, msg, whole, floor) {
+  rrect(r, 3, C.well, C.rule);
+  const d = { x: r.x + 1, y: r.y + 1, w: Math.max(0, r.w - 2), h: Math.max(0, r.h - 2) };
+  const long = whole.to - whole.from, { n: across, thin } = kitWavePixels(d.w);
+  if (!across || !(long > 0) || !(d.h > 0)) return;
+  // The window's place, in pixels across: wide enough to see, however long the sound.
+  const at = (t) => Math.round(Math.min(Math.max((t - whole.from) / long, 0), 1) * across);
+  const least = Math.min(Math.round(3 / thin), across);
+  let a = at(msg.from), b = at(msg.to);
+  if (b - a < least) { a = Math.min(Math.max(Math.floor((a + b - least) / 2), 0), across - least); b = a + least; }
+  // The window's mark has rows of its own, over and under the sound, so it never covers any:
+  // in dB the quiet is at the bottom.
+  const sound = { x: d.x, y: d.y + 2, w: d.w, h: d.h - 4 };
+  const n = Math.min(whole.lo.length, whole.hi.length);
+  for (let px = 0; n && sound.h > 0 && px < across; px++) {
+    const [lo, hi] = kitWaveFold(whole.lo, whole.hi, n, px, across);
+    kitWaveColumn(sound, d.x + px * thin, thin, lo, hi, floor, px >= a && px < b ? C.tape : C.faint);
+  }
+  ctx.fillStyle = C.dim;
+  for (const y of [d.y, d.y + d.h - 2]) ctx.fillRect(d.x + a * thin, y, (b - a) * thin, 2);
+}
+// The waveform in r, from a `wave` message ({ from, to, lo, hi }). o:
+//   unit     what the times are in ("ms", "s")
+//   floor    dB at the bottom (below 0); left out, the picture is straight
+//   whole    the whole sound's picture ({ from, to, lo, hi }), the last the client had, or the
+//            message's own: with it, the window is empty past the sound's ends, over a strip
+//            of the whole with the window's place lit
+//   curve    a point a column in dB, null where there's none (a dB picture's)
+//   markers  [{ at, label, color }]
+// Gives the boxes it drew in, for taps: { window, strip } (strip null with no whole).
+function kitWave(r, msg, o) {
+  const opt = o || {}, floor = opt.floor, whole = opt.whole || msg.whole || null;
+  const boxes = whole ? kitWaveSplit(r) : { window: r, strip: null };
+  const box = boxes.window, plot = kitWavePlot(box), span = msg.to - msg.from;
+  rrect(box, 3, C.well, C.rule);
+  if (boxes.strip) kitWaveStrip(boxes.strip, msg, whole, floor);
+  const { n: across, thin } = kitWavePixels(plot.w);
+  if (!across || !(plot.h > 0) || !(span > 0)) return boxes;
+  const straight = floor === undefined || floor === null;
+  // The pixels across that have sound: all of them, unless the sound's ends are said.
+  let first = 0, end = across;
+  if (whole) {
+    const at = (t) => Math.min(Math.max((t - msg.from) / span, 0), 1) * across;
+    first = Math.floor(at(whole.from)); end = Math.max(Math.ceil(at(whole.to)), first);
+  }
+  // The ground: silence across the middle, or a line every 20 dB.
+  ctx.fillStyle = C.rule;
+  if (straight) ctx.fillRect(plot.x + first * thin, plot.y + plot.h / 2, (end - first) * thin, 1);
+  else for (let db = -20; db > floor; db -= 20) ctx.fillRect(plot.x + first * thin, plot.y + plot.h * db / floor, (end - first) * thin, 1);
+  const n = Math.min(msg.lo.length, msg.hi.length);
+  for (let px = first; n && px < end; px++) {
+    const [lo, hi] = kitWaveFold(msg.lo, msg.hi, n, px, across);
+    kitWaveColumn(plot, plot.x + px * thin, thin, lo, hi, floor, C.tape);
+  }
+  const font = "700 9px sans-serif";
+  const wide = (str) => { ctx.font = font; return Math.ceil(ctx.measureText(str).width) + 2; };
+  if (!straight) {
+    const curve = opt.curve || [];
+    ctx.beginPath();
+    let down = false;
+    curve.forEach((db, k) => {
+      if (db === null || db === undefined) { down = false; return; }
+      const x = plot.x + (k + 0.5) * plot.w / curve.length, y = Math.min(plot.y + plot.h * Math.min(Math.max(db, floor), 0) / floor, plot.y + plot.h - 1);
+      if (down) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+      down = true;
+    });
+    ctx.strokeStyle = C.text; ctx.lineWidth = 1; ctx.stroke();
+    for (let db = -20; db > floor; db -= 20) {
+      const y = plot.y + plot.h * db / floor - 11;
+      if (y <= plot.y) continue;
+      // On a ground of its own: the sound may be behind it.
+      const said = db.toFixed(0);
+      ctx.fillStyle = C.well; ctx.fillRect(plot.x + 1, y, wide(said) + 2, 10);
+      text(said, plot.x + 3, y + 5, font, C.dim);
+    }
+  }
+  // The times: a tick and its figure, about every 70 pixels.
+  const each = kitWaveRound(span * 70 / Math.max(1, plot.w)), axis = plot.y + plot.h;
+  const decimals = each >= 1 ? 0 : Math.ceil(-Math.log10(each));
+  ctx.fillStyle = C.rule; ctx.fillRect(plot.x, axis, plot.w, 1);
+  for (let k = Math.ceil(msg.from / each), said = 0; k * each <= msg.to; k++, said++) {
+    const x = plot.x + (k * each - msg.from) / span * plot.w;
+    ctx.fillStyle = C.dim; ctx.fillRect(Math.min(x, plot.x + plot.w - 1), axis, 1, 3);
+    const label = (k * each).toFixed(decimals) + (said === 0 && opt.unit ? " " + opt.unit : "");
+    if (x + 3 + wide(label) <= plot.x + plot.w) text(label, x + 3, axis + 7.5, font, C.dim);
+  }
+  // The markers, each label on a line of its own so two close together don't collide.
+  (opt.markers || []).forEach((m, k) => {
+    if (m.at < msg.from || m.at > msg.to) return;
+    const x = plot.x + (m.at - msg.from) / span * plot.w;
+    ctx.fillStyle = m.color; ctx.fillRect(Math.min(x, plot.x + plot.w - 1), plot.y, 1, plot.h);
+    const w = wide(m.label), y = plot.y + 2 + 10 * k;
+    if (y + 10 > plot.y + plot.h) return;
+    const right = x + 4 + w <= plot.x + plot.w, left = right ? x + 4 : x - 3 - w;
+    ctx.fillStyle = C.well; ctx.fillRect(left - 1, y, w + 1, 10);
+    text(m.label, right ? left : left + w, y + 5, font, m.color, right ? "left" : "right");
+  });
+  return boxes;
+}

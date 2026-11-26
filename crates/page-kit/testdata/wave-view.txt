@@ -1,0 +1,41 @@
+# The waveform window's rules, as numbers both halves are held to: lp-paint's `Window` and
+# page-kit.js's kitWaveOpen and kitWaveFollow. A line is `open MARK STEP FROM TO` or
+# `follow MARK STEP FROM TO`: what's asked, then the window it must give. A `follow` moves the
+# window the line before left. `case` starts a new one.
+
+case opened with the mark centred, 40 steps across
+open 1000 5 900 1100
+
+case still while the mark is 2 steps or more inside, then as little as keeps it there
+open 1000 5 900 1100
+follow 1005 5 900 1100
+follow 1090 5 900 1100
+follow 1095 5 905 1105
+follow 915 5 905 1105
+follow 900 5 890 1090
+# Still in the window, but nearer its left edge than 2 steps.
+follow 895 5 885 1085
+
+case a new step changes the width, the mark staying where it is across
+open 1000 50 0 2000
+follow 1500 50 0 2000
+follow 1500 10 1200 1600
+follow 1500 50 0 2000
+
+case past the start: the window runs off the sound
+open 0 10 -200 200
+follow -50 10 -200 200
+
+case a mark far off, on and back
+open 100 1 80 120
+follow 5000 1 4962 5002
+follow 0 1 -2 38
+
+case a new step with the mark far off: it comes in 2 steps from that edge
+open 100 1 80 120
+follow 1000 10 620 1020
+
+case no step: the window stays
+open 10 1 -10 30
+follow 20 0 -10 30
+follow 20 -1 -10 30
