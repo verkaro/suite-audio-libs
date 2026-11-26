@@ -243,6 +243,16 @@ to Dexter's `90a40f5`):
   adapter on `dexter-sim`, with a wrapper that adds what a desk with a screen does. As it was
   otherwise. Dexter keeps its own copy until its step 11.
 
+From dexter-irma at `4fc58b4` (2026-11-25), read from its clone (`RFC-waveform.md`, w1):
+
+- `crates/core/src/wave.rs`, now `as-wave`'s `Picture` and `picture` (`crates/wave`), with its
+  test from `crates/core/src/tests.rs`. Changed: the onset is an `Option`, and `decay` is empty
+  without one; a column's frames are worked out in one place, shared with the reading of a file
+  a block at a time; a span that's infinite or not a number pictures nothing, and one past
+  every frame can't overflow. Its original loop is kept in the tests as the reference the
+  numbers are held to, to the bit. The rest of the crate was written here. irma keeps its own
+  until w3.
+
 Written here, not moved:
 
 - `crates/bay/src/sheet.rs` (`as_bay::sheet`, 2026-11-11, `RFC-as-bay.md` b2, for jackbay):

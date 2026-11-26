@@ -6,6 +6,13 @@ the git log.
 
 ## 2026-11-25
 
+- `as-wave`, new (`RFC-waveform.md`, w1): `picture` (irma's, to the bit; **the onset is now
+  `Option<usize>`**, and with `None` there's no decay), `file_picture` (a WAV's span, only its
+  frames read), `overview` (a whole WAV or FLAC), `cached_overview` (kept in a folder the tool
+  names, never the source's own), and `MAX_COLUMNS`, `OVERVIEW_COLUMNS`. Its doc has the
+  `view` and `wave` messages, with `whole` as the whole sound's picture. **A FLAC's span is
+  refused** until `as-flac` can seek (irma's `RFC-flac-from-disk.md`). irma takes it at w3:
+  `picture(.., onset)` becomes `picture(.., Some(onset))`. Nothing else for a tool to do.
 - `as-surface`, new: Dexter's `crates/surface` less its adapter (`RFC-as-surface.md`, s2), for
   sonofader2 first. Nothing for a tool to do until it takes it. Dexter, at its step 11: its
   crate becomes the adapter alone on this one, and three things differ. **`Taper` is data:**

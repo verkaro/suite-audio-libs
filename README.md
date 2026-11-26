@@ -41,6 +41,9 @@ tool's.
 - `as-conv`: zero-latency convolution, the same at any block size.
 - `as-ir`: an IR made ready: true stereo folded, unit energy, its echoes without its direct
   sound. `numbers`: what it measures as, after ISO 3382-1 (RT, EDT, clarity, by octave).
+- `as-wave`: a waveform's numbers: the lowest and highest sample a column over any span, from
+  memory (with an IR's decay) or from a WAV a block at a time; a whole WAV's or FLAC's overview,
+  with a cache in the tool's own folder; and, in its doc, the `view` and `wave` messages.
 - `as-opening`: an opening between the outside and a room: its stops, its wall, its routes.
 - `as-jack-keeper`: a JACK client of two outputs, its player on JACK's thread, its
   connections kept, reattaching to jackd; and `--sim`.

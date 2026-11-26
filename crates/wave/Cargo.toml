@@ -1,0 +1,16 @@
+[package]
+name = "as-wave"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "A waveform's numbers: the lowest and highest sample a column, from memory or from a file's span, and a whole file's overview with its cache"
+
+[dependencies]
+as-flac.workspace = true
+as-keep.workspace = true
+as-wav.workspace = true
+claxon.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]

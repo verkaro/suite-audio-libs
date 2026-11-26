@@ -51,6 +51,7 @@ as-speech = { path = "crates/speech" }
 as-tilt = { path = "crates/tilt" }
 as-transport = { path = "crates/transport" }
 as-wav = { path = "crates/wav" }
+as-wave = { path = "crates/wave" }
 as-ws = { path = "crates/ws" }
 claxon = "0.4.3"
 jack = "0.13"
@@ -94,4 +95,6 @@ opt-level = 3
 [profile.dev.package.as-control]
 opt-level = 3
 [profile.dev.package.libm]
+opt-level = 3
+[profile.dev.package.as-wave]
 opt-level = 3
