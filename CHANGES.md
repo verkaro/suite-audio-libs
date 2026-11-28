@@ -8,7 +8,11 @@ the git log.
 
 - `as-bay`: **`Resolver::candidates(name)` and `Session::candidates(snap, name)`**, new: the
   clients a name could mean when it means more than one (`ambiguous_name`), by raw name, so a
-  front end can ask which (bay's D3). Nothing to do for a tool.
+  front end can ask which (bay's D3). Nothing to do for a tool. A bundle's name has none: it means the bundle.
+- `as-bay`: a shown name never takes over what a name already meant. A generated alias the
+  session's own resolving takes to another client (`focusrite-out`, a substring of a short
+  `focusrite-out-mix`) isn't shown, so it keeps that meaning, and is typed by its raw name.
+  So the entry above holds as written: nothing that resolved reads differently.
 
 - `as-bay`: **the names views show resolve too** (Warren, 2026-11-27, for bay's dialog:
   `bay-rs/docs/dev/DESIGN-front-end.md`, D1). A generated alias (`focusrite-in`) reads as typed

@@ -197,7 +197,10 @@ impl Session {
                     .find(|a| !taken.contains(a))
                     .expect("some suffix is free");
                 taken.insert(alias.clone());
-                if alias == base && bases[&base] == 1 {
+                // Shown only where it adds a meaning: a name the session's resolving already
+                // takes to another client (a substring of a short name, say) keeps that one.
+                let free = res.client_of(&alias).map_or(true, |other| snap.client(other).name() == c.name());
+                if alias == base && bases[&base] == 1 && free {
                     names.shown(c.name(), &alias);
                 } else {
                     names.generated(c.name(), &alias);
@@ -208,7 +211,8 @@ impl Session {
     }
 
     /// The names views show that resolve too, as aliases: each generated alias no other
-    /// client's shares the base of (Warren, 2026-11-27, for bay's "names you see are names you
+    /// client's shares the base of, and that the session's own resolving doesn't already take
+    /// to another client (Warren, 2026-11-27, for bay's "names you see are names you
     /// can type"). `focusrite-in` while one Scarlett is plugged in; with two, neither, since
     /// which is `-2` depends on the order the clients came. A staged line naming one goes
     /// stale then, rather than meaning another client. Below the session's own names.
@@ -509,6 +513,20 @@ mod tests {
         assert_eq!(stage.plan(&session, &two).1.len(), 1, "stale, not another client");
     }
 
+    /// A shown name never takes over what a name already meant (2026-11-27).
+    #[test]
+    fn shown_names_keep_what_resolved() {
+        let mix = crate::fixture::parse(
+            &(include_str!("../testdata/studio.fake").to_owned() + "out focusrite-out-mix:out_L\n"),
+        )
+        .unwrap();
+        let session = Session::new();
+        let c = session.client_of(&mix, "focusrite-out").unwrap();
+        assert_eq!(mix.client(c).name(), "focusrite-out-mix", "the substring match it had");
+        assert!(!session.names(&mix).is_shown(FOCUSRITE_OUT));
+        assert_eq!(session.names(&mix).typable(FOCUSRITE_OUT), FOCUSRITE_OUT, "typed by its raw name");
+    }
+
     #[test]
     fn candidates_of_an_ambiguous_name() {
         let s = studio();
@@ -517,6 +535,11 @@ mod tests {
         assert!(session.candidates(&s, "REAPER").is_empty(), "one client");
         assert!(session.candidates(&s, "focusrite-in").is_empty(), "a shown name, one client");
         assert!(session.candidates(&s, "zz").is_empty(), "none");
+        // A bundle's name means the bundle, never a question about clients.
+        let mut bundled = Session::new();
+        bundled.define("bundle re = REAPER[out 1-2]").unwrap();
+        assert_eq!(Session::new().candidates(&s, "re").len(), 4, "REAPER, Firefox and both Scarletts");
+        assert!(bundled.candidates(&s, "re").is_empty());
     }
 
     #[test]

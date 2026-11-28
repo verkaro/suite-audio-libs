@@ -121,6 +121,9 @@ impl<'a> Resolver<'a> {
     /// name means one client or none.
     pub fn candidates(&self, name: &str) -> Vec<String> {
         let Ok(name) = self.follow(name) else { return Vec::new() };
+        if !self.is_exact(name) && self.lookup_bundle(name).is_some() {
+            return Vec::new();
+        }
         let name = name.split_once(':').map_or(name, |(c, _)| c);
         if self.snap.client_named(name).is_some() {
             return Vec::new();
