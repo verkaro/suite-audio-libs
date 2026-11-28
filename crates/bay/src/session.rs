@@ -192,9 +192,11 @@ impl Session {
     /// The names views print clients by: the shortest user alias that resolves to the
     /// client, else a generated alias for a long name, else the raw name.
     pub fn names(&self, snap: &Snapshot) -> Names {
-        let res = Resolver::new(snap, vec![&self.scope]);
+        let res = Resolver::new(snap, vec![&self.scope, &self.studio]);
         let mut user: HashMap<String, String> = HashMap::new();
-        for (alias, _) in self.scope.aliases() {
+        // The session's names, then the studio's, each the client's shown name when it's the
+        // shortest that resolves to it (a studio name shows on its row too, 2026-11-27).
+        for (alias, _) in self.scope.aliases().chain(self.studio.aliases()) {
             let Ok(c) = res.client_of(alias) else { continue };
             let client = snap.client(c).name();
             let better = |cur: &String| (alias.len(), alias) < (cur.len(), cur.as_str());
@@ -206,6 +208,8 @@ impl Session {
         let mut taken: HashSet<String> = snap.clients().map(|(_, c)| c.name().to_owned()).collect();
         taken.extend(self.scope.aliases().map(|(n, _)| n.to_owned()));
         taken.extend(self.scope.bundles().map(|(n, _)| n.to_owned()));
+        taken.extend(self.studio.aliases().map(|(n, _)| n.to_owned()));
+        taken.extend(self.studio.bundles().map(|(n, _)| n.to_owned()));
         // A base that more than one client would take: its aliases depend on the clients'
         // order, so none of them resolves.
         let mut bases: HashMap<String, usize> = HashMap::new();
@@ -287,7 +291,7 @@ impl Session {
     /// As [`bundles`](Self::bundles), with the ports nobody declared grouped as `grouping`
     /// says rather than as the session does: for a screen of its own (`as_bay::sheet`).
     pub fn bundles_with(&self, snap: &Snapshot, grouping: Grouping) -> (Bundles, Vec<String>) {
-        let (decls, problems) = Resolver::new(snap, vec![&self.scope]).bundle_decls();
+        let (decls, problems) = Resolver::new(snap, vec![&self.scope, &self.studio]).bundle_decls();
         let mut problems: Vec<String> = problems.into_iter().map(|p| p.msg).collect();
         let (bundles, more) = Bundles::derive_with(snap, &decls, grouping);
         problems.extend(more.iter().map(ToString::to_string));
@@ -572,6 +576,14 @@ mod tests {
         // Neither box: booth-1 is unknown, mics too.
         session.set_studio(&st, &[]);
         assert!(session.compile(&s, "booth-1 > OBS[1]", Options::default()).is_err());
+        // A studio name shows on its row: a bundle labels it, an alias names the client.
+        session.set_studio(&st, &["box-a".into()]);
+        let (bundles, _) = session.bundles(&s);
+        assert!(bundles.iter().any(|(_, b)| b.label == "mics"), "the studio bundle labels its row");
+        let whole = crate::studio::Studio::parse("interface box-a\nalias vox = alsa_input\n").unwrap();
+        let mut named = Session::new();
+        named.set_studio(&whole, &["box-a".into()]);
+        assert_eq!(named.names(&s).get(FOCUSRITE_IN), "vox");
         // The session's own name wins.
         session.set_studio(&st, &["box-a".into()]);
         session.define("alias booth-1 = Carla").unwrap();

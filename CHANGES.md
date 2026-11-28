@@ -6,6 +6,10 @@ the git log.
 
 ## 2026-11-27
 
+- `as-bay`: **studio names show:** `Session::names` takes a client's studio alias as its shown
+  name, after the session's, and `Session::bundles` declares the studio's bundles, so a row
+  named in the studio is labelled by it. Nothing to do for a tool without studio names.
+
 - `as-bay`: **studio names**, new (Warren, 2026-11-27; bay-rs `docs/dev/DESIGN-studio-names.md`):
   `as_bay::studio`'s `Studio` reads and writes a studio file, patch syntax in blocks, each
   started by `interface ID` (an `as-interfaces` id), with only `alias` and `bundle` in them.
