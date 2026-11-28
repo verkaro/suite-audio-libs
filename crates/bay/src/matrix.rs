@@ -285,7 +285,8 @@ impl Matrix {
         }
 
         // Which clients the staged edits make exact, and which staged input is just that.
-        let res = Resolver::new(snap, vec![session.scope()]);
+        let shown = session.shown(snap);
+        let res = Resolver::new(snap, vec![session.scope(), &shown]);
         let mut exact: Vec<ClientId> = Vec::new();
         for (i, input) in stage.inputs().iter().enumerate() {
             for s in &input.stmts {
@@ -478,11 +479,8 @@ mod tests {
         let (r, c) = at(&m, "out1/2", "playback_FL/FR");
         assert_eq!((m.cell(r, c).now, m.cell(r, c).change), (Cell::Full, Change::None));
         assert_eq!(m.rows[r].typed.to_string(), "REAPER[1-2]");
-        // A generated alias can't be typed: the raw name is.
-        assert_eq!(
-            m.cols[c].typed.to_string(),
-            "alsa_output.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo"
-        );
+        // A generated alias is typed as shown, since it resolves (Session::shown).
+        assert_eq!(m.cols[c].typed.to_string(), "focusrite-out");
         assert_eq!(m.find(&m.key(r, c)), Some((r, c)));
     }
 
@@ -494,10 +492,9 @@ mod tests {
         let m = Matrix::build(&s, &session, &stage, &View::default());
         assert_eq!(toggle(&m, "out5/6", "input_FL/FR"), Ok(Toggle::Stage("REAPER[5-6] > OBS".into())));
         assert_eq!(toggle(&m, "out3/4", "audio-in1/2"), Ok(Toggle::Stage("REAPER[3-4] !> Carla".into())));
-        let fx = "alsa_input.usb-Focusrite_Scarlett_2i2_USB-00.analog-stereo";
         assert_eq!(
             toggle(&m, "capture_FL/FR", "in1/2"),
-            Ok(Toggle::Stage(format!("{fx} !> REAPER[1-2]; {fx} > REAPER[1-2]")))
+            Ok(Toggle::Stage("focusrite-in !> REAPER[1-2]; focusrite-in > REAPER[1-2]".into()))
         );
 
         // Staged from a cell: that cell unstages it, and shows the change.

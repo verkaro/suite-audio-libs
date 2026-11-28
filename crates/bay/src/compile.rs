@@ -103,6 +103,9 @@ pub struct Skipped {
 pub struct Compiler<'a> {
     snap: &'a Snapshot,
     session: &'a Scope,
+    /// The names views show that resolve too, below the session's own
+    /// ([`crate::Session::shown`]). Empty unless [`Compiler::with_shown`] gives them.
+    shown: Scope,
     opts: Options,
     /// The final say on each link a statement touched: true to have it, false not to.
     want: BTreeMap<Link, bool>,
@@ -111,7 +114,21 @@ pub struct Compiler<'a> {
 
 impl<'a> Compiler<'a> {
     pub fn new(snap: &'a Snapshot, session: &'a Scope, opts: Options) -> Compiler<'a> {
-        Compiler { snap, session, opts, want: BTreeMap::new(), exact: BTreeSet::new() }
+        Compiler {
+            snap,
+            session,
+            shown: Scope::default(),
+            opts,
+            want: BTreeMap::new(),
+            exact: BTreeSet::new(),
+        }
+    }
+
+    /// Resolves the names views show as well, after the input's and the session's own: the
+    /// generated aliases ([`crate::Session::shown`]), so a name on screen can be typed.
+    pub fn with_shown(mut self, shown: Scope) -> Compiler<'a> {
+        self.shown = shown;
+        self
     }
 
     /// Adds one input. On an error the compiler is left as it was before the input.
@@ -148,7 +165,7 @@ impl<'a> Compiler<'a> {
         }
 
         // The clients the skipped connects start from, as far as they can still be named.
-        let res = Resolver::new(self.snap, vec![&local, self.session]);
+        let res = Resolver::new(self.snap, vec![&local, self.session, &self.shown]);
         let mut unread: BTreeMap<ClientId, usize> = BTreeMap::new();
         for k in &skipped {
             if let Statement::Connect { from, .. } = &k.stmt {
@@ -185,7 +202,7 @@ impl<'a> Compiler<'a> {
         want: &mut BTreeMap<Link, bool>,
         exact: &mut BTreeSet<ClientId>,
     ) -> Result<(), CompileError> {
-        let (snap, session) = (self.snap, self.session);
+        let (snap, session, shown) = (self.snap, self.session, &self.shown);
         let err = |p: Problem| CompileError { line: s.line, kind: p.kind, msg: p.msg };
         match &s.stmt {
             Statement::Alias { name, target } => local.alias(name, target).map_err(err)?,
@@ -193,14 +210,16 @@ impl<'a> Compiler<'a> {
                 // Check it first, so a bad bundle is reported where it's declared.
                 let mut with = local.clone();
                 with.bundle(name, target).map_err(err)?;
-                Resolver::new(snap, vec![&with, session]).bundle_decl(name, target).map_err(err)?;
+                Resolver::new(snap, vec![&with, session, shown]).bundle_decl(name, target).map_err(err)?;
                 *local = with;
             }
             Statement::Exact { client } => {
-                exact.insert(Resolver::new(snap, vec![&*local, session]).client_of(client).map_err(err)?);
+                exact.insert(
+                    Resolver::new(snap, vec![&*local, session, shown]).client_of(client).map_err(err)?,
+                );
             }
             Statement::Connect { from, to } | Statement::Disconnect { from, to } => {
-                let res = Resolver::new(snap, vec![&*local, session]);
+                let res = Resolver::new(snap, vec![&*local, session, shown]);
                 let (outs, ins) = both_sides(snap, &res, from, to).map_err(err)?;
                 if matches!(s.stmt, Statement::Connect { .. }) {
                     for link in pair(snap, &outs, &ins).map_err(err)? {

@@ -21,6 +21,9 @@ pub struct Names {
     aliases: HashMap<String, String>,
     /// Clients whose alias was generated, not defined in the session.
     generated: HashSet<String>,
+    /// Of those, the ones whose alias resolves through the session too
+    /// ([`crate::Session::shown`]), so a typed statement can use it.
+    shown: HashSet<String>,
 }
 
 impl Names {
@@ -28,15 +31,32 @@ impl Names {
         self.aliases.insert(client.to_owned(), alias.to_owned());
     }
 
-    /// A generated alias: it resolves only where its `alias` line is printed.
+    /// A generated alias that resolves only where its `alias` line is printed ([`Names::shown`]
+    /// is one that resolves without it too).
     pub fn generated(&mut self, client: &str, alias: &str) {
         self.alias(client, alias);
         self.generated.insert(client.to_owned());
     }
 
-    /// The name a typed statement can use: a session alias, else the raw name.
+    /// A generated alias that resolves through the session as well ([`crate::Session::shown`]):
+    /// no other client's generated alias shares its base, so it can't come to mean another.
+    pub fn shown(&mut self, client: &str, alias: &str) {
+        self.generated(client, alias);
+        self.shown.insert(client.to_owned());
+    }
+
+    /// Whether the client's alias is a shown one ([`Names::shown`]).
+    pub fn is_shown(&self, client: &str) -> bool {
+        self.shown.contains(client)
+    }
+
+    /// The name a typed statement can use: a session alias or a shown one, else the raw name.
     pub fn typable<'a>(&'a self, client: &'a str) -> &'a str {
-        if self.generated.contains(client) { client } else { self.get(client) }
+        if self.generated.contains(client) && !self.shown.contains(client) {
+            client
+        } else {
+            self.get(client)
+        }
     }
 
     pub fn get<'a>(&'a self, client: &'a str) -> &'a str {

@@ -177,6 +177,16 @@ impl Session {
         let mut taken: HashSet<String> = snap.clients().map(|(_, c)| c.name().to_owned()).collect();
         taken.extend(self.scope.aliases().map(|(n, _)| n.to_owned()));
         taken.extend(self.scope.bundles().map(|(n, _)| n.to_owned()));
+        // A base that more than one client would take: its aliases depend on the clients'
+        // order, so none of them resolves.
+        let mut bases: HashMap<String, usize> = HashMap::new();
+        for (_, c) in snap.clients() {
+            if !user.contains_key(c.name())
+                && let Some(base) = short_name(c.name())
+            {
+                *bases.entry(base).or_default() += 1;
+            }
+        }
         let mut names = Names::default();
         for (_, c) in snap.clients() {
             if let Some(alias) = user.get(c.name()) {
@@ -187,10 +197,38 @@ impl Session {
                     .find(|a| !taken.contains(a))
                     .expect("some suffix is free");
                 taken.insert(alias.clone());
-                names.generated(c.name(), &alias);
+                if alias == base && bases[&base] == 1 {
+                    names.shown(c.name(), &alias);
+                } else {
+                    names.generated(c.name(), &alias);
+                }
             }
         }
         names
+    }
+
+    /// The names views show that resolve too, as aliases: each generated alias no other
+    /// client's shares the base of (Warren, 2026-11-27, for bay's "names you see are names you
+    /// can type"). `focusrite-in` while one Scarlett is plugged in; with two, neither, since
+    /// which is `-2` depends on the order the clients came. A staged line naming one goes
+    /// stale then, rather than meaning another client. Below the session's own names.
+    pub fn shown(&self, snap: &Snapshot) -> Scope {
+        let names = self.names(snap);
+        let mut scope = Scope::default();
+        for (_, c) in snap.clients() {
+            if names.is_shown(c.name()) {
+                let alias = names.get(c.name()).to_owned();
+                scope.set(Definition::Alias { name: alias, target: c.name().to_owned() });
+            }
+        }
+        scope
+    }
+
+    /// A client by name, as a typed statement finds it: the session's names, then the shown
+    /// ones ([`Session::shown`]), then the forgiving client match.
+    pub fn client_of(&self, snap: &Snapshot, name: &str) -> Result<crate::ClientId, crate::Problem> {
+        let shown = self.shown(snap);
+        Resolver::new(snap, vec![&self.scope, &shown]).client_of(name)
     }
 
     /// The snapshot's bundles with the session's declarations, and the declarations that
@@ -212,7 +250,7 @@ impl Session {
     /// Compiles one input (a patch file for `apply`) with the session's names.
     pub fn compile(&self, snap: &Snapshot, text: &str, opts: Options) -> Result<Plan, Error> {
         let stmts = syntax::parse(text).map_err(Error::Syntax)?;
-        let mut c = Compiler::new(snap, &self.scope, opts);
+        let mut c = Compiler::new(snap, &self.scope, opts).with_shown(self.shown(snap));
         c.input(&stmts).map_err(Error::Compile)?;
         Ok(c.finish())
     }
@@ -226,7 +264,9 @@ impl Session {
         opts: Options,
     ) -> Result<(Plan, Vec<crate::compile::Skipped>), SyntaxError> {
         let stmts = syntax::parse(text)?;
-        Ok(crate::compile::compile_tolerant(&stmts, snap, &self.scope, opts))
+        let mut c = Compiler::new(snap, &self.scope, opts).with_shown(self.shown(snap));
+        let skipped = c.input_tolerant(&stmts);
+        Ok((c.finish(), skipped))
     }
 
     /// Records what a backend actually changed in `before`, so undo can reverse it. Only
@@ -430,6 +470,36 @@ mod tests {
         let names = session.names(&s);
         assert_eq!(names.get(FOCUSRITE_IN), "focusrite-in-2");
         assert_eq!(names.get(FOCUSRITE_OUT), "focusrite-out");
+    }
+
+    /// The names views show resolve, while no other client shares their base; with two, a
+    /// staged line naming one goes stale rather than meaning the other (2026-11-27).
+    #[test]
+    fn shown_names_resolve_while_theirs_alone() {
+        let s = studio();
+        let session = Session::new();
+        let plan = session.compile(&s, "focusrite-in > OBS", Options::default()).unwrap();
+        assert_eq!(plan.add.len(), 2, "focusrite-in's two captures zipped onto OBS's two inputs");
+        assert_eq!(session.client_of(&s, "focusrite-out").map(|c| s.client(c).name()), Ok(FOCUSRITE_OUT));
+        // The session's own win, and a name it takes isn't shown: focusrite-in-2 doesn't resolve.
+        let mut own = Session::new();
+        own.define("alias focusrite-in = Carla").unwrap();
+        assert_eq!(own.client_of(&s, "focusrite-in").map(|c| s.client(c).name()), Ok("Carla"));
+        assert!(own.client_of(&s, "focusrite-in-2").is_err());
+
+        // A second Scarlett: which is -2 depends on the clients' order, so neither resolves.
+        let two = crate::fixture::parse(
+            &(include_str!("../testdata/studio.fake").to_owned()
+                + "out alsa_input.usb-Focusrite_Scarlett_4i4_USB-00.analog-surround:capture_FL\n"),
+        )
+        .unwrap();
+        let names = session.names(&two);
+        assert_eq!(names.get(FOCUSRITE_IN), "focusrite-in", "still printed, with its alias line");
+        let err = session.compile(&two, "focusrite-in > OBS", Options::default()).unwrap_err();
+        assert_eq!(err.kind(), ErrorKind::UnknownName);
+        let mut stage = Stage::new();
+        stage.add(&session, &s, "focusrite-in > OBS").unwrap();
+        assert_eq!(stage.plan(&session, &two).1.len(), 1, "stale, not another client");
     }
 
     #[test]

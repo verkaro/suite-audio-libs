@@ -4,6 +4,23 @@ What changed in an interface or a behaviour, newest first: a line for each, nami
 what a tool has to do about it. Read it before moving a pin. Begun 2026-11-07; for before that,
 the git log.
 
+## 2026-11-27
+
+- `as-bay`: **the names views show resolve too** (Warren, 2026-11-27, for bay's dialog:
+  `bay-rs/docs/dev/DESIGN-front-end.md`, D1). A generated alias (`focusrite-in`) reads as typed
+  while no other client's generated alias shares its base; with two Scarletts plugged in,
+  neither does, since which is `-2` depends on the clients' order, and a staged line naming one
+  goes stale rather than meaning the other. Below the session's own names, so those still win.
+  New: `Session::shown(snap)` (the scope), `Session::client_of(snap, name)`,
+  `Compiler::with_shown(scope)`, `Names::shown` and `Names::is_shown`. `Session::compile`,
+  `compile_tolerant`, `Stage` and `Matrix` use them. **What a tool sees:** what was
+  `unknown_name` may now resolve, nothing that resolved reads differently, and `Names::typable`
+  gives the shown name, so a `Matrix` axis's `typed` and every staged text get shorter
+  (`REAPER[5-6] > focusrite-out`, where it spelled out `alsa_output.usb-…`). A golden file
+  holding a staged line to a long-named client changes when its pin moves here. Printed
+  patches still carry each `alias` line, so files don't count on it. `Compiler::new` alone, and
+  the free `compile_tolerant`, resolve as before.
+
 ## 2026-11-25
 
 - `as-page-kit`: **`kitWave(r, msg, o)`**, the waveform on a page (`RFC-waveform.md`, w2), from

@@ -90,7 +90,7 @@ impl Stage {
     }
 
     fn compiler<'a>(&'a self, session: &'a Session, snap: &'a Snapshot) -> (Compiler<'a>, Vec<Stale>) {
-        let mut c = Compiler::new(snap, session.scope(), Options::default());
+        let mut c = Compiler::new(snap, session.scope(), Options::default()).with_shown(session.shown(snap));
         let mut stale = Vec::new();
         for (input, Staged { stmts, .. }) in self.inputs.iter().enumerate() {
             if let Err(error) = c.input(stmts) {
