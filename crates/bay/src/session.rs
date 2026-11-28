@@ -224,6 +224,13 @@ impl Session {
         scope
     }
 
+    /// The clients a name could mean, when it means more than one, by raw name
+    /// ([`Resolver::candidates`]), through the session's names and the shown ones.
+    pub fn candidates(&self, snap: &Snapshot, name: &str) -> Vec<String> {
+        let shown = self.shown(snap);
+        Resolver::new(snap, vec![&self.scope, &shown]).candidates(name)
+    }
+
     /// A client by name, as a typed statement finds it: the session's names, then the shown
     /// ones ([`Session::shown`]), then the forgiving client match.
     pub fn client_of(&self, snap: &Snapshot, name: &str) -> Result<crate::ClientId, crate::Problem> {
@@ -500,6 +507,16 @@ mod tests {
         let mut stage = Stage::new();
         stage.add(&session, &s, "focusrite-in > OBS").unwrap();
         assert_eq!(stage.plan(&session, &two).1.len(), 1, "stale, not another client");
+    }
+
+    #[test]
+    fn candidates_of_an_ambiguous_name() {
+        let s = studio();
+        let session = Session::new();
+        assert_eq!(session.candidates(&s, "Scarlett"), [FOCUSRITE_IN, FOCUSRITE_OUT]);
+        assert!(session.candidates(&s, "REAPER").is_empty(), "one client");
+        assert!(session.candidates(&s, "focusrite-in").is_empty(), "a shown name, one client");
+        assert!(session.candidates(&s, "zz").is_empty(), "none");
     }
 
     #[test]

@@ -6,6 +6,10 @@ the git log.
 
 ## 2026-11-27
 
+- `as-bay`: **`Resolver::candidates(name)` and `Session::candidates(snap, name)`**, new: the
+  clients a name could mean when it means more than one (`ambiguous_name`), by raw name, so a
+  front end can ask which (bay's D3). Nothing to do for a tool.
+
 - `as-bay`: **the names views show resolve too** (Warren, 2026-11-27, for bay's dialog:
   `bay-rs/docs/dev/DESIGN-front-end.md`, D1). A generated alias (`focusrite-in`) reads as typed
   while no other client's generated alias shares its base; with two Scarletts plugged in,

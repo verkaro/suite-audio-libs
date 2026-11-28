@@ -116,6 +116,22 @@ impl<'a> Resolver<'a> {
         self.client(self.follow(name)?)
     }
 
+    /// The clients a name could mean when it means more than one (`ambiguous_name`), by raw
+    /// name, as the forgiving match finds them: for a front end to ask which. Empty when the
+    /// name means one client or none.
+    pub fn candidates(&self, name: &str) -> Vec<String> {
+        let Ok(name) = self.follow(name) else { return Vec::new() };
+        let name = name.split_once(':').map_or(name, |(c, _)| c);
+        if self.snap.client_named(name).is_some() {
+            return Vec::new();
+        }
+        let all: Vec<(ClientId, &str)> = self.snap.clients().map(|(id, c)| (id, c.name())).collect();
+        match forgiving(name, &all) {
+            Found::Many(names) => names,
+            _ => Vec::new(),
+        }
+    }
+
     /// A declared bundle resolved to ordinals, for [`crate::Bundles::derive`].
     pub fn bundle_decl(&self, name: &str, target: &Ref) -> Result<BundleDecl, Problem> {
         let dir =
