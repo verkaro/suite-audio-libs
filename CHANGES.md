@@ -6,6 +6,13 @@ the git log.
 
 ## 2026-11-27
 
+- `as-bay`: **studio names**, new (Warren, 2026-11-27; bay-rs `docs/dev/DESIGN-studio-names.md`):
+  `as_bay::studio`'s `Studio` reads and writes a studio file, patch syntax in blocks, each
+  started by `interface ID` (an `as-interfaces` id), with only `alias` and `bundle` in them.
+  `Session::set_studio(studio, present)` takes the names of the boxes the caller says are here,
+  below the session's own names and above the shown ones, and gives back the ids away;
+  `Session::studio()` reads them. `Statement` gains no variant: nothing to do for a tool.
+
 - `as-bay`: **`Resolver::candidates(name)` and `Session::candidates(snap, name)`**, new: the
   clients a name could mean when it means more than one (`ambiguous_name`), by raw name, so a
   front end can ask which (bay's D3). Nothing to do for a tool. A bundle's name has none: it means the bundle.

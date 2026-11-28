@@ -89,6 +89,9 @@ struct Step {
 #[derive(Clone, Debug, Default)]
 pub struct Session {
     scope: Scope,
+    /// The studio names of the boxes here ([`Session::set_studio`]): below the session's own,
+    /// above the generated ones.
+    studio: Scope,
     undo: Vec<Step>,
     /// How ports nobody declared are grouped into bundles.
     grouping: Grouping,
@@ -137,6 +140,32 @@ impl Session {
             self.scope.set(d);
         }
         Ok(())
+    }
+
+    /// Takes the studio names of the boxes in `present` (their ids, as `as-interfaces` gives
+    /// them) from `studio`, in place of any taken before, and gives back the ids of the blocks
+    /// whose box isn't here, which are kept and not applied. A name the session has too is the
+    /// session's.
+    pub fn set_studio(&mut self, studio: &crate::studio::Studio, present: &[String]) -> Vec<String> {
+        self.studio = Scope::default();
+        let mut away = Vec::new();
+        for b in &studio.blocks {
+            if !present.contains(&b.id) {
+                away.push(b.id.clone());
+                continue;
+            }
+            for stmt in &b.stmts {
+                if let Some(d) = definition(stmt.clone()) {
+                    self.studio.set(d);
+                }
+            }
+        }
+        away
+    }
+
+    /// The studio names taken ([`Session::set_studio`]).
+    pub fn studio(&self) -> &Scope {
+        &self.studio
     }
 
     /// Forgets a session name. False if there was none.
@@ -216,13 +245,20 @@ impl Session {
     /// can type"). `focusrite-in` while one Scarlett is plugged in; with two, neither, since
     /// which is `-2` depends on the order the clients came. A staged line naming one goes
     /// stale then, rather than meaning another client. Below the session's own names.
+    ///
+    /// The studio names come first in it ([`Session::set_studio`]), so they win over a
+    /// generated one.
     pub fn shown(&self, snap: &Snapshot) -> Scope {
         let names = self.names(snap);
-        let mut scope = Scope::default();
+        let mut scope = self.studio.clone();
         for (_, c) in snap.clients() {
             if names.is_shown(c.name()) {
                 let alias = names.get(c.name()).to_owned();
-                scope.set(Definition::Alias { name: alias, target: c.name().to_owned() });
+                let taken =
+                    scope.aliases().any(|(n, _)| n == alias) || scope.bundles().any(|(n, _)| n == alias);
+                if !taken {
+                    scope.set(Definition::Alias { name: alias, target: c.name().to_owned() });
+                }
             }
         }
         scope
@@ -511,6 +547,36 @@ mod tests {
         let mut stage = Stage::new();
         stage.add(&session, &s, "focusrite-in > OBS").unwrap();
         assert_eq!(stage.plan(&session, &two).1.len(), 1, "stale, not another client");
+    }
+
+    /// Studio names hold for the boxes here, below the session's own (2026-11-27).
+    #[test]
+    fn studio_names() {
+        let s = studio();
+        let text = "interface box-a\nalias booth-1 = alsa_input:capture_FL\nbundle mics = alsa_input[out 1-2]\n\
+                    interface box-b\nalias booth-1 = REAPER:out1\n";
+        let st = crate::studio::Studio::parse(text).unwrap();
+        let mut session = Session::new();
+        assert_eq!(session.set_studio(&st, &["box-a".into()]), ["box-b"]);
+        let plan = session.compile(&s, "booth-1 > OBS[1]", Options::default()).unwrap();
+        assert_eq!(
+            plan.links_named(&s)[0].from,
+            format!("{FOCUSRITE_IN}:capture_FL"),
+            "an alias to one port"
+        );
+        assert_eq!(session.compile(&s, "mics > OBS", Options::default()).unwrap().add.len(), 2);
+        // The other box: booth-1 is REAPER's out1 there.
+        session.set_studio(&st, &["box-b".into()]);
+        let plan = session.compile(&s, "booth-1 > OBS[1]", Options::default()).unwrap();
+        assert_eq!(plan.links_named(&s)[0].from, "REAPER:out1");
+        // Neither box: booth-1 is unknown, mics too.
+        session.set_studio(&st, &[]);
+        assert!(session.compile(&s, "booth-1 > OBS[1]", Options::default()).is_err());
+        // The session's own name wins.
+        session.set_studio(&st, &["box-a".into()]);
+        session.define("alias booth-1 = Carla").unwrap();
+        let c = session.client_of(&s, "booth-1").unwrap();
+        assert_eq!(s.client(c).name(), "Carla");
     }
 
     /// A shown name never takes over what a name already meant (2026-11-27).

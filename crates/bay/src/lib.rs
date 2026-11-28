@@ -21,6 +21,7 @@ pub mod resolve;
 pub mod session;
 pub mod sheet;
 pub mod stage;
+pub mod studio;
 pub mod syntax;
 pub mod undolog;
 pub mod views;
@@ -39,5 +40,6 @@ pub use model::{
 pub use resolve::{Definition, Resolver, Scope};
 pub use session::{Session, Undo};
 pub use stage::{Stage, Staged, Stale};
+pub use studio::Studio;
 pub use syntax::{Ref, Selector, Spanned, Statement, SyntaxError, parse};
 pub use views::{Layout, Names, SnapshotFilter};
